@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.yihai.wu.sxi">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!--蓝牙权限-->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!--只为BLE提供服务-->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true"
+        />
+
+    <application
+        android:name="com.yihai.wu.appcontext.MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/app_icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        >
+        <meta-data android:name="AA_DB_NAME" android:value="YiHi.db" />
+        <meta-data android:name="AA_DB_VERSION" android:value="1" />
+
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            >
+
+        </activity>
+        <activity
+            android:name=".DeviceScanActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            />
+
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true"/>
+
+        <activity
+            android:name=".DeviceInformationActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".SetActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+        </activity>
+        <activity android:name=".SetDetailsActivity"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".MaterialActivity"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+    </application>
+
+</manifest>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimaryDark"
+
+        >
+
+        <com.yihai.wu.util.DarkImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@mipmap/ic_menu_back"/>
+
+        <TextView
+            android:id="@+id/modelName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/set_material"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/connect_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:text="@string/no_connect"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/activity_text_mid"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:layout_alignParentBottom="true"
+            android:alpha="0.2"
+            android:background="@color/colorWhite"/>
+
+    </RelativeLayout>
+        <com.yihai.wu.widget.stretchscrollview.MyScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <View
+                    android:layout_marginTop="38dp"
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_n"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+
+                        android:id="@+id/check1"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:id="@+id/nickel"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/material_nickel_wire"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_t"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check2"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+
+                        android:id="@+id/titanium"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/material_titanium_wire"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_b"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check3"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+
+                        android:id="@+id/stainless_steel"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/material_stainless_steel_wire"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_c"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check4"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+
+                        android:id="@+id/alcohol"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/material_alcohol_control"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_s"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check5"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/TRC"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/material_TCR_manual"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+
+            </LinearLayout>
+
+        </com.yihai.wu.widget.stretchscrollview.MyScrollView>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </LinearLayout>
+
+</LinearLayout>
