@@ -28,7 +28,6 @@ import static com.yihai.wu.sxi.R.id.rg_joule;
  */
 
 public class SetDetailsActivity extends AppCompatActivity {
-    private static final String MATERIAL = "material";
     @Bind(R.id.selected_material)
     TextView selectedMaterial;
     @Bind(R.id.btn_back)
@@ -73,7 +72,12 @@ public class SetDetailsActivity extends AppCompatActivity {
 
 
     //请求码requestCode
-    private static final int REQUEST_MATERIAL_CODE = 0X010;
+    private final static int REQUEST_MATERIAL_CODE = 0X010;
+    private final static int REQUEST_TEXTURE_CODE = 0x009;
+    private final static String MATERIAL = "material";
+    private final static String TEXTURE = "texture";
+
+
     @Bind(R.id.temp_unit_c)
     RadioButton tempUnitC;
     @Bind(R.id.temp_unit_f)
@@ -122,6 +126,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     private boolean isCentigrade = true;
     private String detail;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,11 +155,12 @@ public class SetDetailsActivity extends AppCompatActivity {
         Log.d("log", "initUI:取得数据 " + display);
         RadioButton display_rbt = (RadioButton) rgDisplayStatus.getChildAt(display);
         display_rbt.setChecked(true);
-
+        //材料
         String material = myModel.material;
         selectedMaterial.setText(material);
-        String textured = myModel.texture;
-        texture.setText(textured);
+        //口感
+        int textured = myModel.texture;
+        setShowText(textured);
         //记忆模式选择
         int memory = myModel.memory;
         RadioButton rb_M = (RadioButton) rgMemories.getChildAt(memory);
@@ -198,6 +204,31 @@ public class SetDetailsActivity extends AppCompatActivity {
         showJoule.setText(joule / 10 + "." + joule % 10);
     }
 
+    //口感选择显示
+    private void setShowText(int textured) {
+        if (textured == 0) {
+            texture.setText(R.string.texture_power_save);
+        }else if(textured == 1){
+            texture.setText(R.string.texture_soft);
+        }else if(textured == 2){
+            texture.setText(R.string.texture_standard);
+        }else if(textured == 3){
+            texture.setText(R.string.texture_strong);
+        }else if(textured == 4){
+            texture.setText(R.string.texture_super_strong);
+        }else if(textured == 5){
+            texture.setText(R.string.texture_custom_s1);
+        }else if(textured == 6){
+            texture.setText(R.string.texture_custom_s2);
+        }else if(textured == 7){
+            texture.setText(R.string.texture_custom_s3);
+        }else if(textured == 8){
+            texture.setText(R.string.texture_custom_s4);
+        }else if(textured == 9){
+            texture.setText(R.string.texture_custom_s5);
+        }
+    }
+
     private void initListener() {
 
         rgDisplayStatus.setOnCheckedChangeListener(new OnCheckedChangeListen());
@@ -235,6 +266,11 @@ public class SetDetailsActivity extends AppCompatActivity {
                 }
                 myModel_s.save();
                 break;
+            case R.id.select_texture:
+                Intent textureIntent = new Intent(SetDetailsActivity.this, SetTextureActivity.class);
+                textureIntent.putExtra("name", detail);
+                startActivityForResult(textureIntent, REQUEST_TEXTURE_CODE);
+                break;
 
 
         }
@@ -247,6 +283,9 @@ public class SetDetailsActivity extends AppCompatActivity {
         if (requestCode == REQUEST_MATERIAL_CODE && resultCode == RESULT_OK) {
             String material = data.getStringExtra(MATERIAL);
             selectedMaterial.setText(material);
+        } else if (requestCode == REQUEST_TEXTURE_CODE && resultCode == RESULT_OK) {
+            String getTexture = data.getStringExtra(TEXTURE);
+            texture.setText(getTexture);
         }
 
     }
@@ -370,12 +409,12 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case R.id.rg_joule:
                     switch (i) {
                         case R.id.rb_power:
-                            myModel_C.JouleOrPower=0;
+                            myModel_C.JouleOrPower = 0;
                             lineShowPower.setVisibility(View.VISIBLE);
                             lineShowJoule.setVisibility(View.GONE);
                             break;
                         case R.id.rb_joule:
-                            myModel_C.JouleOrPower=1;
+                            myModel_C.JouleOrPower = 1;
                             lineShowPower.setVisibility(View.GONE);
                             lineShowJoule.setVisibility(View.VISIBLE);
                             break;
@@ -387,33 +426,31 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case R.id.display_status:
                     if (i == R.id.rb_dis_left) {
                         myModel_C.display = 0;
-                    }else
-                    if (i == R.id.rb_dis_right) {
+                    } else if (i == R.id.rb_dis_right) {
                         myModel_C.display = 1;
-                    }else
-                    if(i == R.id.rb_dis_auto){
-                        myModel_C.display=2;
+                    } else if (i == R.id.rb_dis_auto) {
+                        myModel_C.display = 2;
                     }
                     break;
                 case R.id.rg_memories:
-                    if(i==R.id.rb_M1){
-                        myModel_C.memory=0;
-                    }else if(i==R.id.rb_M2){
-                        myModel_C.memory=1;
-                    }else if(i==R.id.rb_M3){
-                        myModel_C.memory=2;
-                    }else if(i==R.id.rb_M4){
-                        myModel_C.memory=3;
-                    }else if(i==R.id.rb_M4) {
-                        myModel_C.memory=4;
+                    if (i == R.id.rb_M1) {
+                        myModel_C.memory = 0;
+                    } else if (i == R.id.rb_M2) {
+                        myModel_C.memory = 1;
+                    } else if (i == R.id.rb_M3) {
+                        myModel_C.memory = 2;
+                    } else if (i == R.id.rb_M4) {
+                        myModel_C.memory = 3;
+                    } else if (i == R.id.rb_M4) {
+                        myModel_C.memory = 4;
                     }
                     break;
                 case R.id.rg_operation:
-                        if(i==R.id.rb_primary){
-                            myModel_C.operation=0;
-                        }else {
-                            myModel_C.operation=1;
-                        }
+                    if (i == R.id.rb_primary) {
+                        myModel_C.operation = 0;
+                    } else {
+                        myModel_C.operation = 1;
+                    }
                     break;
 
             }

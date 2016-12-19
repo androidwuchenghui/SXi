@@ -19,10 +19,12 @@ public class MyModel extends Model {
     public int status;
     @Column(name = "DisplayStatus")
     public int display;
+    //材料选择
     @Column(name = "Material")
     public String material;
+    //口感选择
     @Column(name = "Texture")
-    public String texture;
+    public int texture;
     @Column(name = "Memory")
     public int memory;
     @Column(name = "TemperatureUnit")
@@ -51,11 +53,17 @@ public class MyModel extends Model {
     initMyModel(String name) {
         MyModel myModel = new MyModel();
         myModel.model = name;
-        myModel.status = 0;       //直通模式是否打开（0-false,1-true）
-        myModel.display = 0;           //显示状态（0-left,1-right,2-auto）
-        myModel.material = "镍丝";       //材质选择
-        myModel.texture = "标准";
+        //直通模式是否打开（0-false,1-true）
+        myModel.status = 0;
+        //显示状态（0-left,1-right,2-auto）
+        myModel.display = 0;
+        //材质选择
+        myModel.material = "镍丝";
+        //口感选择
+        myModel.texture =2;
+        //记忆模式选择
         myModel.memory = 0;
+
         myModel.temperatureUnit = 0;
         myModel.JouleOrPower = 0;
         myModel.operation = 1;

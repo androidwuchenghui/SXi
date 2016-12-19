@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimaryDark"
+
+        >
+
+        <com.yihai.wu.util.DarkImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@mipmap/ic_menu_back"/>
+
+        <TextView
+            android:id="@+id/modelName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/select_texture"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/connect_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:text="@string/no_connect"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/activity_text_mid"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:layout_alignParentBottom="true"
+            android:alpha="0.2"
+            android:background="@color/colorWhite"/>
+
+    </RelativeLayout>
+        <com.yihai.wu.widget.stretchscrollview.MyScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <View
+                    android:layout_marginTop="38dp"
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_power_save"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+
+                        android:id="@+id/check1"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:id="@+id/tv_power_save"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_power_save"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_soft"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check2"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+
+                        android:id="@+id/tv_soft"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_soft"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_standard"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check3"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:id="@+id/tv_standard"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_standard"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:id="@+id/line_strong"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check4"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+
+                        android:id="@+id/tv_strong"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_strong"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_super_strong"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check5"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/tv_super_strong"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_super_strong"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_custom_s1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check6"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/tv_custom_s1"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_custom_s1"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+                    <ImageView
+                        android:id="@+id/detail_s1"
+                        android:layout_marginRight="10dp"
+                        android:padding="8dp"
+                        android:src="@mipmap/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_custom_s2"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check7"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/tv_custom_s2"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_custom_s2"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+                    <ImageView
+                        android:id="@+id/detail_s2"
+                        android:layout_marginRight="10dp"
+                        android:padding="8dp"
+                        android:src="@mipmap/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_custom_s3"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check8"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/tv_custom_s3"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_custom_s3"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+
+                    <ImageView
+                        android:id="@+id/detail_s3"
+                        android:layout_marginRight="10dp"
+                        android:padding="8dp"
+                        android:src="@mipmap/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_custom_s4"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check9"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+
+                        android:id="@+id/tv_custom_s4"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_custom_s4"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+                    <ImageView
+                        android:id="@+id/detail_s4"
+                        android:layout_marginRight="10dp"
+                        android:padding="8dp"
+                        android:src="@mipmap/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+                <LinearLayout
+                    android:clickable="true"
+                    android:id="@+id/line_custom_s5"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/check10"
+                        android:layout_marginLeft="10dp"
+                        android:padding="4dp"
+                        android:src="@mipmap/check"
+                        android:visibility="invisible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:id="@+id/tv_custom_s5"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@color/colorWhite"
+                        android:text="@string/texture_custom_s5"
+                        android:textSize="@dimen/activity_text_mid"
+                        android:textColor="@color/colorPrimaryDark"/>
+                    <ImageView
+                        android:id="@+id/detail_s5"
+                        android:layout_marginRight="10dp"
+                        android:padding="8dp"
+                        android:src="@mipmap/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+                <View
+                    android:background="@color/colorGray"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.4dp"/>
+
+
+            </LinearLayout>
+
+        </com.yihai.wu.widget.stretchscrollview.MyScrollView>
+
+
+</LinearLayout>

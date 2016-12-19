@@ -4,12 +4,10 @@ import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -132,33 +130,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    protected void dialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("确定要退出吗?");
-        builder.setTitle("提示");
-        builder.setPositiveButton("确认",
-                new android.content.DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        finish();
-                    }
-                });
-        builder.setNegativeButton("取消",
-                new android.content.DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        builder.create().show();
-    }
+
+    /**
+     * 点击返回退出APP
+     */
+    private long end;
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            dialog();
-            return false;
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            //按的是返回键
+            //dialog弹出
+            //			dialog.show();
+
+            if(System.currentTimeMillis() - end <= 2000){
+                //关闭当前应用
+                this.finish();
+            } else {
+                Toast.makeText(this, "再按一次退出应用", Toast.LENGTH_SHORT).show();
+                end = System.currentTimeMillis();
+            }
         }
-        return false;
+
+        //表示拦截back事件
+        return true;
     }
 }

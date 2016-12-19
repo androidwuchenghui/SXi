@@ -61,6 +61,8 @@
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name=".MaterialActivity"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".SetTextureActivity"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 
 </manifest>
