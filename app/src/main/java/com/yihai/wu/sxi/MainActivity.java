@@ -23,11 +23,8 @@ import com.youth.banner.listener.OnBannerClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.yihai.wu.sxi.R.mipmap.b;
-import static com.yihai.wu.sxi.R.mipmap.c;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Integer[] images = {R.mipmap.a, b, c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
+    Integer[] images = {R.mipmap.a,R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
     String TAG = "print";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
@@ -69,20 +66,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initButton();
     }
 
-
-
-
-
+    //弹出提示框提示打开蓝牙
     @Override
-
     protected void onStart() {
         super.onStart();
-
         if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
+
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
         }
     }
 
@@ -109,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void OnBannerClick(int position) {
                 Log.d(TAG, "OnBannerClick: " + position); //position 从1开始
+                Intent intent = new Intent(MainActivity.this,WebViewActivity.class);
+                startActivity(intent);
             }
         });
 

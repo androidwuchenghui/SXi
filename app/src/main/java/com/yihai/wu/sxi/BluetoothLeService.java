@@ -114,27 +114,23 @@ public class BluetoothLeService extends Service {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
-                Log.i(TAG, "Connected to GATT server.");
 
+                Log.d("ConnectionStateChange", "onConnectionStateChange:连接状态良好------ ");
                 // Attempts to discover services after successful connection.
-                Log.e("log", "Attempting to start service discovery:" +
-                        mBluetoothGatt.discoverServices());
+                mBluetoothGatt.discoverServices();
+//                Log.e("log", "Attempting to start service discovery:" +
+//                        mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
-                Log.i(TAG, "Disconnected from GATT server.");
+                Log.i("ConnectionStateChange", "Disconnected from GATT server.请注意---断开了----");
                 broadcastUpdate(intentAction);
             }
+
         }
 
-        /*======================================================================
-         *Purpose:
-         *Parameter:
-         *Return:
-         *Remark:
-         *======================================================================
-         */
+        // New services discovered
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -144,14 +140,10 @@ public class BluetoothLeService extends Service {
             }
         }
 
-        /*======================================================================
-         *Purpose:
-         *Parameter:
-         *Return:
-         *Remark:当BluetoothLeService执行了BluetoothGatt类的readCharacteristic(),就
-         *       会触发这个函数.
-         *======================================================================
+        /*
+         *Remark:当BluetoothLeService执行了BluetoothGatt类的readCharacteristic(),会触发这个函数.
          */
+        // Result of a characteristic read operation
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
@@ -161,13 +153,9 @@ public class BluetoothLeService extends Service {
             }
         }
 
-        /*======================================================================
-         *Purpose:
-         *Parameter:
-         *Return:
+        /*
          *Remark:当BluetoothLeService执行了BluetoothGatt类的writeCharacteristic(),就
          *       会触发这个函数.
-         *======================================================================
          */
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt,
@@ -184,8 +172,6 @@ public class BluetoothLeService extends Service {
 
         /*======================================================================
          *Purpose:某个特性的状态改变了,就会触发这个函数.
-         *Parameter:
-         *Return:
          *Remark:如果接收到BLE设备发送过来的数据,并且接收数据的特性的属性已经设置为通知的话,接收完成后
          *       也会触发这个函数.
          *======================================================================
@@ -201,9 +187,6 @@ public class BluetoothLeService extends Service {
 
     /*======================================================================
      *Purpose:向外广播一个字符串信息.
-     *Parameter:
-     *Return:
-     *Remark:
      *======================================================================
      */
     private void broadcastUpdate(final String action) {
@@ -211,13 +194,6 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
-    /*======================================================================
-     *Purpose:
-     *Parameter:
-     *Return:
-     *Remark:
-     *======================================================================
-     */
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -241,17 +217,16 @@ public class BluetoothLeService extends Service {
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else
         */
-        {
-            // For all other profiles, writes the data formatted in HEX.
-            final byte[] data = characteristic.getValue();
-            if (data != null && data.length > 0) {
-                final StringBuilder stringBuilder = new StringBuilder(data.length);
-                for (byte byteChar : data)
-                    stringBuilder.append(String.format("%02X", byteChar));
 
-                intent.putExtra(EXTRA_DATA, stringBuilder.toString());
-                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-            }
+        // For all other profiles, writes the data formatted in HEX.
+        final byte[] data = characteristic.getValue();
+        if (data != null && data.length > 0) {
+            final StringBuilder stringBuilder = new StringBuilder(data.length);
+            for (byte byteChar : data)
+                stringBuilder.append(String.format("%02X", byteChar));
+
+            intent.putExtra(EXTRA_DATA, stringBuilder.toString());
+            //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
         }
         sendBroadcast(intent);
     }
@@ -444,12 +419,12 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
 
         //FFC2特征值，获得通知
-//        if(g_UUID_Charater_Password_C2.equals(characteristic.getUuid())){
-//            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-//                    UUID.fromString(MyGattAttributes.C_UUID_Character_Password_Notify));
-//            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-//            mBluetoothGatt.writeDescriptor(descriptor);
-//        }
+        //        if(g_UUID_Charater_Password_C2.equals(characteristic.getUuid())){
+        //            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
+        //                    UUID.fromString(MyGattAttributes.C_UUID_Character_Password_Notify));
+        //            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        //            mBluetoothGatt.writeDescriptor(descriptor);
+        //        }
 
 
         // This is specific to Heart Rate Measurement.

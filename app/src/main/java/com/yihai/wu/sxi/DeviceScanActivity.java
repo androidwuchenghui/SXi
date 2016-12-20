@@ -55,34 +55,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private static final long SCAN_PERIOD = 5000;
     private final static String TAG = "log";
     private boolean mConnected = false;
-    // Code to manage Service lifecycle.
-    public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            Log.d(TAG, "onServiceConnected: **********************连接服务");
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
-                Log.e(TAG, "Unable to initialize Bluetooth");
-                finish();
-            }
-            // Automatically connects to the device upon successful start-up initialization.
-                        mBluetoothLeService.connect(mDeviceAddress);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(TAG, "onServiceDisconnected: " + "----------------------");
-            mBluetoothLeService = null;
-        }
-    };
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
-
 
 
     private String mDeviceAddress;
@@ -114,22 +93,20 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     public static final int C_SXi_CR_Test_Transmit_RX = 0x11;
 
     //密码
-    private String password = "123456789456";
+    private String password = "000000000000";
     private String mDeviceName;
     private TextView tv_title;
 
     @Override
     protected int getContentId() {
-
         return R.layout.activity_devicescan;
-
     }
 
     @Override
     protected void init() {
+        initView();
 
 
-        mHandler = new Handler();
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -153,8 +130,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        initView();
 
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.d(TAG, "Connect request result=" + result);
+        }
+
+        scanLeDevice(true);
     }
 
     // Handles various events fired by the Service.
@@ -168,26 +150,52 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                Log.e("log", "onReceive: " + "GATT连接成功*************");
+
                 mConnected = true;
+
                 //                updateConnectionState(R.string.connected);
                 //                invalidateOptionsMenu();
-//                Log.e("log", "onReceive: " + "GATT连接成功*************");
+
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
-//                Log.e("log", "onReceive: " + "GATT断开********");
+
+                                Log.e("log", "onReceive: " + "GATT连接断开********");
                 //                updateConnectionState(R.string.disconnected);
                 //                invalidateOptionsMenu();
                 //                clearUI();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+
                 // Show all the supported services and characteristics on the user interface.
-//                Log.e("log", "onReceive: " + "发现GATT中的服务********");
+                //                Log.e("log", "onReceive: " + "发现GATT中的服务********");
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
 
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 String string = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                Log.d(TAG, "onReceive: password_back+++++++++"+string);
+                Log.d(TAG, "onReceive: password_back+++++++++" + string);
                 displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
+        }
+    };
+    // Code to manage Service lifecycle.
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            Log.d(TAG, "onServiceConnected: **********************连接服务");
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+//              mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(TAG, "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
         }
     };
     // Device scan callback. 扫描回掉
@@ -230,17 +238,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        scanLeDevice(true);
-
-    }
-
 
     private void initView() {
-
+        mHandler = new Handler();
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);//设置进度条的样式
         dialog.setMessage("搜索中...");
@@ -258,7 +258,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         device_lv.setXListViewListener(this);
         device_lv.setRefreshTime(getTime());
         device_lv.setOnItemClickListener(this);
+
     }
+
     private String getTime() {
         return new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(new Date());
     }
@@ -278,13 +280,24 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     //设备选择列表的点击事件
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-        final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position-1);
+        final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position - 1);
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
+
         mBluetoothLeService.connect(mDeviceAddress);
-        Sys_SetMyDeviceName();
-        setPassword(password);
+
+        Log.d(TAG, "onItemClick: "+ mBluetoothLeService.connect(mDeviceAddress));
+        if( mBluetoothLeService.connect(mDeviceAddress)){
+            //设置名字
+            Sys_SetMyDeviceName();
+            //提交密码
+            setPassword(password);
+        }else {
+            Toast.makeText(mBluetoothLeService, "未连接", Toast.LENGTH_SHORT).show();
+        }
+
     }
+
     //下拉刷新
     @Override
     public void onRefresh() {
@@ -303,6 +316,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     public void onLoadMore() {
 
     }
+
     private void onLoad() {
         device_lv.stopRefresh();
         device_lv.stopLoadMore();
@@ -542,10 +556,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     }//displayGattServices()------------------------END
 
     private void displayData(String data) {
-     if (data != null) {
+        if (data != null) {
             tv_title.setText(data);
             /*
-        	int i;
+            int i;
         	int m_Length;
         	m_Length=data.length();
         	byte[] m_MyData=new byte[m_Length];
@@ -690,6 +704,12 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             g_Character_Password.setValue(m_Data);
             mBluetoothLeService.writeCharacteristic(g_Character_Password);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mGattUpdateReceiver);
     }
 
     @Override
