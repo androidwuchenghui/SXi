@@ -3,7 +3,6 @@ package com.yihai.wu.sxi;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
@@ -16,6 +15,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +43,7 @@ import java.util.Locale;
 public class DeviceScanActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener, XupListView.IXListViewListener {
     private BluetoothAdapter mBluetoothAdapter;
     private DarkImageButton btn_back;
-    String m_MyDeviceName = "TheDevice";
+
     //dialog
     private ProgressDialog dialog;
     private LeDeviceListAdapter mLeDeviceListAdapter;
@@ -56,17 +56,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private final static String TAG = "log";
     private boolean mConnected = false;
 
-    private String mBluetoothDeviceAddress;
-    private BluetoothGatt mBluetoothGatt;
-    private int mConnectionState = STATE_DISCONNECTED;
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
-
 
     private String mDeviceAddress;
-    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
-            new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+    //    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
+    //            new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
 
@@ -96,6 +89,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private String password = "000000000000";
     private String mDeviceName;
     private TextView tv_title;
+    private Message message;
 
     @Override
     protected int getContentId() {
@@ -129,12 +123,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         /*创建BluetoothLeService并与之绑定.*/
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        //注册广播
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 
-        if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-            Log.d(TAG, "Connect request result=" + result);
-        }
+
+        Log.d(TAG, "init: mBluetoothLeService>>>>>>" + mBluetoothLeService);
 
         scanLeDevice(true);
     }
@@ -149,25 +142,18 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                Log.e("log", "onReceive: " + "GATT连接成功*************");
-
                 mConnected = true;
-
-                //                updateConnectionState(R.string.connected);
-                //                invalidateOptionsMenu();
+                Log.e("log", "onReceive: " + "GATT连接成功*************");
 
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
-
-                                Log.e("log", "onReceive: " + "GATT连接断开********");
-                //                updateConnectionState(R.string.disconnected);
-                //                invalidateOptionsMenu();
-                //                clearUI();
+                Log.e("log", "onReceive: " + "GATT连接断开********");
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
 
                 // Show all the supported services and characteristics on the user interface.
-                //                Log.e("log", "onReceive: " + "发现GATT中的服务********");
+                Log.e("log", "onReceive: " + "发现GATT中的服务********");
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
 
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
@@ -189,7 +175,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 finish();
             }
             // Automatically connects to the device upon successful start-up initialization.
-//              mBluetoothLeService.connect(mDeviceAddress);
+            //              mBluetoothLeService.connect(mDeviceAddress);
         }
 
         @Override
@@ -203,10 +189,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             new BluetoothAdapter.LeScanCallback() {
 
                 @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+
+
+                            Log.d(TAG, "run:>>>>>>>>>>bondstate " +device.getBondState()+"getuuid"+ device.getUuids() + "   address>>" + device.getAddress() + ">>>>>" + scanRecord.toString());
                             mLeDeviceListAdapter.addDevice(device);
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
@@ -284,18 +273,24 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
 
+        //点击了一个想要连接的设备
         mBluetoothLeService.connect(mDeviceAddress);
 
-        Log.d(TAG, "onItemClick: "+ mBluetoothLeService.connect(mDeviceAddress));
-        if( mBluetoothLeService.connect(mDeviceAddress)){
-            //设置名字
-            Sys_SetMyDeviceName();
-            //提交密码
-            setPassword(password);
-        }else {
-            Toast.makeText(mBluetoothLeService, "未连接", Toast.LENGTH_SHORT).show();
-        }
 
+//        Sys_SetMyDeviceName("BleDevice");
+
+
+        Log.d(TAG, "onItemClick: " + mBluetoothLeService.connect(mDeviceAddress));
+        //        new Handler().postDelayed(new Runnable() {
+        //            @Override
+        //            public void run() {
+        //
+        //            }
+        //        },80);
+        //设置名字
+        //            Sys_SetMyDeviceName();
+        //提交密码
+        //            setPassword(password);
     }
 
     //下拉刷新
@@ -401,6 +396,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothLeService.ACTION_BLE_DATA_TX_OK);
         return intentFilter;
     }
 
@@ -429,7 +425,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
         ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData
                 = new ArrayList<ArrayList<HashMap<String, String>>>();
-        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+        //        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
         for (BluetoothGattService gattService : gattServices) {
             HashMap<String, String> currentServiceData = new HashMap<String, String>();
             uuid = gattService.getUuid().toString();
@@ -502,23 +498,31 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 if (m_b_Check_DeviceName == true) //?ж??????????豸????????????
                 {
                     if (mBluetoothLeService.g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
-                        g_Character_DeviceName = gattCharacteristic;//执行成功。。。
+                        g_Character_DeviceName = gattCharacteristic;//执行成功。获得FF91特征。。
                         Log.d(TAG, "displayGattServices: deviceName-----uuid" + g_Character_DeviceName.getUuid());
                         m_b_Check_DeviceName = false;
+                        Sys_SetMyDeviceName("BleDevice");
+
+
+
+
                     }
                 }
                 if (m_b_Check_Password == true) {
                     if (mBluetoothLeService.g_UUID_Charater_Password.equals(gattCharacteristic.getUuid())) {
                         g_Character_Password = gattCharacteristic;
+
+
                     } else if (mBluetoothLeService.g_UUID_Charater_Password_C2.equals(gattCharacteristic.getUuid())) {
                         g_Character_Password_Notify = gattCharacteristic;
                         m_b_Notify_Password = true;
+
                     }
                 }
 
             }//for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics)-----------
-            mGattCharacteristics.add(charas);
-            gattCharacteristicData.add(gattCharacteristicGroupData);
+            //            mGattCharacteristics.add(charas);
+            //            gattCharacteristicData.add(gattCharacteristicGroupData);
         } //for (BluetoothGattService gattService : gattServices)------------
 
         /*
@@ -719,11 +723,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         mBluetoothLeService = null;
     }
 
-    private void Sys_SetMyDeviceName() {
+    private void Sys_SetMyDeviceName(String m_MyDeviceName) {
         // Send a message using content of the edit text widget
         int m_Length = 0;
 
-
+        Log.d(TAG, "Sys_SetMyDeviceName: " + g_Character_DeviceName);
         if (m_MyDeviceName.equals(mDeviceName) == true) {
             return;
         }

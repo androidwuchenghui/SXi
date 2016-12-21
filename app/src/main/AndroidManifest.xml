@@ -65,6 +65,7 @@
 
         <activity android:name=".WebViewActivity"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
     </application>
 
 </manifest>

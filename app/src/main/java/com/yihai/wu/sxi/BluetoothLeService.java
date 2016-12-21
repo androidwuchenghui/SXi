@@ -98,15 +98,15 @@ public class BluetoothLeService extends Service {
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
-
+    //连接回掉
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         /*======================================================================
          *Purpose:本机与外部BLE设备连接或者断开时的处理.
-         *Parameter:
-         *Return:
          *Remark:使用了BluetoothGatt类时,必须重写的BluetoothGattCallback函数.
          *======================================================================
          */
+
+        //连接状态的改变
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
@@ -118,8 +118,8 @@ public class BluetoothLeService extends Service {
                 Log.d("ConnectionStateChange", "onConnectionStateChange:连接状态良好------ ");
                 // Attempts to discover services after successful connection.
                 mBluetoothGatt.discoverServices();
-//                Log.e("log", "Attempting to start service discovery:" +
-//                        mBluetoothGatt.discoverServices());
+                //                Log.e("log", "Attempting to start service discovery:" +
+                //                        mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
@@ -392,7 +392,7 @@ public class BluetoothLeService extends Service {
         }
         //String m_str;
         int m_Property = characteristic.getProperties();
-        Log.e(TAG, "writeCharacteristic:******* " + m_Property);
+        Log.e(TAG, "writeCharacteristic:*****写** " + m_Property);
         //    	String m_str=String.format("%1$08x", m_Property);
         //    	Log.e(TAG, "wc property=***********"+m_str);
         if ((m_Property | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
