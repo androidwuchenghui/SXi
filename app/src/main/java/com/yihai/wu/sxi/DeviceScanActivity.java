@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.query.Delete;
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.base.BaseActivity;
 import com.yihai.wu.util.DarkImageButton;
@@ -93,10 +95,15 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     public static final int C_SXi_CR_Test_Transmit_RX = 0x11;
 
     //密码
-    private static final String DEFAULT_PASSWORD = "000000000000";
+    private static final String DEFAULT_PASSWORD = "000000";
+    private static final String YIHI_DEFAULT_PASSWORD = "135246";
+    private int commit_amount =100;
+    private int reChange=0;
     private String mDeviceName;
     private TextView tv_title;
     private Message message;
+    private StringBuilder sb;
+    private String changeTo;
 
     @Override
     protected int getContentId() {
@@ -153,78 +160,175 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 case BluetoothLeService.ACTION_GATT_CONNECTED:
                     mConnected = true;
                     Log.e("log", "onReceive: " + "GATT连接成功*************");
-                break;
+                    break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     mConnected = false;
                     Log.e("log", "onReceive: " + "GATT连接断开********");
-                break;
+                    break;
                 case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
                     Log.e("log", "onReceive: " + "发现GATT中的服务********");
-                    Log.d(TAG, "onReceive: "+mBluetoothLeService.getSupportedGattServices().size());
+                    Log.d(TAG, "onReceive: " + mBluetoothLeService.getSupportedGattServices().size());
                     displayGattServices(mBluetoothLeService.getSupportedGattServices());
-                break;
+                    break;
                 case BluetoothLeService.ACTION_DATA_AVAILABLE:
                     String string = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                     Log.d(TAG, "onReceive: 收到的一些信息：" + string);
-                break;
+                    break;
                 case BluetoothLeService.ACTION_DATA_COMMIT_PASSWORD_RESULT:
                     String reply = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                     Log.d(TAG, "onReceive:>>>>>>replay " + reply);
-                    handlePasswordCallbacks(reply);
-                break;
-                case "com.id":
+                    if (commit_amount == 0) {
+                        handlePasswordCallbacks(reply);
+                    } else if(commit_amount == 1){
+                        handleSecondPasswordCallback(reply);
+                    }else if(commit_amount==2){
+                        //新密码是否成功回调
+                        handleChangePassword(reply);
+                    }
+                    break;
+                case "com.id"://产品识别码的返回  FF96
                     String customerID = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                     Log.d(TAG, "onReceive:-----customerID>>>>> " + customerID);
+
                     if (customerID.equals("0601")) {
+                        //确认为本公司产品之后，产生6位随机密码
+                        sb = new StringBuilder();
+                        for (int i = 0; i < 6; i++) {
+                            int random = (int) (Math.random() * 100);
+                            if (random % 3 == 0) {
+                                //number
+                                int n = (int) (Math.random() * 10);
+                                sb.append(n);
+                            } else if (random % 3 == 1) {
+                                //big letter
+                                int bl = (int) (Math.random() * 26) + 65;
+                                sb.append((char) bl);
+                            } else {
+                                // small letter
+                                int sl = (int) (Math.random() * 26) + 97;
+                                sb.append((char) sl);
+                            }
+                        }
+
+                        ConnectedBleDevices getCurrent = ConnectedBleDevices.getConnectInfo(mDeviceName);
+                        changeTo = getCurrent.password + sb;
+                        Log.d(TAG, "onReceive: " + changeTo);
+                        commit_amount=2;
+                        reChange++;
+                        commitPassword(changeTo);
+
 
                     } else {
                         //断开连接
                         mBluetoothLeService.disconnect();
                     }
-                break;
+                    break;
 
             }
 
 
         }
     };
+    //修改密码的处理
+    private void handleChangePassword(String str) {
+        switch (str){
+            case "01":
+                //提交错误，修改失败
+                if(reChange==3){
+                    mBluetoothLeService.disconnect();
+
+                }else {
+                    reChange++;
+                    commitPassword(changeTo);
+                }
+                
+
+                break;
+            case "02":
+                //修改成功
+                ConnectedBleDevices changedPassword = ConnectedBleDevices.getConnectInfo(mDeviceName);
+                changedPassword.password = sb.toString();
+                changedPassword.save();
+                //执行正常通信￥￥
+                Log.d(TAG, "handleChangePassword: 大功告成");
+
+                break;
+        }
+
+    }
+
+    //再次提交亿海产品默认密码返回结果的处理
+    private void handleSecondPasswordCallback(String str) {
+        switch (str) {
+            case "00"://正确
+                isFirst();
 
 
+                break;
+            case "01"://错误
+                //删除保存的数据
+                new Delete().from(ConnectedBleDevices.class).execute();
+                //提示用户
+                AlertDialog remindDialog = new AlertDialog.Builder(this)
+                        .setIcon(R.mipmap.app_icon)
+                        .setTitle("提示")
+                        .setMessage("您的密码有误，请尝试以下操作\n1.退出本程序\n2.手动操作设备A,进入\"设备配对\"菜单\n3.长按ENTER键,直到设备A显示蓝牙配对画面\n4.重新启动本程序,重新搜索,并点击连接搜索到的设备A,来完成配对.")
+                        .setCancelable(false)
+                        .setNegativeButton("关闭提示", null)
+                        .create();
+                remindDialog.show();
+
+                break;
+        }
+    }
+
+    //提交密码返回结果处理
     private void handlePasswordCallbacks(String reply) {
         Log.d(TAG, "handlePasswordCallbacks: " + "处理返回的密码状态:" + reply);
         if (reply != null) {
-            //判断回馈的信息
+            //提交密码后判断回馈的信息
             switch (reply) {
                 case "00":
                     Log.d(TAG, "handlePasswordCallbacks: 密码提交---正确---");
                     //判断是不是第一次连接
-                    boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
-                    Log.d(TAG, "handlePasswordCallbacks: isFirstRun: " + isFirstRun);
-                    if (isFirstRun) {
-                        editor.putBoolean("onReceive:-----customerID>>>>>", false);
-                        editor.commit();
-                        Log.d(TAG, "handlePasswordCallbacks: " + "读取特征值" + g_Character_CustomerID);
-                        mBluetoothLeService.readCharacteristic(g_Character_CustomerID);
-
-
-                    } else {//步骤8.1.判断刚才在步骤3,或者步骤5通知提交正确的密码是否为000000或者135246?
-                        Log.d("debug", "不是第一次运行");
-
-                    }
+                    isFirst();
+                   
                     break;
                 case "01":
-                    Log.d(TAG, "displayData: 密码提交---错误---");
+                    Log.d(TAG, "displayData: 默认设备密码提交---错误--- 开始提交产品密码");
+                    commit_amount =1;
+                    commitPassword(YIHI_DEFAULT_PASSWORD);
+
                     break;
-                case "02":
-                    Log.d(TAG, "displayData: 密码修改---成功---");
-                    break;
-                case "03":
-                    Log.d(TAG, "displayData: 取消密码----");
-                    break;
+
             }
 
         }
     }
+
+    //首次连接的判断
+    private void isFirst() {
+        boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
+        ConnectedBleDevices connected = ConnectedBleDevices.getConnectInfo(mDeviceName);
+        if (isFirstRun) {
+            //首次连接需要判断识别码
+
+            mBluetoothLeService.readCharacteristic(g_Character_CustomerID);//读取产品识别码
+            editor.putBoolean("isFirstRun", false);
+            editor.commit();
+        } else {
+            if (connected.password.equals(DEFAULT_PASSWORD) || connected.password.equals(YIHI_DEFAULT_PASSWORD)) {
+                //不是第一次通过默认密码进入，需要判断产品识别码
+                mBluetoothLeService.readCharacteristic(g_Character_CustomerID);//读取产品识别码
+            } else {
+                //通过用户自己保存的密码，并且不是第一次进入，允许执行正常通信￥￥
+                Log.d(TAG, "handleChangePassword: 大功告成");
+                ConnectedBleDevices connectInfo = ConnectedBleDevices.getConnectInfo(mDeviceName);
+                Log.d(TAG, "isFirst: "+connectInfo.password);
+            }
+        }
+    }
+
 
     // Code to manage Service lifecycle.
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -631,17 +735,18 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         }
 
 
-
         //提交密码
         ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfo(mDeviceName);
         //判断之前是否记录过设备A的密码
         if (usedDevice != null) {
             String password = usedDevice.password;
-            Log.d(TAG, "displayGattServices: password:"+password);
-            commitPassword(password);
+            Log.d(TAG, "displayGattServices: password:" + password);
+            commitPassword(password+password);
+            commit_amount=0;
         } else {
             Log.d(TAG, "displayGattServices: 提交默认密码---");
-            commitPassword(DEFAULT_PASSWORD);
+            commitPassword(DEFAULT_PASSWORD+DEFAULT_PASSWORD);
+            commit_amount=0;
             ConnectedBleDevices current = new ConnectedBleDevices();
             current.deviceName = mDeviceName;
             current.deviceAddress = mDeviceAddress;

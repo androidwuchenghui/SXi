@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //dialog弹出
             //			dialog.show();
 
-            if(System.currentTimeMillis() - end <= 2000){
+            if(System.currentTimeMillis() - end <= 3000){
                 //关闭当前应用
                 this.finish();
             } else {
