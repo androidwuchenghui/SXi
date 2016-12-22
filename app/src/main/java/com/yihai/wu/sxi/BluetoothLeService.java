@@ -67,6 +67,11 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String ACTION_DATA_COMMIT_PASSWORD_RESULT =
+            "com.example.bluetooth.le.PASSWORD";
+
+
+
     /*自定义广播消息:一个特性的数据发送完成.*/
     public final static String ACTION_BLE_DATA_TX_OK =
             "com.example.bluetooth.le.ACTION_BLE_DATA_TX_OK";
@@ -87,7 +92,8 @@ public class BluetoothLeService extends Service {
             UUID.fromString(MyGattAttributes.C_UUID_Service_DeviceConfig);
     public final UUID g_UUID_Charater_DeviceName =
             UUID.fromString(MyGattAttributes.C_UUID_Character_Device_Name);
-
+    public final UUID g_UUID_Charater_CustomerID =
+            UUID.fromString(MyGattAttributes.C_UUID_Character_Device_CustomerID);
     public final UUID g_UUID_Service_Password =
             UUID.fromString(MyGattAttributes.C_UUID_Service_Password);
     public final UUID g_UUID_Charater_Password =
@@ -149,7 +155,12 @@ public class BluetoothLeService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+//                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                Log.d(TAG, "onCharacteristicRead: "+characteristic.getUuid()+">>>："+g_UUID_Charater_CustomerID);
+                if(characteristic.getUuid().equals(g_UUID_Charater_CustomerID)){
+                    Log.d(TAG, "onCharacteristicRead: 发出广播");
+                    broadcastUpdate("com.id",characteristic);
+                }
             }
         }
 
@@ -181,7 +192,15 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
+
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+
+            Log.d(TAG, "onCharacteristicChanged: "+characteristic.getUuid()+">>>"+ g_UUID_Charater_Password_C2);
+            if(characteristic.getUuid().equals(g_UUID_Charater_Password_C2)){
+                Log.d(TAG, "onCharacteristicChanged: 提交返回");
+                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT,characteristic);
+            }
+
         }
     };
 
@@ -346,6 +365,7 @@ public class BluetoothLeService extends Service {
      * callback.
      */
     public void disconnect() {
+        Log.d(TAG, "disconnect: 断开连接");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;

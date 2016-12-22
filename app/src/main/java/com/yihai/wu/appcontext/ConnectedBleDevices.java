@@ -26,6 +26,8 @@ public class ConnectedBleDevices extends Model{
     @Column(name = "password")
     public String password;
 
+
+
     public static ConnectedBleDevices getConnectInfo(String name) {
         return new Select().from(ConnectedBleDevices.class).where("deviceName = ?", name).executeSingle();
     }

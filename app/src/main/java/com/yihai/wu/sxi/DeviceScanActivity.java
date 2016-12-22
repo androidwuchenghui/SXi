@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.base.BaseActivity;
 import com.yihai.wu.util.DarkImageButton;
 import com.yihai.wu.widget.refresh_listview.XupListView;
@@ -56,6 +58,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private final static String TAG = "log";
     private boolean mConnected = false;
 
+    //用来判断是否第一次连接
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     private String mDeviceAddress;
     //    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
@@ -72,6 +77,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
      */
     private BluetoothGattCharacteristic g_Character_RX;
     private BluetoothGattCharacteristic g_Character_DeviceName;
+    private BluetoothGattCharacteristic g_Character_CustomerID;
+
     private BluetoothGattCharacteristic g_Character_Password;
     private BluetoothGattCharacteristic g_Character_Password_Notify;
 
@@ -86,7 +93,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     public static final int C_SXi_CR_Test_Transmit_RX = 0x11;
 
     //密码
-    private String password = "000000000000";
+    private static final String DEFAULT_PASSWORD = "000000000000";
     private String mDeviceName;
     private TextView tv_title;
     private Message message;
@@ -142,27 +149,83 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            switch (action) {
+                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                    mConnected = true;
+                    Log.e("log", "onReceive: " + "GATT连接成功*************");
+                break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    mConnected = false;
+                    Log.e("log", "onReceive: " + "GATT连接断开********");
+                break;
+                case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
+                    Log.e("log", "onReceive: " + "发现GATT中的服务********");
+                    Log.d(TAG, "onReceive: "+mBluetoothLeService.getSupportedGattServices().size());
+                    displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                break;
+                case BluetoothLeService.ACTION_DATA_AVAILABLE:
+                    String string = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                    Log.d(TAG, "onReceive: 收到的一些信息：" + string);
+                break;
+                case BluetoothLeService.ACTION_DATA_COMMIT_PASSWORD_RESULT:
+                    String reply = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                    Log.d(TAG, "onReceive:>>>>>>replay " + reply);
+                    handlePasswordCallbacks(reply);
+                break;
+                case "com.id":
+                    String customerID = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                    Log.d(TAG, "onReceive:-----customerID>>>>> " + customerID);
+                    if (customerID.equals("0601")) {
 
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                mConnected = true;
-                Log.e("log", "onReceive: " + "GATT连接成功*************");
+                    } else {
+                        //断开连接
+                        mBluetoothLeService.disconnect();
+                    }
+                break;
 
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                mConnected = false;
-                Log.e("log", "onReceive: " + "GATT连接断开********");
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-
-                // Show all the supported services and characteristics on the user interface.
-                Log.e("log", "onReceive: " + "发现GATT中的服务********");
-                displayGattServices(mBluetoothLeService.getSupportedGattServices());
-
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                String string = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                Log.d(TAG, "onReceive: password_back+++++++++" + string);
-                displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
+
+
         }
     };
+
+
+    private void handlePasswordCallbacks(String reply) {
+        Log.d(TAG, "handlePasswordCallbacks: " + "处理返回的密码状态:" + reply);
+        if (reply != null) {
+            //判断回馈的信息
+            switch (reply) {
+                case "00":
+                    Log.d(TAG, "handlePasswordCallbacks: 密码提交---正确---");
+                    //判断是不是第一次连接
+                    boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
+                    Log.d(TAG, "handlePasswordCallbacks: isFirstRun: " + isFirstRun);
+                    if (isFirstRun) {
+                        editor.putBoolean("onReceive:-----customerID>>>>>", false);
+                        editor.commit();
+                        Log.d(TAG, "handlePasswordCallbacks: " + "读取特征值" + g_Character_CustomerID);
+                        mBluetoothLeService.readCharacteristic(g_Character_CustomerID);
+
+
+                    } else {//步骤8.1.判断刚才在步骤3,或者步骤5通知提交正确的密码是否为000000或者135246?
+                        Log.d("debug", "不是第一次运行");
+
+                    }
+                    break;
+                case "01":
+                    Log.d(TAG, "displayData: 密码提交---错误---");
+                    break;
+                case "02":
+                    Log.d(TAG, "displayData: 密码修改---成功---");
+                    break;
+                case "03":
+                    Log.d(TAG, "displayData: 取消密码----");
+                    break;
+            }
+
+        }
+    }
+
     // Code to manage Service lifecycle.
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -195,7 +258,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         public void run() {
 
 
-                            Log.d(TAG, "run:>>>>>>>>>>bondstate " +device.getBondState()+"getuuid"+ device.getUuids() + "   address>>" + device.getAddress() + ">>>>>" + scanRecord.toString());
+                            Log.d(TAG, "run:>>>>>>>>>>bondstate " + device.getBondState() + "getuuid" + device.getUuids() + "   address>>" + device.getAddress() + ">>>>>" + scanRecord.toString());
                             mLeDeviceListAdapter.addDevice(device);
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
@@ -234,6 +297,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);//设置进度条的样式
         dialog.setMessage("搜索中...");
 
+        LandDialog = new ProgressDialog(this);
+        LandDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        LandDialog.setMessage("登录中~");
+
+        sharedPreferences = this.getSharedPreferences("share", MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
         btn_back = (DarkImageButton) findViewById(R.id.btn_back);
         btn_back.setOnClickListener(this);
         device_lv = (XupListView) findViewById(R.id.device_lv);
@@ -266,6 +336,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         }
     }
 
+
+    private ProgressDialog LandDialog;
+
     //设备选择列表的点击事件
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -275,22 +348,20 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
         //点击了一个想要连接的设备
         mBluetoothLeService.connect(mDeviceAddress);
+        LandDialog.show();
+/*
+        ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfo(mDeviceName);
+        Log.d(TAG, "onItemClick:usedDevice "+usedDevice);
+        //判断之前是否登录过
+        if(usedDevice!=null){
+            String password = usedDevice.password;
+        }else {
+            commitPassword(password);
+        }*/
+
+        //        Sys_SetMyDeviceName("BleDevice");
 
 
-//        Sys_SetMyDeviceName("BleDevice");
-
-
-        Log.d(TAG, "onItemClick: " + mBluetoothLeService.connect(mDeviceAddress));
-        //        new Handler().postDelayed(new Runnable() {
-        //            @Override
-        //            public void run() {
-        //
-        //            }
-        //        },80);
-        //设置名字
-        //            Sys_SetMyDeviceName();
-        //提交密码
-        //            setPassword(password);
     }
 
     //下拉刷新
@@ -397,6 +468,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeService.ACTION_BLE_DATA_TX_OK);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_COMMIT_PASSWORD_RESULT);
+        intentFilter.addAction("com.id");
+
         return intentFilter;
     }
 
@@ -498,15 +572,14 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 if (m_b_Check_DeviceName == true) //?ж??????????豸????????????
                 {
                     if (mBluetoothLeService.g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
-                        g_Character_DeviceName = gattCharacteristic;//执行成功。获得FF91特征。。
-                        Log.d(TAG, "displayGattServices: deviceName-----uuid" + g_Character_DeviceName.getUuid());
-                        m_b_Check_DeviceName = false;
-                        Sys_SetMyDeviceName("BleDevice");
-
-
-
-
+                        g_Character_DeviceName = gattCharacteristic;//执行功。获得FF91特征。。
+                        Log.d(TAG, "displayGattServices: 设备名称-----uuid" + g_Character_DeviceName.getUuid());
+                        //                        Sys_SetMyDeviceName("BleDevice");
+                    } else if (mBluetoothLeService.g_UUID_Charater_CustomerID.equals(gattCharacteristic.getUuid())) {
+                        g_Character_CustomerID = gattCharacteristic;
+                        Log.d(TAG, "displayGattServices: 产品识别码" + g_Character_CustomerID.getUuid());
                     }
+
                 }
                 if (m_b_Check_Password == true) {
                     if (mBluetoothLeService.g_UUID_Charater_Password.equals(gattCharacteristic.getUuid())) {
@@ -516,8 +589,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     } else if (mBluetoothLeService.g_UUID_Charater_Password_C2.equals(gattCharacteristic.getUuid())) {
                         g_Character_Password_Notify = gattCharacteristic;
                         m_b_Notify_Password = true;
-
                     }
+
                 }
 
             }//for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics)-----------
@@ -557,11 +630,34 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             }
         }
 
+
+
+        //提交密码
+        ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfo(mDeviceName);
+        //判断之前是否记录过设备A的密码
+        if (usedDevice != null) {
+            String password = usedDevice.password;
+            Log.d(TAG, "displayGattServices: password:"+password);
+            commitPassword(password);
+        } else {
+            Log.d(TAG, "displayGattServices: 提交默认密码---");
+            commitPassword(DEFAULT_PASSWORD);
+            ConnectedBleDevices current = new ConnectedBleDevices();
+            current.deviceName = mDeviceName;
+            current.deviceAddress = mDeviceAddress;
+            current.password = DEFAULT_PASSWORD;
+            current.save();
+        }
+
+
     }//displayGattServices()------------------------END
 
     private void displayData(String data) {
+
         if (data != null) {
-            tv_title.setText(data);
+
+
+            //            tv_title.setText(data);
             /*
             int i;
         	int m_Length;
@@ -702,7 +798,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         return m_Result;
     }
 
-    public void setPassword(String password) {
+    public void commitPassword(String password) {
+        Log.d(TAG, "commitPassword: g_Character_Password>>>>>" + g_Character_Password);
         byte[] m_Data = password.getBytes();
         if (g_Character_Password != null) {
             g_Character_Password.setValue(m_Data);
@@ -719,6 +816,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy: " + "onDestroy--解除服务--");
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
