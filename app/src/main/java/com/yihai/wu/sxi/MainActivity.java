@@ -2,12 +2,16 @@ package com.yihai.wu.sxi;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -23,8 +27,10 @@ import com.youth.banner.listener.OnBannerClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.yihai.wu.sxi.R.mipmap.f;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Integer[] images = {R.mipmap.a,R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
+    Integer[] images = {R.mipmap.a,R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, f};
     String TAG = "print";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
@@ -32,7 +38,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
+    private static final int REQUEST_CONNECTED = 0X013;
+    private static final int REQUST_RESULT=0X111;
+    private static final int REQUST_MODE=0X222;
+    private static final int REQUEST_CODE_TO_MAIN=0X002;
 
+    //蓝牙
+    private BluetoothLeService mBluetoothLeService;
+
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(TAG, "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
+        }
+    };
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -64,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initBanner();
         initButton();
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
     //弹出提示框提示打开蓝牙
@@ -75,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+
     }
 
     private void initButton() {
@@ -111,18 +145,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_connect:
-                startActivity(new Intent(this, DeviceScanActivity.class));
+                startActivityForResult(new Intent(this, DeviceScanActivity.class),REQUEST_CONNECTED);
                 break;
             case R.id.btn_information:
+
                 startActivity(new Intent(this, DeviceInformationActivity.class));
                 break;
             case R.id.btn_set:
-                startActivity(new Intent(this, SetActivity.class));
+                startActivityForResult(new Intent(this, SetActivity.class),REQUST_MODE);
                 break;
         }
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: "+requestCode+">>>>"+resultCode);
+        if(requestCode==REQUEST_CONNECTED&&resultCode==REQUST_RESULT){
+            List<BluetoothGattService> supportedGattServices = mBluetoothLeService.getSupportedGattServices();
+            Log.d(TAG, "onActivityResult: "+supportedGattServices.size()+">>>>");
+
+        }else if (requestCode==REQUST_MODE&&resultCode==REQUEST_CODE_TO_MAIN){
+            Log.d(TAG, "onActivityResult: "+data.getStringExtra("myMode"));
+        }
+    }
 
     /**
      * 点击返回退出APP
@@ -146,5 +193,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //表示拦截back事件
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
     }
 }

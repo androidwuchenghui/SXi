@@ -29,8 +29,10 @@ public class SetActivity extends AppCompatActivity {
     private LinearLayout line_c1, line_c2, line_c3, line_c4, line_c5;
     private TextView tv_c1,tv_c2,tv_c3,tv_c4,tv_c5;
     private final int REQUEST_CODE_1=0X001;
-    private Intent intent;
+    private final int REQUEST_CODE_TO_MAIN=0X002;
 
+    private Intent intent;
+    private  Intent toMainIntent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +50,10 @@ public class SetActivity extends AppCompatActivity {
     }
 
     private void select_control(int s) {
+
+        toMainIntent.putExtra("myMode","C"+(s+1));
+
+        setResult(REQUEST_CODE_TO_MAIN,toMainIntent);
 
         for (int i = 0; i < check_select.length; i++) {
             check_select[i] = 0;
@@ -137,6 +143,7 @@ public class SetActivity extends AppCompatActivity {
 
         //跳转到设置详情页
         intent = new Intent(SetActivity.this,SetDetailsActivity.class);
+        toMainIntent = new Intent();
     }
 
     private class clickEvent implements View.OnClickListener {
@@ -147,6 +154,7 @@ public class SetActivity extends AppCompatActivity {
                     finish();
                     break;
                 case R.id.tv_c1:
+
                     select_control(0);
                     share_editor.putInt("select",0);
                     share_editor.commit();
@@ -167,6 +175,7 @@ public class SetActivity extends AppCompatActivity {
                     share_editor.commit();
                     break;
                 case R.id.tv_c5:
+
                     share_editor.putInt("select",4);
                     select_control(4);
                     share_editor.commit();
@@ -198,5 +207,9 @@ public class SetActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+    }
 }

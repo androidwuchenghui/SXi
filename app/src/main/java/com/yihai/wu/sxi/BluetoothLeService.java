@@ -141,6 +141,7 @@ public class BluetoothLeService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
+
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
@@ -308,7 +309,6 @@ public class BluetoothLeService extends Service {
             Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
-
         return true;
     }
 
@@ -470,5 +470,7 @@ public class BluetoothLeService extends Service {
 
         return mBluetoothGatt.getServices();
     }
-
+    public int getTheConnectedState(){
+        return mConnectionState;
+    }
 }
