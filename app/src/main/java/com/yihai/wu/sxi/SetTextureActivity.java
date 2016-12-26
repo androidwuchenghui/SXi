@@ -146,6 +146,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(5,getResources().getString(R.string.texture_custom_s1));
                 break;
             case R.id.detail_s1:
+                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));
                 break;
             case R.id.tv_custom_s2:
                 pressed(6,getResources().getString(R.string.texture_custom_s2));

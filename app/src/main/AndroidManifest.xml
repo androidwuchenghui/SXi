@@ -65,7 +65,7 @@
 
         <activity android:name=".WebViewActivity"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-
+        <activity android:name=".BezierActivity"/>
     </application>
 
 </manifest>
