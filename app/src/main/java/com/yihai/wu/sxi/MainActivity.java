@@ -2,6 +2,7 @@ package com.yihai.wu.sxi;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
+    private DarkImageButton btn_reset;
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //蓝牙
     private BluetoothLeService mBluetoothLeService;
+    private BluetoothGattCharacteristic g_Character_BaudRate;
 
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -64,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBluetoothLeService = null;
         }
     };
+
+
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -118,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_information.setOnClickListener(this);
         btn_set = (DarkImageButton) findViewById(R.id.btn_set);
         btn_set.setOnClickListener(this);
+        btn_reset = (DarkImageButton) findViewById(R.id.btn_reset);
+        btn_reset.setOnClickListener(this);
     }
 
     private void initBanner() {
@@ -154,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_set:
                 startActivityForResult(new Intent(this, SetActivity.class),REQUST_MODE);
                 break;
+            case R.id.btn_reset:
+                Log.d(TAG, "onClick: "+g_Character_BaudRate);
+                break;
         }
 
     }
@@ -162,9 +172,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult: "+requestCode+">>>>"+resultCode);
+        boolean m_b_Check_BaudRate = false;
         if(requestCode==REQUEST_CONNECTED&&resultCode==REQUST_RESULT){
             List<BluetoothGattService> supportedGattServices = mBluetoothLeService.getSupportedGattServices();
             Log.d(TAG, "onActivityResult: "+supportedGattServices.size()+">>>>");
+            for (BluetoothGattService supportedGattService : supportedGattServices) {
+
+                if (mBluetoothLeService.g_UUID_Service_DeviceConfig.equals(supportedGattService.getUuid())) {
+                    m_b_Check_BaudRate = true;
+                } else {
+                    m_b_Check_BaudRate = false;
+                }
+
+                List<BluetoothGattCharacteristic> characteristics = supportedGattService.getCharacteristics();
+
+                for (BluetoothGattCharacteristic characteristic : characteristics) {
+                    if(m_b_Check_BaudRate==true&&characteristic.getUuid().equals(mBluetoothLeService.g_UUID_Charater_Baud_Rate)){
+                        g_Character_BaudRate = characteristic;
+                    }
+
+                }
+            }
 
         }else if (requestCode==REQUST_MODE&&resultCode==REQUEST_CODE_TO_MAIN){
             Log.d(TAG, "onActivityResult: "+data.getStringExtra("myMode"));
@@ -190,7 +218,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 end = System.currentTimeMillis();
             }
         }
-
         //表示拦截back事件
         return true;
     }

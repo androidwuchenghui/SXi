@@ -100,6 +100,9 @@ public class BluetoothLeService extends Service {
             UUID.fromString(MyGattAttributes.C_UUID_Character_Password_C1);
     public final UUID g_UUID_Charater_Password_C2 =
             UUID.fromString(MyGattAttributes.C_UUID_Character_Password_Notify);
+     public final UUID g_UUID_Charater_Baud_Rate =
+            UUID.fromString(MyGattAttributes.C_UUID_Character_Device_CommBaudRate);
+
 
 
     // Implements callback methods for GATT events that the app cares about.  For example,

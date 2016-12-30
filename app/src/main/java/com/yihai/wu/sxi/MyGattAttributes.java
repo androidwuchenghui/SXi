@@ -20,13 +20,14 @@ public class MyGattAttributes {
     public static String C_UUID_Character_RSSI_Config="0000ffa2-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Device_Name="0000ff91-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Device_CommInterval="0000ff92-0000-1000-8000-00805f9b34fb";
-    public static String C_UUID_Character_Device_CommBaudrate="0000ff93-0000-1000-8000-00805f9b34fb";
+    public static String C_UUID_Character_Device_CommBaudRate="0000ff93-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Device_ResetRestore="0000ff94-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Device_BroadcastInterval="0000ff95-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Device_CustomerID="0000ff96-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Bluetooth_Power="0000ff97-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Password_C1="0000ffc1-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Password_Notify="0000ffc2-0000-1000-8000-00805f9b34fb";
+
 
 
     /*UUID信息说明:XXXXXXXX-0000-1000-8000-00805F9B34FB(一共32个字符,对应二进制数据为128位长度.)
@@ -52,7 +53,7 @@ public class MyGattAttributes {
         attributes.put(C_UUID_Character_RSSI_Config, "RSSI update interval(2 bytes,mS)");
         attributes.put(C_UUID_Character_Device_Name, "Device name (Read or write,16 bytes)");
         attributes.put(C_UUID_Character_Device_CommInterval, "Communication interval");
-        attributes.put(C_UUID_Character_Device_CommBaudrate, "Device UART Baudrate");
+        attributes.put(C_UUID_Character_Device_CommBaudRate, "Device UART Baudrate");
         attributes.put(C_UUID_Character_Device_ResetRestore, "Device firmware reset or restore");
         attributes.put(C_UUID_Character_Device_BroadcastInterval, "Device bluetooth broadcast interval");
         attributes.put(C_UUID_Character_Device_CustomerID, "Device customer's ID read or write");

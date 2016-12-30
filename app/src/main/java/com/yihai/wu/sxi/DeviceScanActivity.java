@@ -115,6 +115,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
     @Override
     protected void init() {
+        Log.d(TAG, "init: "+"初始化");
         initView();
 
 
@@ -494,9 +495,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position - 1);
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
-
+        Log.d(TAG, "onItemClick: "+mBluetoothLeService);
         //点击了一个想要连接的设备
         mBluetoothLeService.connect(mDeviceAddress);
+
         LandDialog.show();
 /*
         ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfo(mDeviceName);
