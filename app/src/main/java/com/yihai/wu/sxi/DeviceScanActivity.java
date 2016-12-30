@@ -219,20 +219,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         commit_amount = 2;
                         reChange++;
                         commitPassword(changeTo);
-
-
                     } else {
-
-
                         //断开连接(流程结束)
                         mBluetoothLeService.disconnect();
                         LandDialog.dismiss();
                     }
                     break;
-
             }
-
-
         }
     };
 
@@ -249,8 +242,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     reChange++;
                     commitPassword(changeTo);
                 }
-
-
                 break;
             case "02":
                 //修改成功,保存密码
@@ -266,9 +257,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         successDialog.dismiss();
                         Intent connectResult = new Intent();
                         connectResult.putExtra("deviceName",mDeviceName);
+
                         setResult(REQUST_RESULT,connectResult);
-
-
                         DeviceScanActivity.this.finish();
                     }
                 },1000);
@@ -284,7 +274,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         switch (str) {
             case "00"://正确
                 isFirst();
-
 
                 break;
             case "01"://连接失败，删除数据，断开连接(流程结束)
@@ -498,6 +487,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         Log.d(TAG, "onItemClick: "+mBluetoothLeService);
         //点击了一个想要连接的设备
         mBluetoothLeService.connect(mDeviceAddress);
+
 
         LandDialog.show();
 /*
