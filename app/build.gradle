@@ -30,5 +30,6 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile project(':sxi_library')
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    compile 'com.github.lecho:hellocharts-android:v1.5.8'
 
 }
