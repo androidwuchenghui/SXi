@@ -152,25 +152,25 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(6,getResources().getString(R.string.texture_custom_s2));
                 break;
             case R.id.detail_s2:
-
+                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
                 break;
             case R.id.tv_custom_s3:
                 pressed(7,getResources().getString(R.string.texture_custom_s3));
                 break;
             case R.id.detail_s3:
-
+                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
                 break;
             case R.id.tv_custom_s4:
                 pressed(8,getResources().getString(R.string.texture_custom_s4));
                 break;
             case R.id.detail_s4:
-
+                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
                 break;
             case R.id.tv_custom_s5:
                 pressed(9,getResources().getString(R.string.texture_custom_s5));
                 break;
             case R.id.detail_s5:
-
+                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
                 break;
         }
     }

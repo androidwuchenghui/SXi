@@ -415,7 +415,7 @@ public class BluetoothLeService extends Service {
         }
         //String m_str;
         int m_Property = characteristic.getProperties();
-        Log.e(TAG, "writeCharacteristic:*****写** " + m_Property);
+        Log.e(TAG, "writeCharacteristic:  进行了写的动作-- " + m_Property);
         //    	String m_str=String.format("%1$08x", m_Property);
         //    	Log.e(TAG, "wc property=***********"+m_str);
         if ((m_Property | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {

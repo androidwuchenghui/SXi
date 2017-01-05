@@ -330,6 +330,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         Log.d(TAG, "isFirst: "+"判断是不是第一次");
         boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
         ConnectedBleDevices connected = ConnectedBleDevices.getConnectInfo(mDeviceName);
+        Log.d(TAG, "isFirst:   "+isFirstRun);
         if (isFirstRun) {
             //首次连接需要判断识别码
 
@@ -484,7 +485,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position - 1);
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
-        Log.d(TAG, "onItemClick: "+mBluetoothLeService);
+        Log.d(TAG, "onItemClick: "+"address: "+mDeviceAddress);
         //点击了一个想要连接的设备
         mBluetoothLeService.connect(mDeviceAddress);
 
@@ -755,12 +756,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         */
         if (m_b_ConfigEnable == true) {
             final int charaProp = g_Character_RX.getProperties();
-            Log.e(TAG, "displayGattServices: " + g_Character_RX.getUuid());
+            Log.e(TAG, "displayGattServices:  RX " + g_Character_RX.getUuid());
             if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
                 mBluetoothLeService.setCharacteristicNotification(
                         g_Character_RX, true);
             }
-            m_b_ConfigEnable = false;
         }
 
         if (m_b_Notify_Password == true) {
@@ -784,13 +784,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         } else {
             Log.d(TAG, "displayGattServices: 提交默认密码---");
             commit_amount = 0;
-            commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
-
             ConnectedBleDevices current = new ConnectedBleDevices();
             current.deviceName = mDeviceName;
             current.deviceAddress = mDeviceAddress;
             current.password = DEFAULT_PASSWORD;
             current.save();
+            Log.d(TAG, "displayGattServices: "+ConnectedBleDevices.getConnectInfo(mDeviceName).deviceName);
+            commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
         }
 
 
@@ -943,7 +943,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     }
 
     public void commitPassword(String password) {
-        Log.d(TAG, "commitPassword: g_Character_Password>>>>>" + g_Character_Password+">>>>>"+password);
+        Log.d(TAG, "commitPassword: 提交密码：   " + g_Character_Password+" ————— "+password);
         byte[] m_Data = password.getBytes();
         if (g_Character_Password != null) {
             g_Character_Password.setValue(m_Data);
