@@ -153,6 +153,7 @@ public class BezierActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_back:
+                finish();
                 break;
             case R.id.btn_above:
                 break;

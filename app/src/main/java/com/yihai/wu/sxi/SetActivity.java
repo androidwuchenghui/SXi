@@ -50,6 +50,8 @@ public class SetActivity extends AppCompatActivity {
     }
 
     private void select_control(int s) {
+        share_editor.putInt("select",s);
+        share_editor.commit();
 
         toMainIntent.putExtra("myMode","C"+(s+1));
 
@@ -156,48 +158,46 @@ public class SetActivity extends AppCompatActivity {
                 case R.id.tv_c1:
 
                     select_control(0);
-                    share_editor.putInt("select",0);
-                    share_editor.commit();
+
                     break;
                 case R.id.tv_c2:
                     select_control(1);
-                    share_editor.putInt("select",1);
-                    share_editor.commit();
+
                     break;
                 case R.id.tv_c3:
                     select_control(2);
-                    share_editor.putInt("select",2);
-                    share_editor.commit();
+
                     break;
                 case R.id.tv_c4:
                     select_control(3);
-                    share_editor.putInt("select",3);
-                    share_editor.commit();
+
                     break;
                 case R.id.tv_c5:
-
-                    share_editor.putInt("select",4);
                     select_control(4);
-                    share_editor.commit();
+
                     break;
                 case R.id.detail_c1:
+                    select_control(0);
                     intent.putExtra("detail","C1");
                     startActivity(intent);
                     break;
                 case R.id.detail_c2:
+                    select_control(1);
                     intent.putExtra("detail","C2");
                     startActivity(intent);
                     break;
                 case R.id.detail_c3:
+                    select_control(2);
                     intent.putExtra("detail","C3");
                     startActivity(intent);
                     break;
                 case R.id.detail_c4:
+                    select_control(3);
                     intent.putExtra("detail","C4");
                     startActivity(intent);
                     break;
                 case R.id.detail_c5:
-
+                    select_control(4);
                     intent.putExtra("detail","C5");
                     startActivity(intent);
                     break;

@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yihai.wu.appcontext.MyModel;
+import com.yihai.wu.util.DarkImageButton;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,7 +24,7 @@ import static com.yihai.wu.sxi.R.id.stainless_steel;
  */
 
 public class MaterialActivity extends AppCompatActivity {
-    private static final String MATERIAL ="material" ;
+    private static final String MATERIAL = "material";
     @Bind(R.id.check1)
     ImageView check1;
     @Bind(R.id.nickel)
@@ -54,6 +55,8 @@ public class MaterialActivity extends AppCompatActivity {
     TextView TRC;
     @Bind(R.id.line_s)
     LinearLayout lineS;
+    @Bind(R.id.btn_back)
+    DarkImageButton btnBack;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor share_editor;
     private int[] check_select = {0, 0, 0, 0, 0};
@@ -79,7 +82,7 @@ public class MaterialActivity extends AppCompatActivity {
     }
 
 
-    @OnClick({R.id.line_n, R.id.line_t, R.id.line_b, R.id.line_c, R.id.line_s})
+    @OnClick({R.id.line_n, R.id.line_t, R.id.line_b, R.id.line_c, R.id.line_s,R.id.btn_back})
     public void onClick(View view) {
         MyModel myModel = MyModel.getMyModelForGivenName(title);
         Intent intent = new Intent();
@@ -88,44 +91,47 @@ public class MaterialActivity extends AppCompatActivity {
                 select_control(0);
                 share_editor.putInt("material_select", 0);
                 share_editor.commit();
-                intent.putExtra(MATERIAL,nickel.getText().toString());
-               myModel.material=getResources().getString(R.string.material_nickel_wire);
+                intent.putExtra(MATERIAL, nickel.getText().toString());
+                myModel.material = getResources().getString(R.string.material_nickel_wire);
                 myModel.save();
                 break;
             case R.id.line_t:
                 select_control(1);
                 share_editor.putInt("material_select", 1);
                 share_editor.commit();
-                intent.putExtra(MATERIAL,titanium.getText().toString());
-                myModel.material=getResources().getString(R.string.material_titanium_wire);
+                intent.putExtra(MATERIAL, titanium.getText().toString());
+                myModel.material = getResources().getString(R.string.material_titanium_wire);
                 myModel.save();
                 break;
             case R.id.line_b:
                 select_control(2);
                 share_editor.putInt("material_select", 2);
                 share_editor.commit();
-                intent.putExtra(MATERIAL,stainlessSteel.getText().toString());
-                myModel.material=getResources().getString(R.string.material_stainless_steel_wire);
+                intent.putExtra(MATERIAL, stainlessSteel.getText().toString());
+                myModel.material = getResources().getString(R.string.material_stainless_steel_wire);
                 myModel.save();
                 break;
             case R.id.line_c:
                 select_control(3);
                 share_editor.putInt("material_select", 3);
                 share_editor.commit();
-                intent.putExtra(MATERIAL,alcohol.getText().toString());
-                myModel.material=getResources().getString(R.string.material_alcohol_control);
+                intent.putExtra(MATERIAL, alcohol.getText().toString());
+                myModel.material = getResources().getString(R.string.material_alcohol_control);
                 myModel.save();
                 break;
             case R.id.line_s:
                 select_control(4);
                 share_editor.putInt("material_select", 4);
                 share_editor.commit();
-                intent.putExtra(MATERIAL,TRC.getText().toString());
-                myModel.material=getResources().getString(R.string.material_TCR_manual);
+                intent.putExtra(MATERIAL, TRC.getText().toString());
+                myModel.material = getResources().getString(R.string.material_TCR_manual);
                 myModel.save();
                 break;
+            case R.id.btn_back:
+                finish();
+                break;
         }
-        setResult(RESULT_OK,intent);
+        setResult(RESULT_OK, intent);
         finish();
     }
 
