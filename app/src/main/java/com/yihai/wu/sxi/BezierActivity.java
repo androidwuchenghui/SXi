@@ -57,9 +57,12 @@ public class BezierActivity extends AppCompatActivity {
     TextView valueY;
     @Bind(R.id.show)
     LinearLayout show;
+    @Bind(R.id.btn_waveBehind)
+    ImageView btn_waveBehind;
 
     String[] date = {"0s", "1s", "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "10s"};
     int[] score = {40, 42, 80, 33, 25, 74, 22, 18, 79, 20, 45};//图表的数据点
+
     private List<PointValue> values;
     private LineChartData lineData;
     private ChartComputator chartComputator;
@@ -67,6 +70,7 @@ public class BezierActivity extends AppCompatActivity {
     private int clickX;
     private int clickY;
     private PointValue selectedValue;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,14 +81,14 @@ public class BezierActivity extends AppCompatActivity {
         generateInitialLineData();
         initDate();
         myChart.setOnTouchListener(new myChartTouchListener());
-    }
 
+    }
 
     private void initDate() {
         chartComputator = myChart.getChartComputator();
-        PointValue a = new PointValue(0,0);
-        PointValue b = new PointValue(0,1);
-        rate = chartComputator.computeRawY(b.getY())-chartComputator.computeRawY(a.getY());
+        PointValue a = new PointValue(0, 0);
+        PointValue b = new PointValue(0, 1);
+        rate = chartComputator.computeRawY(b.getY()) - chartComputator.computeRawY(a.getY());
     }
 
     private void generateInitialLineData() {
@@ -145,7 +149,7 @@ public class BezierActivity extends AppCompatActivity {
         myChart.setZoomEnabled(false);
     }
 
-    @OnClick({R.id.btn_back, R.id.btn_above, R.id.btn_next, R.id.btn_switch, R.id.btn_wave, R.id.btn_save})
+    @OnClick({R.id.btn_back, R.id.btn_above, R.id.btn_next, R.id.btn_switch, R.id.btn_wave, R.id.btn_save,R.id.btn_waveBehind})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_back:
@@ -157,11 +161,19 @@ public class BezierActivity extends AppCompatActivity {
             case R.id.btn_switch:
                 break;
             case R.id.btn_wave:
+                btn_waveBehind.setVisibility(View.VISIBLE);
+                btnWave.setVisibility(View.GONE);
                 break;
             case R.id.btn_save:
+
+                break;
+            case R.id.btn_waveBehind:
+                btn_waveBehind.setVisibility(View.GONE);
+                btnWave.setVisibility(View.VISIBLE);
                 break;
         }
     }
+
 
     private class myChartTouchListener implements View.OnTouchListener {
         @Override
@@ -174,22 +186,22 @@ public class BezierActivity extends AppCompatActivity {
                 case MotionEvent.ACTION_MOVE:
                     int moveX = (int) motionEvent.getX();
                     int moveY = (int) motionEvent.getY();
-                    int move = moveY -clickY;
+                    int move = moveY - clickY;
                     Log.d(TAG, "onTouch: " + moveX + "  -----  " + moveY);
-                    if(selectedValue!=null) {
+                    if (selectedValue != null) {
                         float currentX = selectedValue.getX();
                         float currentY = selectedValue.getY() - move * rate;
                         Log.d(TAG, "onTouch: " + "找到点" + selectedValue.toString());
                         Line line = lineData.getLines().get(0);// line.
-                        if (currentY<0){
-                            currentY=0;
-                        }else if(currentY>200){
-                            currentY=200;
+                        if (currentY < 0) {
+                            currentY = 0;
+                        } else if (currentY > 200) {
+                            currentY = 200;
                         }
-                        line.getValues().get((int) (selectedValue.getX()*2)).set(currentX,currentY);
-                        float  translateY   =  (float)(Math.round(currentY*10))/10;
-                        valueX.setText(currentX+"");
-                        valueY.setText(translateY+"");
+                        line.getValues().get((int) (selectedValue.getX() * 2)).set(currentX, currentY);
+                        float translateY = (float) (Math.round(currentY * 10)) / 10;
+                        valueX.setText(currentX + "");
+                        valueY.setText(translateY + "");
                         show.setVisibility(View.VISIBLE);
                         myChart.invalidate();
                         clickY = moveY;
@@ -203,6 +215,7 @@ public class BezierActivity extends AppCompatActivity {
             return false;
         }
     }
+
     private PointValue selectPoint(MotionEvent motionEvent) {
         int backgroundGridWidth = MyUtils.dip2px(BezierActivity.this, 45);
         int width = backgroundGridWidth / 2;

@@ -48,6 +48,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //蓝牙
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_BaudRate;
+    //一些特征值
+    private BluetoothGattCharacteristic g_Character_TX;
+    private BluetoothGattCharacteristic g_Character_RX;
+
 
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 

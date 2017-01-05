@@ -52,14 +52,25 @@
             android:src="@mipmap/switch1"/>
 
         <ImageView
-            android:id="@+id/btn_wave"
+        android:id="@+id/btn_wave"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@mipmap/wave"/>
+
+        <ImageView
+            android:id="@+id/btn_waveBehind"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@mipmap/wave"/>
+            android:visibility="gone"
+            android:src="@mipmap/switch2"/>
 
         <ImageView
             android:id="@+id/btn_save"
@@ -81,7 +92,7 @@
 
         <LinearLayout
             android:id="@+id/show"
-
+            android:visibility="invisible"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
