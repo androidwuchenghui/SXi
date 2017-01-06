@@ -51,6 +51,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
     //dialog
     private ProgressDialog dialog;
+
     private ProgressDialog LandDialog;
     private ProgressDialog successDialog;
     private LeDeviceListAdapter mLeDeviceListAdapter;
@@ -179,7 +180,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     break;
                 case BluetoothLeService.ACTION_DATA_COMMIT_PASSWORD_RESULT:
                     String reply = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                    Log.d(TAG, "onReceive:replay " + reply+">>>>"+commit_amount);
+                    Log.d(TAG, "onReceive:commit password back>> " + reply+">>>>"+commit_amount);
                     if (commit_amount == 0) {
                         handlePasswordCallbacks(reply);
                     } else if (commit_amount == 1) {
@@ -234,10 +235,22 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         switch (str) {
             case "01":
                 //提交错误，修改失败
+                Log.d(TAG, "handleChangePassword:修改失败 "+reChange);
                 if (reChange == 3) {
+                    Log.d(TAG, "handleChangePassword: 提交3次后失败，结束");
                     mBluetoothLeService.disconnect();
                     //登录失败(流程结束)
                     LandDialog.dismiss();
+                    reChange=0;
+                    AlertDialog remindDialog = new AlertDialog.Builder(this)
+                            .setIcon(R.mipmap.app_icon)
+                            .setTitle("提示")
+                            .setMessage("登录失败！")
+                            .setCancelable(false)
+                            .setNegativeButton("关闭提示", null)
+                            .create();
+                    remindDialog.show();
+
                 } else {
                     reChange++;
                     commitPassword(changeTo);
@@ -249,19 +262,19 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 changedPassword.password = sb.toString();
                 changedPassword.save();
                 //连接成功，执行正常通信￥￥ （流程OK）
-                Log.d(TAG, "handleChangePassword: over");
+                Log.d(TAG, "handleChangePassword: 成功");
                 LandDialog.cancel();
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         successDialog.dismiss();
-                        Intent connectResult = new Intent();
-                        connectResult.putExtra("deviceName",mDeviceName);
-
-                        setResult(REQUST_RESULT,connectResult);
+//                        Intent connectResult = new Intent();
+//                        connectResult.putExtra("deviceName",mDeviceName);
+//
+//                        setResult(REQUST_RESULT,connectResult);
                         DeviceScanActivity.this.finish();
                     }
-                },1000);
+                },2000);
                 successDialog.show();
                 break;
         }
@@ -351,13 +364,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     @Override
                     public void run() {
 
-                        Intent connectResult = new Intent();
-                        connectResult.putExtra("deviceName",mDeviceName);
-                        setResult(REQUST_RESULT,connectResult);
+//                        Intent connectResult = new Intent();
+//                        connectResult.putExtra("deviceName",mDeviceName);
+//                        setResult(REQUST_RESULT,connectResult);
                         successDialog.dismiss();
                         DeviceScanActivity.this.finish();
                     }
-                },1000);
+                },2000);
                 successDialog.show();
             }
         }
@@ -438,6 +451,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         LandDialog = new ProgressDialog(this);
         LandDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         LandDialog.setMessage("登录中~");
+
+
 
         successDialog = new ProgressDialog(this);
         successDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -715,11 +730,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 {
                     if (mBluetoothLeService.g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
                         g_Character_DeviceName = gattCharacteristic;//执行功。获得FF91特征。。
-                        Log.d(TAG, "displayGattServices: 设备名称-----uuid" + g_Character_DeviceName.getUuid());
+                        Log.d(TAG, "displayGattServices: 设备名称----" + g_Character_DeviceName.getUuid());
                         //                        Sys_SetMyDeviceName("BleDevice");
                     } else if (mBluetoothLeService.g_UUID_Charater_CustomerID.equals(gattCharacteristic.getUuid())) {
                         g_Character_CustomerID = gattCharacteristic;
-                        Log.d(TAG, "displayGattServices: 产品识别码" + g_Character_CustomerID.getUuid());
+                        Log.d(TAG, "displayGattServices: 产品识别码：  " + g_Character_CustomerID.getUuid());
                     }
 
                 }
@@ -774,10 +789,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
         //提交密码
         ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfo(mDeviceName);
+
         //判断之前是否记录过设备A的密码
         if (usedDevice != null) {
             String password = usedDevice.password;
-            Log.d(TAG, "displayGattServices: password:" + password);
+            Log.d(TAG, "displayGattServices:提交保存的密码:" + password);
             commit_amount = 0;
             commitPassword(password + password);
 
@@ -789,7 +805,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             current.deviceAddress = mDeviceAddress;
             current.password = DEFAULT_PASSWORD;
             current.save();
-            Log.d(TAG, "displayGattServices: "+ConnectedBleDevices.getConnectInfo(mDeviceName).deviceName);
+//            Log.d(TAG, "displayGattServices: "+ConnectedBleDevices.getConnectInfo(mDeviceName).deviceName);
             commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
         }
 
@@ -960,7 +976,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: " + "onDestroy--解除服务--");
+        Log.d(TAG, "onDestroy: " + "onDestroy--解除service--");
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }

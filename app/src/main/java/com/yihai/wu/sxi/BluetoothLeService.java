@@ -124,7 +124,7 @@ public class BluetoothLeService extends Service {
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
 
-                Log.d("ConnectionStateChange", "onConnectionStateChange:连接状态良好------ ");
+                Log.d("ConnectionStateChange", "onConnectionStateChange:连接状态改变------ ");
                 // Attempts to discover services after successful connection.
                 mBluetoothGatt.discoverServices();
                 //                Log.e("log", "Attempting to start service discovery:" +
@@ -133,7 +133,7 @@ public class BluetoothLeService extends Service {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
-                Log.i("ConnectionStateChange", "Disconnected from GATT server.请注意---断开了----");
+                Log.i("ConnectionStateChange", "Disconnected from GATT server.连接---断开了----");
                 broadcastUpdate(intentAction);
             }
 
@@ -276,11 +276,13 @@ public class BluetoothLeService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind: "+"BindService");
         return mBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.d(TAG, "onUnbind: service 取消绑定");
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.

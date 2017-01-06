@@ -40,10 +40,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_CONNECTED = 0X013;
-    private static final int REQUST_RESULT=0X111;
-    private static final int REQUST_MODE=0X222;
-    private static final int REQUEST_CODE_TO_MAIN=0X002;
+    private static final int REQUEST_CONNECTED = 0X013;  //19
+    private static final int REQUST_RESULT=0X111;        //273
+    private static final int REQUST_MODE=0X222;             //546
+    private static final int REQUEST_CODE_TO_MAIN=0X002;    //2
 
     //蓝牙
     private BluetoothLeService mBluetoothLeService;
@@ -79,7 +79,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        int a = REQUEST_CONNECTED;
+        int b = REQUST_RESULT;
+        int c = REQUST_MODE;
+        int d = REQUEST_CODE_TO_MAIN;
+        Log.d(TAG, "onCreate: 0x013:"+a+"  0x111:"+b+"   0x222:"+c+"    0x002:" +d);
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -101,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-
         initBanner();
         initButton();
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -117,8 +120,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-
     }
+
 
     private void initButton() {
         btn_connect = (DarkImageButton) findViewById(R.id.btn_connect);
@@ -159,14 +162,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(new Intent(this, DeviceScanActivity.class),REQUEST_CONNECTED);
                 break;
             case R.id.btn_information:
+                Intent deviceInfo = new Intent(this, DeviceInformationActivity.class);
+                deviceInfo.putExtra("connectState",mBluetoothLeService.getTheConnectedState());
 
-                startActivity(new Intent(this, DeviceInformationActivity.class));
+                startActivity(deviceInfo);
                 break;
             case R.id.btn_set:
                 startActivityForResult(new Intent(this, SetActivity.class),REQUST_MODE);
                 break;
             case R.id.btn_reset:
-                Log.d(TAG, "onClick: "+g_Character_BaudRate);
+                Log.d(TAG, "onClick: "+g_Character_BaudRate+"---状态  "+mBluetoothLeService.getTheConnectedState());
+
                 break;
         }
 
@@ -175,11 +181,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: "+requestCode+">>>>"+resultCode);
+
+//        Log.d(TAG, "onActivityResult: "+requestCode+">>>>"+resultCode);
+        Log.d(TAG, "onActivityResult: "+mBluetoothLeService.getTheConnectedState());
+
         boolean m_b_Check_BaudRate = false;
-        if(requestCode==REQUEST_CONNECTED&&resultCode==REQUST_RESULT){
+        if(mBluetoothLeService.getTheConnectedState()==2){
             List<BluetoothGattService> supportedGattServices = mBluetoothLeService.getSupportedGattServices();
-            Log.d(TAG, "onActivityResult: "+supportedGattServices.size()+">>>>");
+            Log.d(TAG, "onActivityResult:service count: -- "+supportedGattServices.size());
             for (BluetoothGattService supportedGattService : supportedGattServices) {
 
                 if (mBluetoothLeService.g_UUID_Service_DeviceConfig.equals(supportedGattService.getUuid())) {
@@ -187,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     m_b_Check_BaudRate = false;
                 }
-
                 List<BluetoothGattCharacteristic> characteristics = supportedGattService.getCharacteristics();
 
                 for (BluetoothGattCharacteristic characteristic : characteristics) {
@@ -197,9 +205,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
             }
-
-        }else if (requestCode==REQUST_MODE&&resultCode==REQUEST_CODE_TO_MAIN){
-            Log.d(TAG, "onActivityResult: "+data.getStringExtra("myMode"));
         }
     }
 
@@ -229,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
