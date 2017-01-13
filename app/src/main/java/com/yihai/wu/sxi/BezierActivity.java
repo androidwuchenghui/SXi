@@ -526,16 +526,16 @@ public class BezierActivity extends AppCompatActivity {
                         setAboveAndNextButtonState(temperDataList,temperIndex);
                         startAnimation(temperDataList,temperIndex,dashListInTemper);
                     }
-
                     break;
                 case R.id.btn_next:
-                    aboveDisable.setVisibility(View.GONE);
-                    btnAbove.setVisibility(View.VISIBLE);
-                    powerIndex++;
-                    startAnimation(powerIndex);
-                    if (powerIndex == powerMoveList.size() - 1) {
-                        btnNext.setVisibility(View.GONE);
-                        nextDisable.setVisibility(View.VISIBLE);
+                    if(touchInChart==TOUCH_FOR_POWER_CHART){
+                        powerIndex++;
+                        setAboveAndNextButtonState(powerMoveList,powerIndex);
+                        startAnimation(powerMoveList,powerIndex,dashListInPower);
+                    }else if(touchInChart==TOUCH_FOR_TEMPER_CHART){
+                        temperIndex++;
+                        setAboveAndNextButtonState(temperDataList,temperIndex);
+                        startAnimation(temperDataList,temperIndex,dashListInTemper);
                     }
                     break;
                 case R.id.btn_switch:
