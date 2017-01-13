@@ -100,7 +100,6 @@ public class BezierActivity extends AppCompatActivity {
     List<Integer> currentDashLineList;
     private List<AxisValue> currentAxisY_Values;  //当前Y轴坐标
     private Line currentDashLine;
-    private boolean isPowerChart = true;
     private Line selectedDashLine;
     private Line currentMainLine;
 
@@ -114,7 +113,7 @@ public class BezierActivity extends AppCompatActivity {
     private int dash1;
     private int[] temperData1;
     private Line powerLine;
-    private Line dashLine1;
+    private Line powerDashLine;
     private Textures texture;
     private Axis axisX;
     private Line temperLine_back;
@@ -141,6 +140,8 @@ public class BezierActivity extends AppCompatActivity {
         btnAbove.setOnClickListener(new myClickListener());
         btnNext.setOnClickListener(new myClickListener());
         btnSwitch.setOnClickListener(new myClickListener());
+        btnWave.setOnClickListener(new myClickListener());
+        btn_waveBehind.setOnClickListener(new myClickListener());
     }
 
     private void init() {
@@ -175,12 +176,10 @@ public class BezierActivity extends AppCompatActivity {
     }
 
     private void initDate() {
-
         chartComputator = myChart.getChartComputator();
         PointValue a = new PointValue(0, 100);
         PointValue b = new PointValue(0, 101);
         rate = chartComputator.computeRawY(b.getY()) - chartComputator.computeRawY(a.getY());
-
     }
 
     //显示为功率坐标
@@ -197,13 +196,13 @@ public class BezierActivity extends AppCompatActivity {
         }
 
         //虚线---
-        if (dashLine1 == null) {
+        if (powerDashLine == null) {
             List<PointValue> dashValue1 = new ArrayList<>();
             for (int i = 0; i < 11; i++) {
                 dashValue1.add(new PointValue(i, dash1));
             }
-            dashLine1 = new Line(dashValue1);
-            setLineStyle(dashLine1, DASH);
+            powerDashLine = new Line(dashValue1);
+            setLineStyle(powerDashLine, DASH);
         }
         //初始化背后的温度曲线℃
         if (temperLine_back == null) {
@@ -241,7 +240,7 @@ public class BezierActivity extends AppCompatActivity {
 
         //所有的线的集合
         List<Line> lines = new ArrayList<Line>();
-        lines.add(dashLine1);
+        lines.add(powerDashLine);
         lines.add(temperLine_back);
         lines.add(powerLine);
 
@@ -274,7 +273,7 @@ public class BezierActivity extends AppCompatActivity {
         setAboveAndNextButtonState(powerMoveList, powerIndex);
         currentAxisY_Values = axisValuesY_in_powerChart;
         currentMainLine = powerLine;
-        currentDashLine = dashLine1;
+        currentDashLine = powerDashLine;
         currentIndex = powerIndex;
         currentMoveLineList = powerMoveList;
         currentDashLineList = dashListInPower;
@@ -508,7 +507,7 @@ public class BezierActivity extends AppCompatActivity {
         }
         return null;
     }
-
+    private boolean waveIsTrue = false;
     private class myClickListener implements ClickImageView.OnClickListener {
         @Override
         public void OnClick(ClickImageView view) {
@@ -517,14 +516,33 @@ public class BezierActivity extends AppCompatActivity {
                     finish();
                     break;
                 case R.id.btn_above:
+//                    if(waveIsTrue){
+//                        btn_waveBehind.performClick();
+//                        waveIsTrue=false;
+//                    }
+
                     if(touchInChart==TOUCH_FOR_POWER_CHART){
                         powerIndex--;
                         setAboveAndNextButtonState(powerMoveList,powerIndex);
                         startAnimation(powerMoveList,powerIndex,dashListInPower);
+                        if(waveIsTrue){
+                            btn_waveBehind.setVisibility(View.GONE);
+                            btnWave.setVisibility(View.VISIBLE);
+                            powerMoveList.remove(powerMoveList.get(powerMoveList.size()-1));
+                            setAboveAndNextButtonState(powerMoveList,powerIndex);
+                            waveIsTrue = false;
+                        }
                     }else if(touchInChart==TOUCH_FOR_TEMPER_CHART){
                         temperIndex--;
                         setAboveAndNextButtonState(temperDataList,temperIndex);
                         startAnimation(temperDataList,temperIndex,dashListInTemper);
+                        if(waveIsTrue){
+                            btn_waveBehind.setVisibility(View.GONE);
+                            btnWave.setVisibility(View.VISIBLE);
+                            temperDataList.remove(temperDataList.get(temperDataList.size()-1));
+                            setAboveAndNextButtonState(temperDataList,temperIndex);
+                            waveIsTrue = false;
+                        }
                     }
                     break;
                 case R.id.btn_next:
@@ -539,17 +557,69 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.btn_switch:
-                    if (isPowerChart) {
+                    if (touchInChart==TOUCH_FOR_POWER_CHART) {
                         generateInitialTemperChart();
-                        isPowerChart = false;
-                    } else {
+                    } else if(touchInChart==TOUCH_FOR_TEMPER_CHART){
                         generateInitialLineData();
-                        isPowerChart = true;
                     }
-
+                    break;
+                case R.id.btn_wave:
+                    waveIsTrue = true;
+                    btnWave.setVisibility(View.GONE);
+                    btn_waveBehind.setVisibility(View.VISIBLE);
+                    if(touchInChart==TOUCH_FOR_POWER_CHART){
+                        powerIndex++;
+                        changeForWave(powerIndex,powerLine,powerDashLine);
+                    }else if(touchInChart==TOUCH_FOR_TEMPER_CHART){
+                        temperIndex++;
+                        changeForWave(temperIndex,temperLine,temperDashLine);
+                    }
+//                    Log.d(TAG, "OnClick: pl: "+powerMoveList.size()+" index : "+powerIndex);
+                    break;
+                case R.id.btn_waveBehind:
+                    btn_waveBehind.setVisibility(View.GONE);
+                    btnWave.setVisibility(View.VISIBLE);
+                    if(touchInChart==TOUCH_FOR_POWER_CHART){
+                        powerIndex--;
+                        changeForBehindWave(powerIndex,powerLine);
+                    }else if(touchInChart==TOUCH_FOR_TEMPER_CHART){
+                        temperIndex--;
+                        changeForBehindWave(temperIndex,temperLine);
+                    }
+                    Log.d(TAG, "OnClick: powerMoveList: "+powerMoveList.size()+" index "+powerIndex);
                     break;
             }
         }
+    }
+
+    private void changeForBehindWave(int index,Line line) {
+        currentMoveLineList.remove(currentMoveLineList.size()-1);
+        currentDashLineList.remove(currentDashLineList.size()-1);
+        setAboveAndNextButtonState(currentMoveLineList,index);
+
+        List<PointValue> values = line.getValues();
+        for (int i = 0; i < values.size(); i++) {
+            values.get(i).setTarget(values.get(i).getX(),currentMoveLineList.get(currentMoveLineList.size()-1)[i]);
+        }
+        myChart.startDataAnimation(300);
+    }
+
+    private void changeForWave(int index,Line Line,Line dashLine) {
+
+        List<PointValue> values = Line.getValues();
+        for (PointValue value : values) {
+            value.setTarget(value.getX(),dashLine.getValues().get(0).getY());
+        }
+        myChart.startDataAnimation(300);
+
+        List<PointValue> vs = Line.getValues();
+        int[] arr = new int[21];
+        for (int i = 0; i < vs.size(); i++) {
+            arr[i] = (int) vs.get(i).getY();
+        }
+        currentMoveLineList.add(arr);
+        currentDashLineList.add((int) dashLine.getValues().get(0).getY());
+        setAboveAndNextButtonState(currentMoveLineList,index);
     }
 
 
@@ -644,21 +714,21 @@ public class BezierActivity extends AppCompatActivity {
 
 
     //变换的动画
-    private void startAnimation(int powerIndex) {
-        myChart.cancelDataAnimation();
-        int[] currentPower = powerMoveList.get(powerIndex);
-        int currentDash = dashListInPower.get(powerIndex);
-        List<PointValue> powerValues = powerLine.getValues();
-        List<PointValue> dashValues = dashLine1.getValues();
-        Log.d(TAG, "OnClick: " + "size:  " + powerValues.size() + "dash  " + dashValues.size());
-        for (int i = 0; i < powerValues.size(); i++) {
-            powerValues.get(i).setTarget(powerValues.get(i).getX(), currentPower[i]);
-        }
-        for (int i = 0; i < dashValues.size(); i++) {
-            dashValues.get(i).setTarget(dashValues.get(i).getX(), currentDash);
-        }
-        myChart.startDataAnimation(300);
-    }
+//    private void startAnimation(int powerIndex) {
+//        myChart.cancelDataAnimation();
+//        int[] currentPower = powerMoveList.get(powerIndex);
+//        int currentDash = dashListInPower.get(powerIndex);
+//        List<PointValue> powerValues = powerLine.getValues();
+//        List<PointValue> dashValues = powerDashLine.getValues();
+//        Log.d(TAG, "OnClick: " + "size:  " + powerValues.size() + "dash  " + dashValues.size());
+//        for (int i = 0; i < powerValues.size(); i++) {
+//            powerValues.get(i).setTarget(powerValues.get(i).getX(), currentPower[i]);
+//        }
+//        for (int i = 0; i < dashValues.size(); i++) {
+//            dashValues.get(i).setTarget(dashValues.get(i).getX(), currentDash);
+//        }
+//        myChart.startDataAnimation(300);
+//    }
 
     private void startAnimation(List<int[]> dataList,int Index,List<Integer> dashList) {
         myChart.cancelDataAnimation();
@@ -666,7 +736,7 @@ public class BezierActivity extends AppCompatActivity {
         int currentDash = dashList.get(Index);
         List<PointValue> powerValues = currentMainLine.getValues();
         List<PointValue> dashValues = currentDashLine.getValues();
-        Log.d(TAG, "OnClick: " + "size:  " + powerValues.size() + "dash  " + dashValues.size());
+
         for (int i = 0; i < powerValues.size(); i++) {
             powerValues.get(i).setTarget(powerValues.get(i).getX(), currentPower[i]);
         }
