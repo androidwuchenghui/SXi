@@ -5,6 +5,8 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
+import java.util.List;
+
 /**
  * Created by ${Wu} on 2016/12/15.
  */
@@ -73,12 +75,16 @@ public class MyModel extends Model {
         myModel.power = 100;
         myModel.joule =100;
         myModel.save();
+
+        Textures.initTextures(name);
     }
     public static MyModel getMyModelForGivenName(String model) {
         return new Select().from(MyModel.class).where("ModelName = ?", model).executeSingle();
     }
 
-
+    public List<Textures> getCurves(){
+        return getMany(Textures.class,"MyModel");
+    }
 
 }
 

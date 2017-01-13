@@ -8,6 +8,7 @@
     <color name="lightWhite">#e7e7e7</color>
     <color name="colorTransparent">#00000000</color>
     <color name="blueSky">#1C86EE</color>
-    <color name="bezierBack">#37afef</color>
-
+    <color name="bezierBack">#1284d6</color>
+    <color name="gray">#82947243</color>
+    <color name="temperOrange">#f27d50</color>
 </resources>

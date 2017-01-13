@@ -28,10 +28,11 @@ import com.youth.banner.listener.OnBannerClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.yihai.wu.sxi.R.mipmap.a;
 import static com.yihai.wu.sxi.R.mipmap.f;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Integer[] images = {R.mipmap.a,R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, f};
+    Integer[] images = {a,R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, f};
     String TAG = "print";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
@@ -171,8 +172,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(new Intent(this, SetActivity.class),REQUST_MODE);
                 break;
             case R.id.btn_reset:
-                Log.d(TAG, "onClick: "+g_Character_BaudRate+"---状态  "+mBluetoothLeService.getTheConnectedState());
-
+//                Log.d(TAG, "onClick: "+g_Character_BaudRate+"---状态  "+mBluetoothLeService.getTheConnectedState());
+               /* MyModel model = MyModel.getMyModelForGivenName("C1");
+                List<Textures> curves = model.getCurves();
+                Log.d(TAG, "curve: "+curves);
+                for (Textures curve : curves) {
+                    Log.d(TAG, "curve: "+curve.name);
+                }
+                List<Textures> all = Textures.getAll();
+                for (Textures textures : all) {
+                    Log.d(TAG, " modelName :  "+textures.modelName+"  name : "+textures.name+"  data:  "+textures.arr1+"    "+all.size()+"selected   "+textures.selected);
+                }*/
                 break;
         }
 

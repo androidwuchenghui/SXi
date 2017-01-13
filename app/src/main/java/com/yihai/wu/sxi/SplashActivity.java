@@ -34,7 +34,6 @@ public class SplashActivity extends AppCompatActivity {
         MyModel myModel5 = MyModel.getMyModelForGivenName("C5");
         if (myModel == null) {
             MyModel.initMyModel("C1");
-
         }
         if (myModel2 == null) {
             MyModel.initMyModel("C2");
@@ -48,7 +47,6 @@ public class SplashActivity extends AppCompatActivity {
         if (myModel5 == null) {
             MyModel.initMyModel("C5");
         }
-
     }
 
     private void init() {

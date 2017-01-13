@@ -102,6 +102,8 @@ public class SetTextureActivity extends AppCompatActivity {
     private int[] checked_arr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private final static String TEXTURE = "texture";
     private MyModel myModel;
+    private String model;
+    private Intent curveIntent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,10 +116,12 @@ public class SetTextureActivity extends AppCompatActivity {
     //界面初始化
     private void initUI() {
         Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
-        myModel = MyModel.getMyModelForGivenName(name);
+        model = intent.getStringExtra("name");
+        myModel = MyModel.getMyModelForGivenName(model);
         int texture = myModel.texture;
         select_control(texture);
+        curveIntent = new Intent(SetTextureActivity.this,BezierActivity.class);
+        curveIntent.putExtra("modelName",model);
     }
 
     //点击事件
@@ -146,31 +150,38 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(5,getResources().getString(R.string.texture_custom_s1));
                 break;
             case R.id.detail_s1:
-                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
+
+                curveIntent.putExtra("custom","S1");
+                startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s2:
                 pressed(6,getResources().getString(R.string.texture_custom_s2));
                 break;
             case R.id.detail_s2:
-                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
+
+                curveIntent.putExtra("custom","S2");
+                startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s3:
                 pressed(7,getResources().getString(R.string.texture_custom_s3));
                 break;
             case R.id.detail_s3:
-                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
+                curveIntent.putExtra("custom","S3");
+                startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s4:
                 pressed(8,getResources().getString(R.string.texture_custom_s4));
                 break;
             case R.id.detail_s4:
-                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
+                curveIntent.putExtra("custom","S4");
+                startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s5:
                 pressed(9,getResources().getString(R.string.texture_custom_s5));
                 break;
             case R.id.detail_s5:
-                startActivity(new Intent(SetTextureActivity.this,BezierActivity.class));//进入曲线界面
+                curveIntent.putExtra("custom","S5");
+                startActivity(curveIntent);//进入曲线界面
                 break;
         }
     }

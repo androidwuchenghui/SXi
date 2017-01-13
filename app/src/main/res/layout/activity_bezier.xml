@@ -6,81 +6,114 @@
               android:orientation="vertical">
 
     <LinearLayout
-        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bezierBack"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
+        <com.yihai.wu.util.ClickImageView
             android:id="@+id/btn_back"
-            android:padding="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
+            android:padding="10dp"
             android:src="@mipmap/back"/>
 
-        <ImageView
-            android:id="@+id/btn_above"
-            android:layout_marginLeft="20dp"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+        <com.yihai.wu.util.DisEnableImageView
+            android:id="@+id/btn_above_disable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
             android:layout_weight="1"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
             android:src="@mipmap/above"/>
 
-        <ImageView
-            android:id="@+id/btn_next"
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_above"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1"
+
+            android:paddingBottom="10dp"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:src="@mipmap/above"
+            android:visibility="gone"/>
+
+
+        <com.yihai.wu.util.DisEnableImageView
+            android:id="@+id/btn_next_disable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
             android:src="@mipmap/next"/>
 
-        <ImageView
-            android:id="@+id/btn_switch"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:src="@mipmap/next"
+            android:visibility="gone"/>
+
+
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
             android:src="@mipmap/switch1"/>
 
-        <ImageView
-        android:id="@+id/btn_wave"
-        android:paddingLeft="10dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:src="@mipmap/wave"/>
-
-        <ImageView
-            android:id="@+id/btn_waveBehind"
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_wave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:paddingBottom="10dp"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:src="@mipmap/switch2"/>
+            android:src="@mipmap/wave"/>
 
-        <ImageView
-            android:id="@+id/btn_save"
-           android:padding="10dp"
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_waveBehind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:src="@mipmap/switch2"
+            android:visibility="gone"/>
+
+        <com.yihai.wu.util.ClickImageView
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:padding="10dp"
             android:src="@mipmap/save"/>
 
     </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -91,14 +124,13 @@
             android:layout_height="match_parent"/>
 
         <LinearLayout
-            android:id="@+id/show"
-            android:visibility="invisible"
-            android:orientation="horizontal"
+            android:id="@+id/showTemper"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <TextView
-
                 android:id="@+id/valueX"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,34 +138,62 @@
                 android:gravity="right"
                 android:text="5"
                 android:textColor="@color/colorWhite"
-                android:textSize="28sp"/>
+                android:textSize="30sp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="60dp"
                 android:gravity="center_horizontal"
                 android:text="s :"
-                android:layout_marginRight="72dp"
                 android:textColor="@color/colorWhite"
-                android:textSize="28sp"/>
+                android:textSize="30sp"/>
 
             <TextView
 
                 android:id="@+id/valueY"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:text="100"
                 android:textColor="@color/colorWhite"
-                android:textSize="26sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textSize="30sp"/>
+
             <TextView
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="left"
+                android:layout_weight="1"
                 android:text="W"
                 android:textColor="@color/colorWhite"
-                android:textSize="26sp"
+                android:textSize="30sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_dashY"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="50"
+                android:textColor="@color/colorWhite"
+                android:textSize="30sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="W"
+                android:textColor="@color/colorWhite"
+                android:textSize="30sp"/>
 
         </LinearLayout>
 
