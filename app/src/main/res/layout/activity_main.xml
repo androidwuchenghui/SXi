@@ -36,9 +36,10 @@
     <com.youth.banner.Banner
         android:id="@+id/head_banner"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="220dp"
         app:delay_time="3000"
-        app:image_scale_type="fit_xy"
+        android:background="@color/colorPrimary"
+        app:image_scale_type="center_inside"
         app:indicator_drawable_selected="@mipmap/page_indicator_focused"
         app:indicator_drawable_unselected="@mipmap/page_indicator_unfocused"
         />
@@ -48,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="60dp"
         android:textSize="20sp"
         android:text="设备未连接"
         />

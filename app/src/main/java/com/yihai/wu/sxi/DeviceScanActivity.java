@@ -115,6 +115,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override
+    public boolean isOpenStatus() {
+        return false;
+    }
+
+    @Override
     protected void init() {
         Log.d(TAG, "init: "+"初始化");
         initView();

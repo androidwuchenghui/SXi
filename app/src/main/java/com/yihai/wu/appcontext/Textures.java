@@ -24,8 +24,10 @@ public class Textures extends Model {
     //℃温度曲线的数据（不可动）
     @Column(name = "data3")
     public String arr3;
+    //焦耳数据
     @Column(name = "data4")
     public String arr4;
+
     @Column(name = "MyModel")
     public MyModel myModel;
 
@@ -42,6 +44,7 @@ public class Textures extends Model {
             Textures texture = new Textures();
             texture.modelName = modelName;
             texture.customName = "S" + (1 + i);
+            //生成初始  W   功率曲线数据
             StringBuilder sb1 = new StringBuilder();
             for (int j = 0; j < 21; j++) {
                 int a = 22 + (int) (Math.random() * 60);
@@ -52,7 +55,8 @@ public class Textures extends Model {
                 }
             }
             texture.arr1 = sb1.toString();
-            StringBuilder sb3 = new StringBuilder();
+            //生成初始   ℃    温度曲线数据
+             StringBuilder sb3 = new StringBuilder();
             for (int j = 0; j < 21; j++) {
                 int a = 10 + (int) (Math.random() * 175);
                 if (j != 20) {
@@ -63,6 +67,17 @@ public class Textures extends Model {
             }
             texture.arr3 = sb3.toString();
 
+            //生成初始   J    焦耳曲线数据
+            StringBuilder sb4 = new StringBuilder();
+            for (int j = 0; j < 21; j++) {
+                int a = 10 + (int) (Math.random() * 175);
+                if (j != 20) {
+                    sb4 = sb4.append(a + ",");
+                } else {
+                    sb4 = sb4.append(a);
+                }
+            }
+            texture.arr4 = sb4.toString();
 
             texture.myModel = MyModel.getMyModelForGivenName(modelName);
             texture.save();
