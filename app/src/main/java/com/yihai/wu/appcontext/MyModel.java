@@ -14,6 +14,8 @@ import java.util.List;
 @Table(name = "MyModel")
 public class MyModel extends Model {
 
+    @Column(name = "ModelSelected")
+    public int  modelSelected;
 
     @Column(name = "ModelName")
     public String model;
@@ -54,6 +56,8 @@ public class MyModel extends Model {
     public static void
     initMyModel(String name) {
         MyModel myModel = new MyModel();
+        myModel.modelSelected=0;
+
         myModel.model = name;
         //直通模式是否打开（0-false,1-true）
         myModel.status = 0;
@@ -82,9 +86,14 @@ public class MyModel extends Model {
         return new Select().from(MyModel.class).where("ModelName = ?", model).executeSingle();
     }
 
+    public static MyModel getSelectedModel(){
+        return new Select().from(MyModel.class).where("modelSelected = ?",1).executeSingle();
+    }
+
     public List<Textures> getCurves(){
         return getMany(Textures.class,"MyModel");
     }
+
 
 }
 

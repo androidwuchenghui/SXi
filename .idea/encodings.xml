@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/yihai/wu/sxi/BluetoothLeService.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/sxi_library/src/main/java/com/yihai/wu/bluetooth_service/BluetoothLeService.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/sxi_library/src/main/java/com/yihai/wu/bluetooth_service/MyGattAttributes.java" charset="GBK" />
-  </component>
-</project>

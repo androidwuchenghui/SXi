@@ -23,4 +23,42 @@ public class MyUtils {
         return (int) (spValue * fontScale + 0.5f);
     }
 
+    public static String hexStringToString(String s) {
+        if (s == null || s.equals("")) {
+            return null;
+        }
+        s = s.replace(" ", "");
+        byte[] baKeyword = new byte[s.length() / 2];
+        for (int i = 0; i < baKeyword.length; i++) {
+            try {
+                baKeyword[i] = (byte) (0xff & Integer.parseInt(
+                        s.substring(i * 2, i * 2 + 2), 16));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            s = new String(baKeyword, "gbk");
+            new String();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        return s;
+    }
+
+    //byte[] 转换成16进制字符
+    public static String BinaryToHexString(byte[] bytes) {
+
+        String hexStr = "0123456789ABCDEF";
+        String result = "";
+        String hex = "";
+        for (int i = 0; i < bytes.length; i++) {
+            //字节高4位
+            hex = String.valueOf(hexStr.charAt((bytes[i] & 0xF0) >> 4));
+            //字节低4位
+            hex += String.valueOf(hexStr.charAt(bytes[i] & 0x0F));
+            result += hex + "";  //这里可以去掉空格，或者添加0x标识符。
+        }
+        return result;
+    }
 }

@@ -30,6 +30,7 @@ public class MyGattAttributes {
 
 
 
+
     /*UUID信息说明:XXXXXXXX-0000-1000-8000-00805F9B34FB(一共32个字符,对应二进制数据为128位长度.)
      *前面8个字符就是Profile,Service,Characteristics对应的UUID,
      *而后面的 0000-1000-8000-00805F9B34FB表示这里使用了SIG定义的Profile.

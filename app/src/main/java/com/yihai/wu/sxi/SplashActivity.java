@@ -59,6 +59,7 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             }
         }, 1000);
+
     }
 
     @Override
