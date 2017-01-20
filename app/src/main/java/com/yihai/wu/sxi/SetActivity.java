@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 
@@ -53,13 +52,7 @@ public class SetActivity extends AppCompatActivity {
         setContentView(R.layout.activity_set);
         initView();
         status = (TextView) findViewById(R.id.connect_state);
-        ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        if (connectedDevice != null) {
-            status.setText("已连接");
-            if (g_Character_TX != null) {
-                setSelectedData(connectedDevice.deviceName);
-            }
-        }
+
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -104,6 +97,28 @@ public class SetActivity extends AppCompatActivity {
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
 
 
+            MyModel selectedModel = MyModel.getSelectedModel();
+
+            if (selectedModel != null && g_Character_TX != null) {
+                status.setText("已连接");
+                switch (selectedModel.model) {
+                    case "C1":
+                        select_control(0);
+                        break;
+                    case "C2":
+                        select_control(1);
+                        break;
+                    case "C3":
+                        select_control(2);
+                        break;
+                    case "C4":
+                        select_control(3);
+                        break;
+                    case "C5":
+                        select_control(4);
+                        break;
+                }
+            }
         }
 
         @Override
@@ -121,59 +136,10 @@ public class SetActivity extends AppCompatActivity {
         return intentFilter;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        MyModel selectedModel = MyModel.getSelectedModel();
-        if (selectedModel != null) {
-            switch (selectedModel.model) {
-                case "C1":
-                    select = 0;
-                    break;
-                case "C2":
-                    select = 1;
-                    break;
-                case "C3":
-                    select = 2;
-                    break;
-                case "C4":
-                    select = 3;
-                    break;
-                case "C5":
-                    select = 4;
-                    break;
-
-            }
-        }
-        //                 select = sharedPreferences.getInt("select", 0);
-        select_control(select);
-
-    }
 
     private void select_control(int s) {
         //        share_editor.putInt("select", s);
         //        share_editor.commit();
-        if (g_Character_TX != null) {
-            switch (s) {
-                case 0:
-                    setSelectedData("C1");
-                    break;
-                case 1:
-                    setSelectedData("C2");
-                    break;
-                case 2:
-                    setSelectedData("C3");
-                    break;
-                case 3:
-                    setSelectedData("C4");
-                    break;
-                case 4:
-                    setSelectedData("C5");
-                    break;
-
-
-            }
-        }
 
         for (int i = 0; i < check_select.length; i++) {
             check_select[i] = 0;
@@ -182,26 +148,31 @@ public class SetActivity extends AppCompatActivity {
 
         if (check_select[0] == 1) {
             select_c1.setVisibility(View.VISIBLE);
+            setSelectedData("C1");
         } else {
             select_c1.setVisibility(View.INVISIBLE);
         }
         if (check_select[1] == 1) {
             select_c2.setVisibility(View.VISIBLE);
+            setSelectedData("C2");
         } else {
             select_c2.setVisibility(View.INVISIBLE);
         }
         if (check_select[2] == 1) {
             select_c3.setVisibility(View.VISIBLE);
+            setSelectedData("C3");
         } else {
             select_c3.setVisibility(View.INVISIBLE);
         }
         if (check_select[3] == 1) {
             select_c4.setVisibility(View.VISIBLE);
+            setSelectedData("C4");
         } else {
             select_c4.setVisibility(View.INVISIBLE);
         }
         if (check_select[4] == 1) {
             select_c5.setVisibility(View.VISIBLE);
+            setSelectedData("C5");
         } else {
             select_c5.setVisibility(View.INVISIBLE);
         }
@@ -274,32 +245,25 @@ public class SetActivity extends AppCompatActivity {
                     finish();
                     break;
                 case R.id.tv_c1:
-
                     select_control(0);
-
                     break;
                 case R.id.tv_c2:
 
                     select_control(1);
-
                     break;
                 case R.id.tv_c3:
-
                     select_control(2);
 
                     break;
                 case R.id.tv_c4:
-
                     select_control(3);
 
                     break;
                 case R.id.tv_c5:
-
                     select_control(4);
 
                     break;
                 case R.id.detail_c1:
-
                     select_control(0);
                     intent.putExtra("detail", "C1");
 
@@ -308,24 +272,20 @@ public class SetActivity extends AppCompatActivity {
                 case R.id.detail_c2:
                     select_control(1);
                     intent.putExtra("detail", "C2");
-
                     startActivity(intent);
                     break;
                 case R.id.detail_c3:
                     select_control(2);
-
                     intent.putExtra("detail", "C3");
                     startActivity(intent);
                     break;
                 case R.id.detail_c4:
                     select_control(3);
-
                     intent.putExtra("detail", "C4");
                     startActivity(intent);
                     break;
                 case R.id.detail_c5:
                     select_control(4);
-
                     intent.putExtra("detail", "C5");
                     startActivity(intent);
                     break;
@@ -344,15 +304,6 @@ public class SetActivity extends AppCompatActivity {
     }
 
     public void setSelectedData(String str) {
-        for (int i = 0; i < 5; i++) {
-            String name = "C" + (i + 1);
-            MyModel myModel = MyModel.getMyModelForGivenName(name);
-            myModel.modelSelected = 0;
-            myModel.save();
-        }
-        MyModel myModelSlected = MyModel.getMyModelForGivenName(str);
-        myModelSlected.modelSelected = 1;
-        myModelSlected.save();
         switch (str) {
             case "C1":
                 setUserDeviceSettingModel((byte) 0x00);
@@ -371,6 +322,19 @@ public class SetActivity extends AppCompatActivity {
                 break;
 
         }
+
+        for (int i = 0; i < 5; i++) {
+            String name = "C" + (i + 1);
+            MyModel myModel = MyModel.getMyModelForGivenName(name);
+            if (myModel.model.equals(str)) {
+                myModel.modelSelected = 1;
+            } else {
+                myModel.modelSelected = 0;
+            }
+            myModel.save();
+        }
+
+
     }
 
     public void setUserDeviceSettingModel(byte b) {
@@ -409,18 +373,19 @@ public class SetActivity extends AppCompatActivity {
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
 
-    public void setUserDeviceSettingPowerModel() {
+//    public void setUserDeviceSettingPowerModel() {
+//
+//        byte[] m_Data = new byte[32];
+//        int m_Length = 0;
+//        m_Data[0] = 0x55;
+//        m_Data[1] = (byte) 0xFF;
+//        m_Data[3] = 0x01; //Device ID
+//        m_Data[2] = 0x03;
+//        m_Data[4] = 0x57;
+//        m_Data[5] = 0x0F;
+//        m_Length = 6;
+//        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+//
+//    }
 
-        byte[] m_Data = new byte[32];
-        int m_Length = 0;
-        m_Data[0] = 0x55;
-        m_Data[1] = (byte) 0xFF;
-        m_Data[3] = 0x01; //Device ID
-        m_Data[2] = 0x03;
-        m_Data[4] = 0x57;
-        m_Data[5] = 0x0F;
-        m_Length = 6;
-        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
-
-    }
 }

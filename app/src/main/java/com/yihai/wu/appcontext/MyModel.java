@@ -19,6 +19,7 @@ public class MyModel extends Model {
 
     @Column(name = "ModelName")
     public String model;
+
     @Column(name = "StraightModel")
     public int status;
     @Column(name = "DisplayStatus")
