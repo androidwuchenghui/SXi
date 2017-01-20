@@ -57,6 +57,29 @@ public class SetActivity extends AppCompatActivity {
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
+
+        MyModel selectedModel = MyModel.getSelectedModel();
+
+        if (selectedModel != null ) {
+            status.setText("已连接");
+            switch (selectedModel.model) {
+                case "C1":
+                    select_control(0);
+                    break;
+                case "C2":
+                    select_control(1);
+                    break;
+                case "C3":
+                    select_control(2);
+                    break;
+                case "C4":
+                    select_control(3);
+                    break;
+                case "C5":
+                    select_control(4);
+                    break;
+            }
+        }
     }
 
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
@@ -97,28 +120,7 @@ public class SetActivity extends AppCompatActivity {
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
 
 
-            MyModel selectedModel = MyModel.getSelectedModel();
 
-            if (selectedModel != null && g_Character_TX != null) {
-                status.setText("已连接");
-                switch (selectedModel.model) {
-                    case "C1":
-                        select_control(0);
-                        break;
-                    case "C2":
-                        select_control(1);
-                        break;
-                    case "C3":
-                        select_control(2);
-                        break;
-                    case "C4":
-                        select_control(3);
-                        break;
-                    case "C5":
-                        select_control(4);
-                        break;
-                }
-            }
         }
 
         @Override
@@ -148,31 +150,41 @@ public class SetActivity extends AppCompatActivity {
 
         if (check_select[0] == 1) {
             select_c1.setVisibility(View.VISIBLE);
-            setSelectedData("C1");
+            if (g_Character_TX != null) {
+                setSelectedData("C1");
+            }
         } else {
             select_c1.setVisibility(View.INVISIBLE);
         }
         if (check_select[1] == 1) {
             select_c2.setVisibility(View.VISIBLE);
-            setSelectedData("C2");
+            if (g_Character_TX != null) {
+                setSelectedData("C2");
+            }
         } else {
             select_c2.setVisibility(View.INVISIBLE);
         }
         if (check_select[2] == 1) {
             select_c3.setVisibility(View.VISIBLE);
-            setSelectedData("C3");
+            if (g_Character_TX != null) {
+                setSelectedData("C3");
+            }
         } else {
             select_c3.setVisibility(View.INVISIBLE);
         }
         if (check_select[3] == 1) {
             select_c4.setVisibility(View.VISIBLE);
-            setSelectedData("C4");
+            if (g_Character_TX != null) {
+                setSelectedData("C4");
+            }
         } else {
             select_c4.setVisibility(View.INVISIBLE);
         }
         if (check_select[4] == 1) {
             select_c5.setVisibility(View.VISIBLE);
-            setSelectedData("C5");
+            if (g_Character_TX != null) {
+                setSelectedData("C5");
+            }
         } else {
             select_c5.setVisibility(View.INVISIBLE);
         }
@@ -373,19 +385,19 @@ public class SetActivity extends AppCompatActivity {
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
 
-//    public void setUserDeviceSettingPowerModel() {
-//
-//        byte[] m_Data = new byte[32];
-//        int m_Length = 0;
-//        m_Data[0] = 0x55;
-//        m_Data[1] = (byte) 0xFF;
-//        m_Data[3] = 0x01; //Device ID
-//        m_Data[2] = 0x03;
-//        m_Data[4] = 0x57;
-//        m_Data[5] = 0x0F;
-//        m_Length = 6;
-//        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
-//
-//    }
+    //    public void setUserDeviceSettingPowerModel() {
+    //
+    //        byte[] m_Data = new byte[32];
+    //        int m_Length = 0;
+    //        m_Data[0] = 0x55;
+    //        m_Data[1] = (byte) 0xFF;
+    //        m_Data[3] = 0x01; //Device ID
+    //        m_Data[2] = 0x03;
+    //        m_Data[4] = 0x57;
+    //        m_Data[5] = 0x0F;
+    //        m_Length = 6;
+    //        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    //
+    //    }
 
 }
