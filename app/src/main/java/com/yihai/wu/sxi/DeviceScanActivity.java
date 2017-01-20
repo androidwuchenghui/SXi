@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -120,6 +122,24 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private String changeTo;
     private ScanCallback mScanCallback;
 
+    private static final int REQUEST_FINE_LOCATION=0;
+    private void mayRequestLocation() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkCallPhonePermission = ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION);
+            if(checkCallPhonePermission != PackageManager.PERMISSION_GRANTED){
+                //判断是否需要 向用户解释，为什么要申请该权限
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION))
+
+
+                ActivityCompat.requestPermissions(this ,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_FINE_LOCATION);
+                return;
+            }else{
+
+            }
+        } else {
+
+        }
+    }
     @Override
     protected int getContentId() {
         return R.layout.activity_devicescan;
@@ -168,20 +188,8 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Log.d(TAG, "init: " + "6.0   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
                 if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    //                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    //                    builder.setTitle("This app needs location access");
-                    //                    builder.setMessage("Please grant location access so this app can detect Bluetooth.");
-                    //                    builder.setPositiveButton(android.R.string.ok, null);
-                    //                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    //                        @Override
-                    //                        public void onDismiss(DialogInterface dialog) {
-                    //                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    //                                Log.d(TAG, "bbbbbb: 申请权限");
+
                     requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
-                    // }
-                    //                        }
-                    //                    });
-                    //                    builder.show();
                 }
             }
         }
@@ -366,13 +374,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 //连接成功，执行正常通信￥￥ （流程OK）
                 Log.d(TAG, "handleChangePassword: 成功");
                 LandDialog.cancel();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        successDialog.dismiss();
 
-                    }
-                }, 1500);
                 successDialog.show();
                 getConnectedDeviceRealName();
                 break;
@@ -464,18 +466,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
                 LandDialog.dismiss();
 
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        //                        Intent connectResult = new Intent();
-                        //                        connectResult.putExtra("deviceName",mDeviceName);
-                        //                        setResult(REQUST_RESULT,connectResult);
-                        successDialog.dismiss();
-
-                        //                        DeviceScanActivity.this.finish();
-                    }
-                }, 1500);
                 getConnectedDeviceRealName();
                 successDialog.show();
                 ConnectedBleDevices getDevice = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
@@ -1334,9 +1324,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        successDialog.dismiss();
                         DeviceScanActivity.this.finish();
                     }
-                },1600);
+                },1000);
+
                 break;
 
         }

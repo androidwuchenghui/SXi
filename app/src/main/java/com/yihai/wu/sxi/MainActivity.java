@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 import com.yihai.wu.util.GlideImageLoader;
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: 收到的数据为：  " + s);
+                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s);
                     Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
@@ -271,7 +272,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
+        mBluetoothLeService.close();
         mBluetoothLeService = null;
+        ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+        connectedDevice.isConnected=false;
+        connectedDevice.save();
     }
 
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
@@ -341,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String substring = s.substring(12);
 
                 int model = Integer.parseInt(substring);
-                Log.d(TAG, "处理数据:     " + s + "    " + substring + " --m:  " + model);
+                Log.d(TAG, "处理数据:     " + s + "    " + substring + " m:  " + model);
                 String selectedModel = "C" + (model + 1);
 
 

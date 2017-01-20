@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.yihai.wu.util.MyUtils;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -125,7 +127,9 @@ public class BluetoothLeService extends Service {
                 broadcastUpdate(intentAction);
                 // Attempts to discover services after successful connection.
                 Log.d(TAG, "onConnectionStateChange: " + "连接状态   mBluetoothGatt：  " + mBluetoothGatt);
-                mBluetoothGatt.discoverServices();
+
+                            mBluetoothGatt.discoverServices();
+
                 Log.e("discovery", "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
 
@@ -168,7 +172,7 @@ public class BluetoothLeService extends Service {
                     }
                 }, 1500);
             }*/ else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+//                Log.w(TAG, "onServicesDiscovered received: " + status);
             }
         }
 
@@ -226,6 +230,7 @@ public class BluetoothLeService extends Service {
                 Log.d(TAG, "onCharacteristicChanged: 提交返回");
                 broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
             } else if (characteristic.getUuid().equals(g_UUID_Charater_ReadData)) {
+                Log.d(TAG, "onCharacteristicChanged:  RX"+ MyUtils.BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
             }
 

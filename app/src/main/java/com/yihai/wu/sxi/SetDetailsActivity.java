@@ -1,7 +1,14 @@
 package com.yihai.wu.sxi;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,12 +21,14 @@ import android.widget.TextView;
 
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
+import com.yihai.wu.util.MyUtils;
 import com.yihai.wu.widget.switch_button.SwitchView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
 import static com.yihai.wu.sxi.R.id.rg_joule;
 
 
@@ -122,20 +131,79 @@ public class SetDetailsActivity extends AppCompatActivity {
     SeekBar seekBarSetJoule;
     @Bind(R.id.line_show_joule)
     LinearLayout lineShowJoule;
-
+    private static final String TAG = "SetDetailsActivity";
     private boolean isCentigrade = true;
     private String detail;
-
+    private BluetoothLeService mBluetoothLeService;
+    private BluetoothGattCharacteristic g_Character_TX;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setdetails);
         ButterKnife.bind(this);
+        registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
         initListener();
         initUI();
 
+        Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    private final BroadcastReceiver setDetailsActivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            switch (action) {
+                case BluetoothLeService.ACTION_DATA_RX:
+                    Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
+                    byte[] data = bundle.getByteArray("byteValues");
+                    String s = BinaryToHexString(data);
+                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据为：  " + s);
+                    Sys_YiHi_Protocol_RX_Porc(data);
+                    break;
+            }
+        }
+    };
+
+    private static IntentFilter makeBroadcastFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        return intentFilter;
+    }
+
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("service", "Unable to initialize Bluetooth");
+                finish();
+            }
+
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
+            if (g_Character_TX != null) {
+
+                getConnectedDevicePowerModel();
+                //                AckUserDeviceSetting();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
+        }
+    };
 
     @Override
     protected void onStart() {
@@ -208,23 +276,23 @@ public class SetDetailsActivity extends AppCompatActivity {
     private void setShowText(int textured) {
         if (textured == 0) {
             texture.setText(R.string.texture_power_save);
-        }else if(textured == 1){
+        } else if (textured == 1) {
             texture.setText(R.string.texture_soft);
-        }else if(textured == 2){
+        } else if (textured == 2) {
             texture.setText(R.string.texture_standard);
-        }else if(textured == 3){
+        } else if (textured == 3) {
             texture.setText(R.string.texture_strong);
-        }else if(textured == 4){
+        } else if (textured == 4) {
             texture.setText(R.string.texture_super_strong);
-        }else if(textured == 5){
+        } else if (textured == 5) {
             texture.setText(R.string.texture_custom_s1);
-        }else if(textured == 6){
+        } else if (textured == 6) {
             texture.setText(R.string.texture_custom_s2);
-        }else if(textured == 7){
+        } else if (textured == 7) {
             texture.setText(R.string.texture_custom_s3);
-        }else if(textured == 8){
+        } else if (textured == 8) {
             texture.setText(R.string.texture_custom_s4);
-        }else if(textured == 9){
+        } else if (textured == 9) {
             texture.setText(R.string.texture_custom_s5);
         }
     }
@@ -319,6 +387,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     break;
                 case R.id.seekBar_set_power:
                     showPower.setText((i + 50) / 10 + "." + (i + 50) % 10);
+
                     break;
                 case R.id.seekBar_set_joule:
                     showJoule.setText((i + 100) / 10 + "." + (i + 100) % 10);
@@ -350,9 +419,12 @@ public class SetDetailsActivity extends AppCompatActivity {
                     myModel2.save();
                     break;
                 case R.id.seekBar_set_power:
+                    int sendData = seekBar.getProgress() + 50;
                     MyModel myModel3 = MyModel.getMyModelForGivenName(detail);
-                    myModel3.power = seekBar.getProgress() + 50;
+                    myModel3.power = sendData;//需要发送的数据
                     myModel3.save();
+                    setPowerValue(sendData / 10, sendData % 10);
+
                 case R.id.seekBar_set_joule:
                     MyModel myModel4 = MyModel.getMyModelForGivenName(detail);
                     myModel4.joule = seekBar.getProgress() + 100;
@@ -412,11 +484,14 @@ public class SetDetailsActivity extends AppCompatActivity {
                             myModel_C.JouleOrPower = 0;
                             lineShowPower.setVisibility(View.VISIBLE);
                             lineShowJoule.setVisibility(View.GONE);
+                            setUserDevicePowerOrJoule((byte) 0x01);
+
                             break;
                         case R.id.rb_joule:
                             myModel_C.JouleOrPower = 1;
                             lineShowPower.setVisibility(View.GONE);
                             lineShowJoule.setVisibility(View.VISIBLE);
+                            setUserDevicePowerOrJoule((byte) 0x02);
                             break;
 
 
@@ -457,4 +532,157 @@ public class SetDetailsActivity extends AppCompatActivity {
             myModel_C.save();
         }
     }
+
+    private void getConnectedDevicePowerModel() {
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x03;
+        m_Data[4] = 0x57;
+        m_Data[5] = 0x0F;
+        m_length = 6;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
+    private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
+
+        byte[] m_MyData = new byte[m_Length];
+        for (int i = 0; i < m_Length; i++) {
+            m_MyData[i] = m_Data[i];
+        }
+
+        if (g_Character_TX == null) {
+            Log.e("SetDetailsActivity", "character TX is null");
+            return;
+        }
+
+        if (m_Length <= 0) {
+            return;
+        }
+        g_Character_TX.setValue(m_MyData);
+        mBluetoothLeService.writeCharacteristic(g_Character_TX);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(setDetailsActivityReceiver);
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+    }
+
+    private void AckUserDeviceSetting() {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x03;
+        m_Data_DeviceSetting[4] = 0x57;
+        m_Data_DeviceSetting[5] = 0x11;
+
+        m_Length = 6;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    private void Sys_YiHi_Protocol_RX_Porc(byte[] m_Data) {
+        int m_Length = 0;
+        int i;
+        int m_Index = 0xfe;
+        byte m_ValidData_Length = 0;
+        byte m_Command = 0;
+        byte m_SecondCommand = 0;
+        String s = null;
+        int m_iTemp_x10, m_iTemp_x1;
+        m_Length = m_Data.length;
+        if (m_Length < 5) {
+            return;
+        }
+        //Get sync code.
+        for (i = 0; i < m_Length; i++) {
+            //if (i<16)
+            //{
+            //	if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---Data["+i+"]="+m_Data[i]);
+            //}
+            //if ((m_Data[i]==0x55)&&(m_Data[(i+1)]==0xFF))
+            if (((m_Data[i] == 85) || (m_Data[i] == 0x55))
+                    && ((m_Data[(i + 1)] == -1) || (m_Data[(i + 1)] == 0xFF)
+                    || (m_Data[(i + 1)] == -3) || (m_Data[i + 1] == 0xFD))) {
+                //if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---i="+i);
+                m_Index = i;
+                //i=m_Length;
+                break;
+            }
+
+        }
+        if (m_Index == 0xfe) {
+            return;
+        }
+        if (m_Index > (m_Length - 2)) {
+            return;
+        }
+        //Get valid data length.
+        m_ValidData_Length = m_Data[(m_Index + 2)];
+        if ((m_Index + m_ValidData_Length) > m_Length) {
+            return;
+        }
+        //Get command code.
+        m_Command = m_Data[(m_Index + 4)];
+        m_SecondCommand = m_Data[(m_Index + 5)];
+        Log.d(TAG, "onReceiveMainActivity: " + m_Command);
+        if (m_Command == 0x58 && m_SecondCommand == 0x0F)
+        //获得功率焦耳切换
+        {
+            s = BinaryToHexString(m_Data);
+            String substring = s.substring(12);
+            Log.d(TAG, "处理    : power&Joule--   " + s + "  -:   " + substring);
+            int model = Integer.parseInt(substring);
+            //1
+            MyModel myModel = MyModel.getMyModelForGivenName(detail);
+            if (myModel != null) {
+                myModel.JouleOrPower = model - 1;
+
+                rgJoule.getChildAt(myModel.JouleOrPower).performClick();
+                myModel.save();
+            }
+
+        }
+
+    }
+
+    public void setUserDevicePowerOrJoule(byte b) {
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x04;
+        m_Data[4] = 0x59;
+        m_Data[5] = 0x0F;
+        m_Data[6] = b;
+        m_length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
+    public void setPowerValue(int powerValue_x10, int powerValue_x1) {
+
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        byte temp;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+
+        m_Data[2] = 0x04;
+        m_Data[4] = 0x07;
+        temp = MyUtils.int2OneByte(powerValue_x10);
+        m_Data[5] = temp;
+        temp = MyUtils.int2OneByte(powerValue_x1);
+        m_Data[6] = temp;
+        m_length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
 }

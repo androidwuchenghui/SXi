@@ -1,9 +1,17 @@
 package com.yihai.wu.sxi;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +22,8 @@ import android.widget.TextView;
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
+
+import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
 
 /**
  * Created by ${Wu} on 2016/12/12.
@@ -34,7 +44,8 @@ public class SetActivity extends AppCompatActivity {
     private Intent intent;
     private Intent toMainIntent;
     int select = 0;
-
+    private BluetoothLeService mBluetoothLeService;
+    private BluetoothGattCharacteristic g_Character_TX;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,8 +56,63 @@ public class SetActivity extends AppCompatActivity {
         if(connectedDevice!=null){
             status.setText("已连接");
         }
+
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
     }
 
+    private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action) {
+
+                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                    status.setText("已连接");
+                    Log.e("log", "onReceive: " + "GATT连接成功*************");
+                    break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    status.setText("未连接");
+                    Log.e("log", "onReceive: " + "GATT未连接********");
+                    break;
+                case BluetoothLeService.ACTION_DATA_RX:
+                    Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
+                    byte[] data = bundle.getByteArray("byteValues");
+                    String s = BinaryToHexString(data);
+                    Log.d("set", "onReceive: 收到的数据为：  " + s);
+//                    Sys_YiHi_Protocol_RX_Porc(data);
+
+                    break;
+            }
+        }
+    };
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("service", "Unable to initialize Bluetooth");
+                finish();
+            }
+            Log.d("setActivity", "onServiceConnected: "+mBluetoothLeService);
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
+
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
+        }
+    };
+    private static IntentFilter makeMainBroadcastFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        return intentFilter;
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -73,6 +139,7 @@ public class SetActivity extends AppCompatActivity {
         }
 //                 select = sharedPreferences.getInt("select", 0);
         select_control(select);
+
     }
 
     private void select_control(int s) {
@@ -176,7 +243,7 @@ public class SetActivity extends AppCompatActivity {
     private class clickEvent implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
             switch (view.getId()) {
                 case R.id.btn_back:
                     finish();
@@ -240,6 +307,9 @@ public class SetActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mainActivityReceiver);
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
     }
     public void setSelectedData(String str){
         for (int i = 0; i <5 ; i++) {
@@ -251,5 +321,73 @@ public class SetActivity extends AppCompatActivity {
         MyModel myModelSlected = MyModel.getMyModelForGivenName(str);
         myModelSlected.modelSelected=1;
         myModelSlected.save();
+        switch (str){
+            case "C1":
+                setUserDeviceSettingModel((byte) 0x00);
+                break;
+            case "C2":
+                setUserDeviceSettingModel((byte) 0x01);
+                break;
+            case "C3":
+                setUserDeviceSettingModel((byte) 0x02);
+                break;
+            case "C4":
+                setUserDeviceSettingModel((byte) 0x03);
+                break;
+            case "C5":
+                setUserDeviceSettingModel((byte) 0x04);
+                break;
+
+        }
+    }
+
+    public void setUserDeviceSettingModel(byte b){
+
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x11;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = 0x11;
+        m_Data_DeviceSetting[6] = b;
+
+        m_Length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+
+    }
+    private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
+
+        byte[] m_MyData = new byte[m_Length];
+        for (int i = 0; i < m_Length; i++) {
+            m_MyData[i] = m_Data[i];
+        }
+
+        if (g_Character_TX == null) {
+            Log.e("set", "character TX is null");
+            return;
+        }
+
+        if (m_Length <= 0) {
+            return;
+        }
+        g_Character_TX.setValue(m_MyData);
+        mBluetoothLeService.writeCharacteristic(g_Character_TX);
+    }
+
+    public void setUserDeviceSettingPowerModel(){
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x03;
+        m_Data[4] = 0x57;
+        m_Data[5] = 0x0F;
+        m_Length = 6;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+
     }
 }
