@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yihai.wu.appcontext.ConnectedBleDevices;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
     private DarkImageButton btn_reset;
+    private TextView connectedState;
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -63,6 +65,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!mBluetoothLeService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
+            }
+            if(mBluetoothLeService.getTheConnectedState()==0){
+                connectedState.setText("已连接设备");
+            }else if(mBluetoothLeService.getTheConnectedState()==2){
+                connectedState.setText("设备未连接");
             }
 
         }
@@ -113,6 +120,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "onRestart:再次打开MainActivity---");
+        if(mBluetoothLeService.getTheConnectedState()==2){
+            connectedState.setText("已连接设备");
+            AckUserDeviceSetting();
+        }else {
+            connectedState.setText("未连接设备");
+        }
+    }
+
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -133,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static IntentFilter makeMainBroadcastFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+
         return intentFilter;
     }
 
@@ -148,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void initButton() {
+        connectedState = (TextView) findViewById(R.id.device_name);
         btn_connect = (DarkImageButton) findViewById(R.id.btn_connect);
         btn_connect.setOnClickListener(this);
         btn_information = (DarkImageButton) findViewById(R.id.btn_information);
@@ -194,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_set:
 
-                startActivityForResult(new Intent(this, SetActivity.class), REQUST_MODE);
+                startActivity(new Intent(this, SetActivity.class));
                 break;
             case R.id.btn_reset:
                 //                Log.d(TAG, "onClick: "+g_Character_BaudRate+"---状态  "+mBluetoothLeService.getTheConnectedState());
@@ -212,21 +235,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        //        Log.d(TAG, "onActivityResult: "+requestCode+">>>>"+resultCode);
-        Log.d(TAG, "onActivityResult: " + mBluetoothLeService.getTheConnectedState());
-
-        boolean m_b_Check_BaudRate = false;
-        if (mBluetoothLeService.getTheConnectedState() == 2 && requestCode == REQUEST_CONNECTED) {
-            g_Character_TX = mBluetoothLeService.getG_Character_TX();
-
-            AckUserDeviceSetting();
-        }
     }
 
     private void AckUserDeviceSetting() {
@@ -341,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_Command = m_Data[(m_Index + 4)];
         Log.d(TAG, "onReceiveMainActivity: " + m_Command);
         switch (m_Command) {
-            case AckUserDeviceSetting:
+            case AckUserDeviceSetting:   //查看系统设定的 C
                 String s = BinaryToHexString(m_Data);
                 String substring = s.substring(12);
 

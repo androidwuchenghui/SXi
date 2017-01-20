@@ -675,13 +675,17 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Data[1] = (byte) 0xFF;
         m_Data[3] = 0x01; //Device ID
 
-        m_Data[2] = 0x04;
+        m_Data[2] = 0x05;
         m_Data[4] = 0x07;
-        temp = MyUtils.int2OneByte(powerValue_x10);
+        temp = (byte) (powerValue_x10>>8);
         m_Data[5] = temp;
-        temp = MyUtils.int2OneByte(powerValue_x1);
+
+        temp = (byte) ((powerValue_x10<<8)>>8);
         m_Data[6] = temp;
-        m_length = 7;
+
+        temp =  (MyUtils.int2OneByte(powerValue_x1));
+        m_Data[7] = temp;
+        m_length = 8;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
 

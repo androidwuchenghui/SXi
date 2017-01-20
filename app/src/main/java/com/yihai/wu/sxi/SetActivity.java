@@ -37,7 +37,7 @@ public class SetActivity extends AppCompatActivity {
     private ImageView select_c1, select_c2, select_c3, select_c4, select_c5;
     private ImageView detail_c1, detail_c2, detail_c3, detail_c4, detail_c5;
     private LinearLayout line_c1, line_c2, line_c3, line_c4, line_c5;
-    private TextView tv_c1, tv_c2, tv_c3, tv_c4, tv_c5,status;
+    private TextView tv_c1, tv_c2, tv_c3, tv_c4, tv_c5, status;
     private final int REQUEST_CODE_1 = 0X001;
     private final int REQUEST_CODE_TO_MAIN = 0X002;
 
@@ -46,6 +46,7 @@ public class SetActivity extends AppCompatActivity {
     int select = 0;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +54,11 @@ public class SetActivity extends AppCompatActivity {
         initView();
         status = (TextView) findViewById(R.id.connect_state);
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        if(connectedDevice!=null){
+        if (connectedDevice != null) {
             status.setText("已连接");
+            if (g_Character_TX != null) {
+                setSelectedData(connectedDevice.deviceName);
+            }
         }
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -81,7 +85,7 @@ public class SetActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
                     Log.d("set", "onReceive: 收到的数据为：  " + s);
-//                    Sys_YiHi_Protocol_RX_Porc(data);
+                    //                    Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
             }
@@ -96,7 +100,7 @@ public class SetActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
-            Log.d("setActivity", "onServiceConnected: "+mBluetoothLeService);
+            Log.d("setActivity", "onServiceConnected: " + mBluetoothLeService);
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
 
 
@@ -108,11 +112,15 @@ public class SetActivity extends AppCompatActivity {
             mBluetoothLeService = null;
         }
     };
+
     private static IntentFilter makeMainBroadcastFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         return intentFilter;
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -137,18 +145,35 @@ public class SetActivity extends AppCompatActivity {
 
             }
         }
-//                 select = sharedPreferences.getInt("select", 0);
+        //                 select = sharedPreferences.getInt("select", 0);
         select_control(select);
 
     }
 
     private void select_control(int s) {
-//        share_editor.putInt("select", s);
-//        share_editor.commit();
+        //        share_editor.putInt("select", s);
+        //        share_editor.commit();
+        if (g_Character_TX != null) {
+            switch (s) {
+                case 0:
+                    setSelectedData("C1");
+                    break;
+                case 1:
+                    setSelectedData("C2");
+                    break;
+                case 2:
+                    setSelectedData("C3");
+                    break;
+                case 3:
+                    setSelectedData("C4");
+                    break;
+                case 4:
+                    setSelectedData("C5");
+                    break;
 
-        toMainIntent.putExtra("myMode", "C" + (s + 1));
 
-        setResult(REQUEST_CODE_TO_MAIN, toMainIntent);
+            }
+        }
 
         for (int i = 0; i < check_select.length; i++) {
             check_select[i] = 0;
@@ -249,52 +274,58 @@ public class SetActivity extends AppCompatActivity {
                     finish();
                     break;
                 case R.id.tv_c1:
+
                     select_control(0);
-                    setSelectedData("C1");
+
                     break;
                 case R.id.tv_c2:
+
                     select_control(1);
-                    setSelectedData("C2");
+
                     break;
                 case R.id.tv_c3:
+
                     select_control(2);
-                    setSelectedData("C3");
+
                     break;
                 case R.id.tv_c4:
+
                     select_control(3);
-                    setSelectedData("C4");
+
                     break;
                 case R.id.tv_c5:
+
                     select_control(4);
-                    setSelectedData("C5");
+
                     break;
                 case R.id.detail_c1:
+
                     select_control(0);
                     intent.putExtra("detail", "C1");
-                    setSelectedData("C1");
+
                     startActivity(intent);
                     break;
                 case R.id.detail_c2:
                     select_control(1);
                     intent.putExtra("detail", "C2");
-                    setSelectedData("C2");
+
                     startActivity(intent);
                     break;
                 case R.id.detail_c3:
                     select_control(2);
-                    setSelectedData("C3");
+
                     intent.putExtra("detail", "C3");
                     startActivity(intent);
                     break;
                 case R.id.detail_c4:
                     select_control(3);
-                    setSelectedData("C4");
+
                     intent.putExtra("detail", "C4");
                     startActivity(intent);
                     break;
                 case R.id.detail_c5:
                     select_control(4);
-                    setSelectedData("C5");
+
                     intent.putExtra("detail", "C5");
                     startActivity(intent);
                     break;
@@ -311,17 +342,18 @@ public class SetActivity extends AppCompatActivity {
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
-    public void setSelectedData(String str){
-        for (int i = 0; i <5 ; i++) {
-            String name = "C"+(i+1);
+
+    public void setSelectedData(String str) {
+        for (int i = 0; i < 5; i++) {
+            String name = "C" + (i + 1);
             MyModel myModel = MyModel.getMyModelForGivenName(name);
-            myModel.modelSelected=0;
+            myModel.modelSelected = 0;
             myModel.save();
         }
         MyModel myModelSlected = MyModel.getMyModelForGivenName(str);
-        myModelSlected.modelSelected=1;
+        myModelSlected.modelSelected = 1;
         myModelSlected.save();
-        switch (str){
+        switch (str) {
             case "C1":
                 setUserDeviceSettingModel((byte) 0x00);
                 break;
@@ -341,7 +373,7 @@ public class SetActivity extends AppCompatActivity {
         }
     }
 
-    public void setUserDeviceSettingModel(byte b){
+    public void setUserDeviceSettingModel(byte b) {
 
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
@@ -357,6 +389,7 @@ public class SetActivity extends AppCompatActivity {
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
 
     }
+
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
 
         byte[] m_MyData = new byte[m_Length];
@@ -376,7 +409,7 @@ public class SetActivity extends AppCompatActivity {
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
 
-    public void setUserDeviceSettingPowerModel(){
+    public void setUserDeviceSettingPowerModel() {
 
         byte[] m_Data = new byte[32];
         int m_Length = 0;
