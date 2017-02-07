@@ -601,7 +601,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position - 1);
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
-        Log.d(TAG, "onItemClick: " + "address: " + mDeviceAddress + "service：  " + mBluetoothLeService);
+        Log.d(TAG, "onItemClick: " + "address: " + mDeviceAddress + "  service：  " + mBluetoothLeService);
         //点击了一个想要连接的设备
 
         mBluetoothLeService.connect(mDeviceAddress);
@@ -913,8 +913,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             //            Log.d(TAG, "displayGattServices: "+ConnectedBleDevices.getConnectInfo(mDeviceName).deviceName);
             commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
         }
-
-
     }//displayGattServices()------------------------END
 
     private void displayData(String data) {
@@ -1065,7 +1063,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     }
 
     public void commitPassword(String password) {
-        Log.d(TAG, "password: 提交密码：   " + g_Character_Password + " ————— " + password);
+        Log.d(TAG, "password: 提交密码： 特征值为：   " + g_Character_Password + "   密码为：  " + password);
         byte[] m_Data = password.getBytes();
         if (g_Character_Password != null) {
             g_Character_Password.setValue(m_Data);
