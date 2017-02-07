@@ -283,8 +283,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBluetoothLeService.close();
         mBluetoothLeService = null;
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        connectedDevice.isConnected=false;
-        connectedDevice.save();
+        if(connectedDevice!=null) {
+            connectedDevice.isConnected = false;
+            connectedDevice.save();
+        }
     }
 
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {

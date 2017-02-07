@@ -643,7 +643,6 @@ public class SetDetailsActivity extends AppCompatActivity {
             MyModel myModel = MyModel.getMyModelForGivenName(detail);
             if (myModel != null) {
                 myModel.JouleOrPower = model - 1;
-
                 rgJoule.getChildAt(myModel.JouleOrPower).performClick();
                 myModel.save();
             }

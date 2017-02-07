@@ -45,6 +45,7 @@ public class SetActivity extends AppCompatActivity {
     int select = 0;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
+    private static final String TAG = "SetActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,8 +60,8 @@ public class SetActivity extends AppCompatActivity {
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
 
         MyModel selectedModel = MyModel.getSelectedModel();
-
-        if (selectedModel != null ) {
+        Log.d(TAG, "onCreate: init"+selectedModel);
+        if (selectedModel != null) {
             status.setText("已连接");
             switch (selectedModel.model) {
                 case "C1":
@@ -79,6 +80,8 @@ public class SetActivity extends AppCompatActivity {
                     select_control(4);
                     break;
             }
+        }else {
+            select_control(0);
         }
     }
 
@@ -120,12 +123,11 @@ public class SetActivity extends AppCompatActivity {
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
 
 
-
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.d("service", "onServiceDisconnected: " + "---------服务断开-------------");
             mBluetoothLeService = null;
         }
     };
@@ -148,8 +150,28 @@ public class SetActivity extends AppCompatActivity {
         }
         check_select[s] = 1;
 
+        MyModel c1 = MyModel.getMyModelForGivenName("C1");
+        c1.modelSelected = 0;
+        c1.save();
+        MyModel c2 = MyModel.getMyModelForGivenName("C2");
+        c2.modelSelected = 0;
+        c2.save();
+        MyModel c3 = MyModel.getMyModelForGivenName("C3");
+        c3.modelSelected = 0;
+        c3.save();
+        MyModel c4 = MyModel.getMyModelForGivenName("C4");
+        c4.modelSelected = 0;
+        c4.save();
+        MyModel c5 = MyModel.getMyModelForGivenName("C5");
+        c5.modelSelected = 0;
+        c5.save();
+
+
         if (check_select[0] == 1) {
             select_c1.setVisibility(View.VISIBLE);
+            MyModel  sc1= MyModel.getMyModelForGivenName("C1");
+            sc1.modelSelected = 1;
+            sc1.save();
             if (g_Character_TX != null) {
                 setSelectedData("C1");
             }
@@ -158,6 +180,9 @@ public class SetActivity extends AppCompatActivity {
         }
         if (check_select[1] == 1) {
             select_c2.setVisibility(View.VISIBLE);
+            MyModel  sc2= MyModel.getMyModelForGivenName("C2");
+            sc2.modelSelected = 1;
+            sc2.save();
             if (g_Character_TX != null) {
                 setSelectedData("C2");
             }
@@ -165,6 +190,9 @@ public class SetActivity extends AppCompatActivity {
             select_c2.setVisibility(View.INVISIBLE);
         }
         if (check_select[2] == 1) {
+            MyModel  sc3= MyModel.getMyModelForGivenName("C3");
+            sc3.modelSelected = 1;
+            sc3.save();
             select_c3.setVisibility(View.VISIBLE);
             if (g_Character_TX != null) {
                 setSelectedData("C3");
@@ -174,6 +202,9 @@ public class SetActivity extends AppCompatActivity {
         }
         if (check_select[3] == 1) {
             select_c4.setVisibility(View.VISIBLE);
+            MyModel  sc4= MyModel.getMyModelForGivenName("C4");
+            sc4.modelSelected = 1;
+            sc4.save();
             if (g_Character_TX != null) {
                 setSelectedData("C4");
             }
@@ -182,11 +213,15 @@ public class SetActivity extends AppCompatActivity {
         }
         if (check_select[4] == 1) {
             select_c5.setVisibility(View.VISIBLE);
+            MyModel  sc5= MyModel.getMyModelForGivenName("C5");
+            sc5.modelSelected = 1;
+            sc5.save();
             if (g_Character_TX != null) {
                 setSelectedData("C5");
             }
         } else {
             select_c5.setVisibility(View.INVISIBLE);
+
         }
     }
 

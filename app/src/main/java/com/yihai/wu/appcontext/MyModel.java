@@ -95,6 +95,5 @@ public class MyModel extends Model {
         return getMany(Textures.class,"MyModel");
     }
 
-
 }
 
