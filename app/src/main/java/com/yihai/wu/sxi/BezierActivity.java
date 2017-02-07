@@ -131,7 +131,9 @@ public class BezierActivity extends AppCompatActivity {
     private int[] initJouleData;
 
     private Line jouleLine;
+    private Line backJouleLine;
     private Line jouleDashline;
+    private int jouleOrPower;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -175,14 +177,15 @@ public class BezierActivity extends AppCompatActivity {
         initJouleData = getLineData(texture.arr4);
         //通过查询数据库判断是焦耳还是功率
         MyModel myMode = texture.myModel;
-        int jouleOrPower = myMode.JouleOrPower; //0代表功率曲线，1代表焦耳曲线
+        //0代表功率曲线，1代表焦耳曲线
+        jouleOrPower = myMode.JouleOrPower;
         Log.d(TAG, "init: " + jouleOrPower);
         switch (jouleOrPower) {
             case 0:
                 generateInitialLineData();//生成功率曲线
                 break;
             case 1:
-                generateJouleChart();
+                generateJouleChart();  //生成焦耳曲线
                 break;
         }
 
@@ -393,14 +396,9 @@ public class BezierActivity extends AppCompatActivity {
         axisY_In_TemperChart.setValues(axisValuesY_in_temperChart);
         axisY_In_TemperChart.setHasLines(true);
 
-        //功率曲线切换成阴暗 w
-        backPowerLine = getLine_PowerChart_To_TemperChart(powerLine);
-        setLineStyle(backPowerLine, DARK_CURVE);
-
         //温度曲线由暗转明 c
         temperLine = getLine_PowerChart_To_TemperChart(temperLine_back);
         setLineStyle(temperLine, TEMPER_HIGHLIGHT_CURVE);
-
         //温度曲线的初始化数据存储
         List<PointValue> temperValues = temperLine.getValues();
         int[] arr = new int[21];
@@ -418,8 +416,22 @@ public class BezierActivity extends AppCompatActivity {
 
         //新chart线的集合
         List<Line> lineList = new ArrayList<>();
+        switch (jouleOrPower){
+            case 0:
+                //功率曲线切换成阴暗 w
+                backPowerLine = getLine_PowerChart_To_TemperChart(powerLine);
+                setLineStyle(backPowerLine, DARK_CURVE);
+                lineList.add(backPowerLine);
+                break;
+            case 1:
+                //焦耳曲线切换 j
+                backJouleLine = getLine_PowerChart_To_TemperChart(jouleLine);
+                setLineStyle(backJouleLine, DARK_CURVE);
+                lineList.add(backJouleLine);
+                break;
+        }
+
         lineList.add(temperDashLine);
-        lineList.add(backPowerLine);
         lineList.add(temperLine);
 
         //把曲线和 chart 通过 LineChartData 联系起来
@@ -693,10 +705,12 @@ public class BezierActivity extends AppCompatActivity {
                 case R.id.btn_switch:
                     if (touchInChart == TOUCH_FOR_POWER_CHART) {
                         generateInitialTemperChart();
-                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART) {
+                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART&&jouleOrPower==0) {
                         generateInitialLineData();
+                    }else if(touchInChart == TOUCH_FOR_TEMPER_CHART&&jouleOrPower==1){
+                        generateJouleChart();
                     }else if(touchInChart==TOUCH_FOR_JOULE_CHART){
-
+                        generateInitialTemperChart();
                     }
                     break;
                 case R.id.btn_wave:
