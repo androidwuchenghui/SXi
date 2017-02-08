@@ -24,7 +24,8 @@ import com.yihai.wu.util.DarkImageButton;
 
 import java.util.List;
 
-import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+
 
 /**
  * Created by ${Wu} on 2016/12/12.

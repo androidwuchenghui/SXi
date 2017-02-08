@@ -28,8 +28,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
 import static com.yihai.wu.sxi.R.id.rg_joule;
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 
 
 /**
@@ -136,7 +136,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     private String detail;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
-
+    private byte pack;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,7 +148,6 @@ public class SetDetailsActivity extends AppCompatActivity {
 
         Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
     }
 
     @Override
@@ -167,7 +166,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据为：  " + s);
+                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s);
                     Sys_YiHi_Protocol_RX_Porc(data);
                     break;
             }
@@ -192,9 +191,30 @@ public class SetDetailsActivity extends AppCompatActivity {
 
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {
-                getConnectedDevicePowerModel();
+                //                getConnectedDevicePowerModel();
                 //                AckUserDeviceSetting();
+
+                switch (detail){
+                    case "C1":
+                        pack = 0x00;
+                        break;
+                    case "C2":
+                        pack = 0x01;
+                        break;
+                    case "C3":
+                        pack = 0x02;
+                        break;
+                    case "C4":
+                        pack = 0x03;
+                        break;
+                    case "C5":
+                        pack = 0x04;
+                        break;
+                }
+                getSettingPackage_ReadData_Exe(pack);
             }
+
+            Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }
 
         @Override
@@ -492,8 +512,6 @@ public class SetDetailsActivity extends AppCompatActivity {
                             lineShowJoule.setVisibility(View.VISIBLE);
                             setUserDevicePowerOrJoule((byte) 0x02);
                             break;
-
-
                     }
 
                     break;
@@ -647,6 +665,29 @@ public class SetDetailsActivity extends AppCompatActivity {
             }
 
         }
+        switch (m_Command){
+            case 0x60://SettingPackage_AckReadData
+                if(m_Data[5]==0x01){
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 进行等待:   ");
+                    final int waitTime = ((m_Data[8] & 0xff) << 8) | (m_Data[9] & 0xff);
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间为："+waitTime);
+
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            try {
+                                Thread.sleep(waitTime);
+                                getSettingPackage_ReadData_GetResult();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.start();
+
+                }
+                break;
+        }
 
     }
 
@@ -675,16 +716,44 @@ public class SetDetailsActivity extends AppCompatActivity {
 
         m_Data[2] = 0x05;
         m_Data[4] = 0x07;
-        temp = (byte) (powerValue_x10>>8);
+        temp = (byte) (powerValue_x10 >> 8);
         m_Data[5] = temp;
 
-        temp = (byte) ((powerValue_x10<<8)>>8);
+        temp = (byte) ((powerValue_x10 << 8) >> 8);
         m_Data[6] = temp;
 
-        temp =  (MyUtils.int2OneByte(powerValue_x1));
+        temp = (MyUtils.int2OneByte(powerValue_x1));
         m_Data[7] = temp;
         m_length = 8;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
+
+
+    private void getSettingPackage_ReadData_Exe(byte packNumber) {
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x4;
+        m_Data[4] = 0x5F;
+        m_Data[5] = packNumber;
+        m_Data[6]=0x01;
+        m_length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
+    private void getSettingPackage_ReadData_GetResult() {
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x02;
+        m_Data[4] = 0x61;
+        m_length = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
 
 }

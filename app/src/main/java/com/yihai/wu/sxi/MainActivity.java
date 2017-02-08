@@ -32,7 +32,8 @@ import com.youth.banner.listener.OnBannerClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Integer[] images = {R.mipmap.a, R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};

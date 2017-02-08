@@ -7,15 +7,16 @@ import android.content.Context;
  * Created by Dacer on 10/8/13.
  */
 public class MyUtils {
+    private static String hexStr = "0123456789ABCDEF";
 
-    public static int dip2px(Context context, float dipValue){
+    public static int dip2px(Context context, float dipValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
-        return (int)(dipValue * scale + 0.5f);
+        return (int) (dipValue * scale + 0.5f);
     }
 
-    public static int px2dip(Context context, float pxValue){
+    public static int px2dip(Context context, float pxValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
-        return (int)(pxValue / scale + 0.5f);
+        return (int) (pxValue / scale + 0.5f);
     }
 
     public static int sp2px(Context context, float spValue) {
@@ -48,8 +49,6 @@ public class MyUtils {
 
     //byte[] 转换成16进制字符
     public static String BinaryToHexString(byte[] bytes) {
-
-        String hexStr = "0123456789ABCDEF";
         String result = "";
         String hex = "";
         for (int i = 0; i < bytes.length; i++) {
@@ -65,4 +64,5 @@ public class MyUtils {
     public static byte int2OneByte(int num) {
         return (byte) (num & 0x000000ff);
     }
+
 }

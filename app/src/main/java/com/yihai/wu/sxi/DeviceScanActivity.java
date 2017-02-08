@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.hexStringToString;
 
 /**
@@ -334,8 +335,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             }
         }
     };
-
-
 
     //修改密码的处理
     private void handleChangePassword(String str) {
@@ -1329,21 +1328,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
         }
     }
-    //byte[] 转换成16进制字符
-    public static String BinaryToHexString(byte[] bytes) {
-
-        String hexStr = "0123456789ABCDEF";
-        String result = "";
-        String hex = "";
-        for (int i = 0; i < bytes.length; i++) {
-            //字节高4位
-            hex = String.valueOf(hexStr.charAt((bytes[i] & 0xF0) >> 4));
-            //字节低4位
-            hex += String.valueOf(hexStr.charAt(bytes[i] & 0x0F));
-            result += hex + "";  //这里可以去掉空格，或者添加0x标识符。
-        }
-        return result;
-    }
 
     private byte Sys_BCD_To_HEX(byte m_BCD)
     {
@@ -1355,5 +1339,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         m_Return+=(byte)(m_Temp%10);
         return m_Return;
     }
+
+
 
 }
