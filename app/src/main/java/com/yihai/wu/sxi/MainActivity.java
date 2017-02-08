@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int REQUEST_CODE_TO_MAIN = 0X002;    //2
     private static final int AckUserDeviceSetting = 0X58;    //2
 
-    //蓝牙
+    //服务
     private BluetoothLeService mBluetoothLeService;
 
     //一些特征值
@@ -66,10 +66,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
-            if(mBluetoothLeService.getTheConnectedState()==0){
-                connectedState.setText("已连接设备");
-            }else if(mBluetoothLeService.getTheConnectedState()==2){
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState());
+            if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
+            } else if (mBluetoothLeService.getTheConnectedState() == 2) {
+                connectedState.setText("已连接设备");
             }
 
         }
@@ -123,14 +124,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d(TAG, "onRestart:再次打开MainActivity---");
-        if(mBluetoothLeService.getTheConnectedState()==2){
+        g_Character_TX = mBluetoothLeService.getG_Character_TX();
+        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        if (mBluetoothLeService.getTheConnectedState() == 2) {
             connectedState.setText("已连接设备");
-            AckUserDeviceSetting();
-        }else {
+            getUserDeviceSetting();
+        } else {
             connectedState.setText("未连接设备");
         }
     }
+
 
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
         @Override
@@ -141,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s);
+                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s + "  byte: " + data);
                     Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
@@ -237,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void AckUserDeviceSetting() {
+    private void getUserDeviceSetting() {
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -278,12 +281,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy: MainActivity");
         unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService.close();
         mBluetoothLeService = null;
+
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        if(connectedDevice!=null) {
+        if (connectedDevice != null) {
             connectedDevice.isConnected = false;
             connectedDevice.save();
         }
@@ -349,20 +354,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //Get command code.
         m_Command = m_Data[(m_Index + 4)];
-        Log.d(TAG, "onReceiveMainActivity: " + m_Command);
+
         switch (m_Command) {
             case AckUserDeviceSetting:   //查看系统设定的 C
+
                 String s = BinaryToHexString(m_Data);
                 String substring = s.substring(12);
 
                 int model = Integer.parseInt(substring);
-                Log.d(TAG, "处理数据:     " + s + "    " + substring + " m:  " + model);
                 String selectedModel = "C" + (model + 1);
+                Log.d(TAG, "receiveSetting:     " + s + "    " + substring + "   m:  " + model + "   " + selectedModel);
 
-
-                MyModel c1 = MyModel.getMyModelForGivenName(selectedModel);
-                c1.modelSelected = 1;
-                c1.save();
+                List<MyModel> allMyModel = MyModel.getAllMyModel();
+                for (MyModel myModel : allMyModel) {
+                    if (myModel.model.equals(selectedModel)) {
+                        myModel.modelSelected = 1;
+                    } else {
+                        myModel.modelSelected = 0;
+                    }
+                    myModel.save();
+                }
                 break;
         }
 

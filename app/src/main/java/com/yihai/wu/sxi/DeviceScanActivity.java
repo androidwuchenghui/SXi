@@ -618,8 +618,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         }*/
 
         //        Sys_SetMyDeviceName("BleDevice");
-
-
     }
 
     //下拉刷新

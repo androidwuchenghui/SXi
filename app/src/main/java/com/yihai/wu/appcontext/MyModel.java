@@ -94,6 +94,8 @@ public class MyModel extends Model {
     public List<Textures> getCurves(){
         return getMany(Textures.class,"MyModel");
     }
-
+    public static List<MyModel> getAllMyModel(){
+        return new Select().from(MyModel.class).execute();
+    }
 }
 

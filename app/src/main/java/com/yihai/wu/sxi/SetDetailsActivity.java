@@ -192,7 +192,6 @@ public class SetDetailsActivity extends AppCompatActivity {
 
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {
-
                 getConnectedDevicePowerModel();
                 //                AckUserDeviceSetting();
             }

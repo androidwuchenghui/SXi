@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 
+import java.util.List;
+
 import static com.yihai.wu.sxi.DeviceScanActivity.BinaryToHexString;
 
 /**
@@ -60,28 +62,14 @@ public class SetActivity extends AppCompatActivity {
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
 
         MyModel selectedModel = MyModel.getSelectedModel();
-        Log.d(TAG, "onCreate: init"+selectedModel);
+        Log.d(TAG, "onCreate: init" + selectedModel);
         if (selectedModel != null) {
             status.setText("已连接");
-            switch (selectedModel.model) {
-                case "C1":
-                    select_control(0);
-                    break;
-                case "C2":
-                    select_control(1);
-                    break;
-                case "C3":
-                    select_control(2);
-                    break;
-                case "C4":
-                    select_control(3);
-                    break;
-                case "C5":
-                    select_control(4);
-                    break;
-            }
-        }else {
-            select_control(0);
+
+            select_control (selectedModel.model) ;
+
+        } else {
+            select_control("C1");
         }
     }
 
@@ -141,87 +129,70 @@ public class SetActivity extends AppCompatActivity {
     }
 
 
-    private void select_control(int s) {
+    private void select_control(String modelC) {
         //        share_editor.putInt("select", s);
         //        share_editor.commit();
-
+        int s ;
         for (int i = 0; i < check_select.length; i++) {
             check_select[i] = 0;
         }
+        switch (modelC){
+            case "C1":
+                s=0;
+                break;
+            case "C2":
+                s=1;
+                break;
+            case "C3":
+                s=2;
+                break;
+            case "C4":
+                s=3;
+                break;
+            case "C5":
+                s=4;
+                break;
+            default:
+                s=0;
+                break;
+        }
         check_select[s] = 1;
 
-        MyModel c1 = MyModel.getMyModelForGivenName("C1");
-        c1.modelSelected = 0;
-        c1.save();
-        MyModel c2 = MyModel.getMyModelForGivenName("C2");
-        c2.modelSelected = 0;
-        c2.save();
-        MyModel c3 = MyModel.getMyModelForGivenName("C3");
-        c3.modelSelected = 0;
-        c3.save();
-        MyModel c4 = MyModel.getMyModelForGivenName("C4");
-        c4.modelSelected = 0;
-        c4.save();
-        MyModel c5 = MyModel.getMyModelForGivenName("C5");
-        c5.modelSelected = 0;
-        c5.save();
-
-
+        List<MyModel> allMyModel = MyModel.getAllMyModel();
+        for (MyModel myModel : allMyModel) {
+            if(myModel.model.equals(modelC)){
+                myModel.modelSelected=1;
+            }else {
+                myModel.modelSelected=0;
+            }
+            myModel.save();
+        }
         if (check_select[0] == 1) {
             select_c1.setVisibility(View.VISIBLE);
-            MyModel  sc1= MyModel.getMyModelForGivenName("C1");
-            sc1.modelSelected = 1;
-            sc1.save();
-            if (g_Character_TX != null) {
-                setSelectedData("C1");
-            }
         } else {
             select_c1.setVisibility(View.INVISIBLE);
         }
         if (check_select[1] == 1) {
             select_c2.setVisibility(View.VISIBLE);
-            MyModel  sc2= MyModel.getMyModelForGivenName("C2");
-            sc2.modelSelected = 1;
-            sc2.save();
-            if (g_Character_TX != null) {
-                setSelectedData("C2");
-            }
         } else {
             select_c2.setVisibility(View.INVISIBLE);
         }
         if (check_select[2] == 1) {
-            MyModel  sc3= MyModel.getMyModelForGivenName("C3");
-            sc3.modelSelected = 1;
-            sc3.save();
+
             select_c3.setVisibility(View.VISIBLE);
-            if (g_Character_TX != null) {
-                setSelectedData("C3");
-            }
         } else {
             select_c3.setVisibility(View.INVISIBLE);
         }
         if (check_select[3] == 1) {
             select_c4.setVisibility(View.VISIBLE);
-            MyModel  sc4= MyModel.getMyModelForGivenName("C4");
-            sc4.modelSelected = 1;
-            sc4.save();
-            if (g_Character_TX != null) {
-                setSelectedData("C4");
-            }
+
         } else {
             select_c4.setVisibility(View.INVISIBLE);
         }
         if (check_select[4] == 1) {
             select_c5.setVisibility(View.VISIBLE);
-            MyModel  sc5= MyModel.getMyModelForGivenName("C5");
-            sc5.modelSelected = 1;
-            sc5.save();
-            if (g_Character_TX != null) {
-                setSelectedData("C5");
-            }
         } else {
             select_c5.setVisibility(View.INVISIBLE);
-
         }
     }
 
@@ -292,47 +263,79 @@ public class SetActivity extends AppCompatActivity {
                     finish();
                     break;
                 case R.id.tv_c1:
-                    select_control(0);
+                    select_control("C1");
+                    if (g_Character_TX != null) {
+//                        setSelectedData("C1");
+                        setUserDeviceSettingModel((byte) 0x00);
+                    }
                     break;
                 case R.id.tv_c2:
-
-                    select_control(1);
+                    if (g_Character_TX != null) {
+//                        setSelectedData("C2");
+                        setUserDeviceSettingModel((byte) 0x01);
+                    }
+                    select_control("C2");
                     break;
                 case R.id.tv_c3:
-                    select_control(2);
+                    if (g_Character_TX != null) {
+//                        setSelectedData("C3");
+                        setUserDeviceSettingModel((byte) 0x02);
+                    }
+                    select_control("C3");
 
                     break;
                 case R.id.tv_c4:
-                    select_control(3);
-
+                    if (g_Character_TX != null) {
+//                        setSelectedData("C4");
+                        setUserDeviceSettingModel((byte) 0x03);
+                    }
+                    select_control("C4");
                     break;
                 case R.id.tv_c5:
-                    select_control(4);
-
+                    if (g_Character_TX != null) {
+//                        setSelectedData("C5");
+                        setUserDeviceSettingModel((byte) 0x04);
+                    }
+                    select_control("C5");
                     break;
                 case R.id.detail_c1:
-                    select_control(0);
+                    if (g_Character_TX != null) {
+                        setSelectedData("C1");
+                    }
+                    select_control("C1");
                     intent.putExtra("detail", "C1");
 
                     startActivity(intent);
                     break;
                 case R.id.detail_c2:
-                    select_control(1);
+                    if (g_Character_TX != null) {
+                        setSelectedData("C2");
+                    }
+                    select_control("C2");
                     intent.putExtra("detail", "C2");
                     startActivity(intent);
                     break;
                 case R.id.detail_c3:
-                    select_control(2);
+                    if (g_Character_TX != null) {
+                        setSelectedData("C3");
+                    }
+                    select_control("C3");
                     intent.putExtra("detail", "C3");
                     startActivity(intent);
                     break;
                 case R.id.detail_c4:
-                    select_control(3);
+                    if (g_Character_TX != null) {
+                        setSelectedData("C4");
+                    }
+                    select_control("C4");
                     intent.putExtra("detail", "C4");
                     startActivity(intent);
                     break;
                 case R.id.detail_c5:
-                    select_control(4);
+                    if (g_Character_TX != null) {
+                        setSelectedData("C5");
+                    }
+                    select_control("C5");
                     intent.putExtra("detail", "C5");
                     startActivity(intent);
                     break;
@@ -351,6 +354,7 @@ public class SetActivity extends AppCompatActivity {
     }
 
     public void setSelectedData(String str) {
+        Log.d(TAG, "setSelectedData: "+str);
         switch (str) {
             case "C1":
                 setUserDeviceSettingModel((byte) 0x00);
@@ -380,8 +384,6 @@ public class SetActivity extends AppCompatActivity {
             }
             myModel.save();
         }
-
-
     }
 
     public void setUserDeviceSettingModel(byte b) {
@@ -391,18 +393,15 @@ public class SetActivity extends AppCompatActivity {
         m_Data_DeviceSetting[0] = 0x55;
         m_Data_DeviceSetting[1] = (byte) 0xFF;
         m_Data_DeviceSetting[3] = 0x01; //Device ID
-        m_Data_DeviceSetting[2] = 0x11;
+        m_Data_DeviceSetting[2] = 0x04;
         m_Data_DeviceSetting[4] = 0x59;
         m_Data_DeviceSetting[5] = 0x11;
         m_Data_DeviceSetting[6] = b;
-
         m_Length = 7;
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
-
     }
 
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
-
         byte[] m_MyData = new byte[m_Length];
         for (int i = 0; i < m_Length; i++) {
             m_MyData[i] = m_Data[i];
@@ -419,20 +418,5 @@ public class SetActivity extends AppCompatActivity {
         g_Character_TX.setValue(m_MyData);
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
-
-    //    public void setUserDeviceSettingPowerModel() {
-    //
-    //        byte[] m_Data = new byte[32];
-    //        int m_Length = 0;
-    //        m_Data[0] = 0x55;
-    //        m_Data[1] = (byte) 0xFF;
-    //        m_Data[3] = 0x01; //Device ID
-    //        m_Data[2] = 0x03;
-    //        m_Data[4] = 0x57;
-    //        m_Data[5] = 0x0F;
-    //        m_Length = 6;
-    //        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
-    //
-    //    }
 
 }

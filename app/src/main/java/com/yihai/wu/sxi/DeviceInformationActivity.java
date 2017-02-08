@@ -15,7 +15,7 @@ import butterknife.OnClick;
  * Created by ${Wu} on 2016/12/6.
  */
 
-public class DeviceInformationActivity extends BaseActivity  {
+public class DeviceInformationActivity extends BaseActivity {
 
 
     @Bind(R.id.name_after)
@@ -29,6 +29,7 @@ public class DeviceInformationActivity extends BaseActivity  {
     @Bind(R.id.connect_state)
     TextView connectState;
     private static final String TAG = "DeviceInformationActivi";
+
     @Override
     protected int getContentId() {
         return R.layout.activity_deviceinformation;
@@ -43,7 +44,7 @@ public class DeviceInformationActivity extends BaseActivity  {
         if (state == 2) {
             connectState.setText("已连接");
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-           nameAfter.setText(connectedDevice.realName);
+            nameAfter.setText(connectedDevice.realName);
             softAfter.setText(connectedDevice.softVision);
             idAfter.setText(connectedDevice.deviceID);
         }

@@ -377,7 +377,7 @@ public class BluetoothLeService extends Service {
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection."+"   mBluetoothGatt.connect():"+mBluetoothGatt.connect());
             /*必须有过BluetoothDevice的connectGatt()调用,并获得BluetoothGatt的实例对象后,才能调用这个函数.*/
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
