@@ -92,7 +92,8 @@ public class MaterialActivity extends AppCompatActivity {
                 share_editor.putInt("material_select", 0);
                 share_editor.commit();
                 intent.putExtra(MATERIAL, nickel.getText().toString());
-                myModel.material = getResources().getString(R.string.material_nickel_wire);
+                myModel.coilSelect = 0;
+//                getResources().getString(R.string.material_nickel_wire);
                 myModel.save();
                 break;
             case R.id.line_t:
@@ -100,7 +101,7 @@ public class MaterialActivity extends AppCompatActivity {
                 share_editor.putInt("material_select", 1);
                 share_editor.commit();
                 intent.putExtra(MATERIAL, titanium.getText().toString());
-                myModel.material = getResources().getString(R.string.material_titanium_wire);
+                myModel.coilSelect = 1;
                 myModel.save();
                 break;
             case R.id.line_b:
@@ -108,7 +109,7 @@ public class MaterialActivity extends AppCompatActivity {
                 share_editor.putInt("material_select", 2);
                 share_editor.commit();
                 intent.putExtra(MATERIAL, stainlessSteel.getText().toString());
-                myModel.material = getResources().getString(R.string.material_stainless_steel_wire);
+                myModel.coilSelect = 2;
                 myModel.save();
                 break;
             case R.id.line_c:
@@ -116,7 +117,7 @@ public class MaterialActivity extends AppCompatActivity {
                 share_editor.putInt("material_select", 3);
                 share_editor.commit();
                 intent.putExtra(MATERIAL, alcohol.getText().toString());
-                myModel.material = getResources().getString(R.string.material_alcohol_control);
+                myModel.coilSelect = 3;
                 myModel.save();
                 break;
             case R.id.line_s:
@@ -124,7 +125,7 @@ public class MaterialActivity extends AppCompatActivity {
                 share_editor.putInt("material_select", 4);
                 share_editor.commit();
                 intent.putExtra(MATERIAL, TRC.getText().toString());
-                myModel.material = getResources().getString(R.string.material_TCR_manual);
+                myModel.coilSelect = 4;
                 myModel.save();
                 break;
             case R.id.btn_back:

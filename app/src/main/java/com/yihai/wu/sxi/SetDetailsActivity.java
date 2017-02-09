@@ -30,6 +30,7 @@ import butterknife.OnClick;
 
 import static com.yihai.wu.sxi.R.id.rg_joule;
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.byteMerger;
 
 
 /**
@@ -137,6 +138,8 @@ public class SetDetailsActivity extends AppCompatActivity {
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
     private byte pack;
+    private String getPackageResult = null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +159,9 @@ public class SetDetailsActivity extends AppCompatActivity {
 
     }
 
+    private String first = "";
+    private byte[] firstByteArray;
+    private int receiveCount = 0;
     private final BroadcastReceiver setDetailsActivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -166,7 +172,25 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s);
+                    Log.d(TAG, "settingpackege: " + s);
+                    if (getPackageResult != null) {
+                        if (receiveCount == 1) {
+                            byte[] mergerBytes = byteMerger(firstByteArray, data);
+                            String result = first + s;
+                            receiveCount = 0;
+                            Log.d(TAG, "mergerBytes: " + result);
+                            Log.d(TAG, "mergerBytes: 合并：" + BinaryToHexString(mergerBytes));
+                            Sys_YiHi_Protocol_RX_Porc(mergerBytes);
+                        } else {
+                            first += s;
+                            Log.d(TAG, "mergerBytes: " + first);
+                            firstByteArray = new byte[data.length];
+                            firstByteArray = data;
+                        }
+                        receiveCount++;
+                    }
+                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s + "     ");
+
                     Sys_YiHi_Protocol_RX_Porc(data);
                     break;
             }
@@ -194,7 +218,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                 //                getConnectedDevicePowerModel();
                 //                AckUserDeviceSetting();
 
-                switch (detail){
+                switch (detail) {
                     case "C1":
                         pack = 0x00;
                         break;
@@ -235,7 +259,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         detail = intent.getStringExtra("detail");
         modelName.setText(detail);
         MyModel myModel = MyModel.getMyModelForGivenName(detail);
-        int status = myModel.status;
+        int status = myModel.bypass;
         btSwitch.setOpened(status == 0 ? false : true);
 
         int display = myModel.display;
@@ -243,8 +267,26 @@ public class SetDetailsActivity extends AppCompatActivity {
         RadioButton display_rbt = (RadioButton) rgDisplayStatus.getChildAt(display);
         display_rbt.setChecked(true);
         //材料
-        String material = myModel.material;
-        selectedMaterial.setText(material);
+        int material = myModel.coilSelect;
+        String coil = "";
+        switch (material) {
+            case 0:
+                coil = "镍丝";
+                break;
+            case 1:
+                coil = "钛丝";
+                break;
+            case 2:
+                coil = "不锈钢";
+                break;
+            case 3:
+                coil = "百醇控制";
+                break;
+            case 4:
+                coil = "手动TCR";
+                break;
+        }
+        selectedMaterial.setText(coil);
         //口感
         int textured = myModel.texture;
         setShowText(textured);
@@ -317,7 +359,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     }
 
     private void initListener() {
-
+        //
         rgDisplayStatus.setOnCheckedChangeListener(new OnCheckedChangeListen());
         rgUnitTemperature.setOnCheckedChangeListener(new OnCheckedChangeListen());
         rgJoule.setOnCheckedChangeListener(new OnCheckedChangeListen());
@@ -347,9 +389,14 @@ public class SetDetailsActivity extends AppCompatActivity {
             case R.id.bt_switch:
                 MyModel myModel_s = MyModel.getMyModelForGivenName(detail);
                 if (btSwitch.isOpened()) {
-                    myModel_s.status = 1;
+                    myModel_s.bypass = 1;
+                    Log.d(TAG, "onClick: 开");
+                    if(g_Character_TX!=null){
+
+                    }
                 } else {
-                    myModel_s.status = 0;
+                    myModel_s.bypass = 0;
+                    Log.d(TAG, "onClick: 关");
                 }
                 myModel_s.save();
                 break;
@@ -665,14 +712,14 @@ public class SetDetailsActivity extends AppCompatActivity {
             }
 
         }
-        switch (m_Command){
+        switch (m_Command) {
             case 0x60://SettingPackage_AckReadData
-                if(m_Data[5]==0x01){
+                if (m_Data[5] == 0x01) {
                     Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 进行等待:   ");
                     final int waitTime = ((m_Data[8] & 0xff) << 8) | (m_Data[9] & 0xff);
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间为："+waitTime);
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间为：" + waitTime);
 
-                    new Thread(){
+                    new Thread() {
                         @Override
                         public void run() {
                             super.run();
@@ -685,6 +732,38 @@ public class SetDetailsActivity extends AppCompatActivity {
                         }
                     }.start();
 
+                } else if (m_Data[5] == 0x04) {
+                    //得到数据包  - SettingPackage
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 处理数据包:  " + BinaryToHexString(m_Data) + "  int:  " + (int) m_Data[8]);
+                    MyModel configPackage = MyModel.getMyModelForGivenName(detail);
+                    configPackage.bypass = (int) m_Data[8];
+                    configPackage.JouleOrPower = (int) m_Data[9] - 1;
+                    configPackage.operation = (int) m_Data[10];
+                    configPackage.display = (int) m_Data[12];
+                    configPackage.coilSelect = (int) m_Data[13];
+                    configPackage.temperatureUnit = (int) m_Data[14];
+                    //   功率值
+                    int powerValue = (m_Data[15] & 0xff) << 24  | (m_Data[16] & 0xff) << 16  | (m_Data[17]&0xff)<<8  | m_Data[18]&0xff;
+                    configPackage.power = powerValue;
+                    //   焦耳值
+                    int jouleValue = (m_Data[19] & 0xff) << 24  | (m_Data[20] & 0xff) << 16  | (m_Data[21]&0xff)<<8  | m_Data[22]&0xff;
+                    configPackage.joule = jouleValue;
+                    //   温度值
+                    int tempValue = (m_Data[23] & 0xff) << 24  | (m_Data[24] & 0xff) << 16  | (m_Data[25]&0xff)<<8  | m_Data[26]&0xff;
+                    configPackage.temperature = tempValue;
+                    //   温度补偿值
+                    int compensateTempValue = (m_Data[27] & 0xff) << 24  | (m_Data[28] & 0xff) << 16  | (m_Data[29]&0xff)<<8  | m_Data[30]&0xff;
+                    configPackage.temperature_c = compensateTempValue;
+                    //   TCR_Value值
+                    int TCR_Value = (m_Data[31] & 0xff) << 24  | (m_Data[32] & 0xff) << 16  | (m_Data[33]&0xff)<<8  | m_Data[34]&0xff;
+                    configPackage.tcr = TCR_Value;
+                    //口感
+                    configPackage.texture = (int) m_Data[35] - 1;
+                    //记忆模式
+                    configPackage.memory = (int) m_Data[36];
+                    configPackage.save();
+                    initUI();
+                    Log.d(TAG, "powerValue: " + powerValue +"  jouleValue: " + jouleValue+"  tempValue:  " +tempValue+"  compensateTempValue:  " +compensateTempValue+"  TCR_Value:  " +TCR_Value);
                 }
                 break;
         }
@@ -738,12 +817,13 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Data[2] = 0x4;
         m_Data[4] = 0x5F;
         m_Data[5] = packNumber;
-        m_Data[6]=0x01;
+        m_Data[6] = 0x01;
         m_length = 7;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
 
     private void getSettingPackage_ReadData_GetResult() {
+        getPackageResult = "getResult";
         byte[] m_Data = new byte[32];
         int m_length = 0;
         m_Data[0] = 0x55;

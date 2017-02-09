@@ -21,31 +21,39 @@ public class MyModel extends Model {
     public String model;
 
     @Column(name = "StraightModel")
-    public int status;
+    public int bypass;
     @Column(name = "DisplayStatus")
     public int display;
     //材料选择
     @Column(name = "Material")
-    public String material;
+    public int coilSelect;
     //口感选择
     @Column(name = "Texture")
     public int texture;
     @Column(name = "Memory")
     public int memory;
+    //温度单位
     @Column(name = "TemperatureUnit")
     public int temperatureUnit;
+    //功率焦耳切换（1-功率，2-焦耳）
     @Column(name = "JouleOrPower")
     public int JouleOrPower;
-    @Column(name = "Operation")
+    //操作模式
+    @Column(name ="Operation")
     public int operation;
+    //温度调节
     @Column(name = "Temperature")
     public int temperature;
+    //补偿温度
     @Column(name = "temperature_c")
     public int temperature_c;
+    //TCR设置
     @Column(name = "TCR")
     public int tcr;
+    //功率调节
     @Column(name = "power")
     public int power;
+    //焦耳调节
     @Column(name ="joule")
     public int joule;
 
@@ -61,11 +69,11 @@ public class MyModel extends Model {
 
         myModel.model = name;
         //直通模式是否打开（0-false,1-true）
-        myModel.status = 0;
+        myModel.bypass = 0;
         //显示状态（0-left,1-right,2-auto）
         myModel.display = 0;
         //材质选择
-        myModel.material = "镍丝";
+        myModel.coilSelect = 0;
         //口感选择
         myModel.texture =2;
         //记忆模式选择
