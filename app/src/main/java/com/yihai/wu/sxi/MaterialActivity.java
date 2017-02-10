@@ -1,10 +1,14 @@
 package com.yihai.wu.sxi;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,17 +61,17 @@ public class MaterialActivity extends AppCompatActivity {
     LinearLayout lineS;
     @Bind(R.id.btn_back)
     DarkImageButton btnBack;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor share_editor;
     private int[] check_select = {0, 0, 0, 0, 0};
     private String title;
-
+    private static final String TAG = "MaterialActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_material);
         ButterKnife.bind(this);
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         initView();
 
     }
@@ -75,12 +79,33 @@ public class MaterialActivity extends AppCompatActivity {
     private void initView() {
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
-        sharedPreferences = getSharedPreferences("YiHi_material_UI", MODE_PRIVATE);
-        share_editor = sharedPreferences.edit();
-        int select = sharedPreferences.getInt("material_select", 0);
+
+        MyModel model = MyModel.getMyModelForGivenName(title);
+        int select = model.coilSelect;
         select_control(select);
     }
+    private BluetoothLeService mBluetoothLeService;
+    private BluetoothGattCharacteristic g_Character_TX;
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("service", "Unable to initialize Bluetooth");
+                finish();
+            }
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
+
+            Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
+        }
+    };
 
     @OnClick({R.id.line_n, R.id.line_t, R.id.line_b, R.id.line_c, R.id.line_s,R.id.btn_back})
     public void onClick(View view) {
@@ -89,42 +114,47 @@ public class MaterialActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.line_n:
                 select_control(0);
-                share_editor.putInt("material_select", 0);
-                share_editor.commit();
                 intent.putExtra(MATERIAL, nickel.getText().toString());
                 myModel.coilSelect = 0;
-//                getResources().getString(R.string.material_nickel_wire);
+                if(g_Character_TX!=null){
+                    setUserDeviceSetting((byte)0x02,(byte)0x00);
+                }
                 myModel.save();
                 break;
             case R.id.line_t:
                 select_control(1);
-                share_editor.putInt("material_select", 1);
-                share_editor.commit();
                 intent.putExtra(MATERIAL, titanium.getText().toString());
+                if(g_Character_TX!=null){
+                    setUserDeviceSetting((byte)0x02,(byte)0x01);
+                }
                 myModel.coilSelect = 1;
                 myModel.save();
                 break;
             case R.id.line_b:
                 select_control(2);
-                share_editor.putInt("material_select", 2);
-                share_editor.commit();
+
                 intent.putExtra(MATERIAL, stainlessSteel.getText().toString());
+                if(g_Character_TX!=null){
+                    setUserDeviceSetting((byte)0x02,(byte)0x02);
+                }
                 myModel.coilSelect = 2;
                 myModel.save();
                 break;
             case R.id.line_c:
                 select_control(3);
-                share_editor.putInt("material_select", 3);
-                share_editor.commit();
                 intent.putExtra(MATERIAL, alcohol.getText().toString());
                 myModel.coilSelect = 3;
+                if(g_Character_TX!=null){
+                    setUserDeviceSetting((byte)0x02,(byte)0x03);
+                }
                 myModel.save();
                 break;
             case R.id.line_s:
                 select_control(4);
-                share_editor.putInt("material_select", 4);
-                share_editor.commit();
                 intent.putExtra(MATERIAL, TRC.getText().toString());
+                if(g_Character_TX!=null){
+                    setUserDeviceSetting((byte)0x02,(byte)0x04);
+                }
                 myModel.coilSelect = 4;
                 myModel.save();
                 break;
@@ -170,5 +200,46 @@ public class MaterialActivity extends AppCompatActivity {
         } else {
             check5.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public void setUserDeviceSetting(byte nn,byte pp) {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x04;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = nn;
+        m_Data_DeviceSetting[6] = pp;
+
+        m_Length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
+
+        byte[] m_MyData = new byte[m_Length];
+        for (int i = 0; i < m_Length; i++) {
+            m_MyData[i] = m_Data[i];
+        }
+
+        if (g_Character_TX == null) {
+            Log.e("SetDetailsActivity", "character TX is null");
+            return;
+        }
+
+        if (m_Length <= 0) {
+            return;
+        }
+        g_Character_TX.setValue(m_MyData);
+        mBluetoothLeService.writeCharacteristic(g_Character_TX);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
     }
 }

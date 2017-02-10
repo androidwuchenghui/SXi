@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initButton();
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
+
     }
 
     @Override
@@ -166,10 +166,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
+        registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+
     }
 
 
@@ -283,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: MainActivity");
-        unregisterReceiver(mainActivityReceiver);
+//        unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService.close();
         mBluetoothLeService = null;
@@ -377,8 +379,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
         }
-
-
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(mainActivityReceiver);
+    }
 }

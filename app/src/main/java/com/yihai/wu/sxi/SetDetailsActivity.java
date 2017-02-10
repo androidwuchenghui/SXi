@@ -138,8 +138,9 @@ public class SetDetailsActivity extends AppCompatActivity {
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
     private byte pack;
-    private String getPackageResult = null;
-
+    private boolean mergerData = false;
+    private int jouleOrPower;
+    private boolean mergerDataOver = false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,22 +173,30 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "settingpackege: " + s);
-                    if (getPackageResult != null) {
+                    Log.d(TAG, "receiveInfo: " + s);
+                    if (mergerData ) {
                         if (receiveCount == 1) {
+                            mergerDataOver = true;
                             byte[] mergerBytes = byteMerger(firstByteArray, data);
                             String result = first + s;
                             receiveCount = 0;
-                            Log.d(TAG, "mergerBytes: " + result);
-                            Log.d(TAG, "mergerBytes: 合并：" + BinaryToHexString(mergerBytes));
+                            Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
+                            mergerData = false;
+
+                            receiveCount=0;
+                            first = "";
                             Sys_YiHi_Protocol_RX_Porc(mergerBytes);
+
                         } else {
+                            mergerDataOver = false;
                             first += s;
-                            Log.d(TAG, "mergerBytes: " + first);
+                            Log.d(TAG, "mergerBytes: 一段：" + first);
                             firstByteArray = new byte[data.length];
                             firstByteArray = data;
+
+                            receiveCount++;
                         }
-                        receiveCount++;
+
                     }
                     Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s + "     ");
 
@@ -236,6 +245,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                         break;
                 }
                 getSettingPackage_ReadData_Exe(pack);
+
             }
 
             Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
@@ -296,11 +306,12 @@ public class SetDetailsActivity extends AppCompatActivity {
         rb_M.setChecked(true);
         //温度单位选择
         int temperatureUnit = myModel.temperatureUnit;
-        rgUnitTemperature.getChildAt(temperatureUnit).performClick();
+       RadioButton rb_TempUnit= (RadioButton) rgUnitTemperature.getChildAt(temperatureUnit);
+        rb_TempUnit.setChecked(true);
         //功率焦耳切换
-        int JouleOrPower = myModel.JouleOrPower;
-        rgJoule.getChildAt(JouleOrPower).performClick();
-
+        jouleOrPower = myModel.JouleOrPower;
+        RadioButton rb_jouleOrPower = (RadioButton) rgJoule.getChildAt(jouleOrPower);
+        rb_jouleOrPower.setChecked(true);
         //操作模式
         int operation = myModel.operation;
         RadioButton rb_operation = (RadioButton) rgOperation.getChildAt(operation);
@@ -390,13 +401,14 @@ public class SetDetailsActivity extends AppCompatActivity {
                 MyModel myModel_s = MyModel.getMyModelForGivenName(detail);
                 if (btSwitch.isOpened()) {
                     myModel_s.bypass = 1;
-                    Log.d(TAG, "onClick: 开");
-                    if(g_Character_TX!=null){
-
+                    if (g_Character_TX != null) {
+                        setUserDeviceSetting((byte) 0x0C, (byte) 0x01);
+                        //                        setBypass((byte) 0x01);
                     }
                 } else {
                     myModel_s.bypass = 0;
-                    Log.d(TAG, "onClick: 关");
+                    //                    setBypass((byte) 0x00);
+                    setUserDeviceSetting((byte) 0x0C, (byte) 0x00);
                 }
                 myModel_s.save();
                 break;
@@ -432,6 +444,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case R.id.seekBar_adjust_temperature:
                     if (isCentigrade) {
                         showAdjustTemperature.setText(i + 100 + "");
+
                     } else {
                         showAdjustTemperature.setText((i + 100) * 9 / 5 + 32 + "");
                     }
@@ -471,29 +484,50 @@ public class SetDetailsActivity extends AppCompatActivity {
             switch (seekBar.getId()) {
                 case R.id.seekBar_adjust_temperature:
                     MyModel myModel = MyModel.getMyModelForGivenName(detail);
-                    myModel.temperature = seekBar.getProgress() + 100;
+                    int num = seekBar.getProgress() + 100;
+                    if (g_Character_TX != null) {
+                        setUserDeviceSetting((byte) 0x06, num);
+                    }
+                    myModel.temperature = num;
                     myModel.save();
                     break;
                 case R.id.seekBar_compensation_temperature:
                     MyModel myModel1 = MyModel.getMyModelForGivenName(detail);
-                    myModel1.temperature_c = seekBar.getProgress();
+                    int compensation_temperature_num = seekBar.getProgress();
+                    if (g_Character_TX != null) {
+                        setUserDeviceSetting((byte) 0x07, compensation_temperature_num);
+                    }
+                    myModel1.temperature_c = compensation_temperature_num;
                     myModel1.save();
                     break;
                 case R.id.seekBar_set_TCR:
                     MyModel myModel2 = MyModel.getMyModelForGivenName(detail);
-                    myModel2.tcr = seekBar.getProgress() + 50;
+                    int TCR_num = seekBar.getProgress() + 50;
+                    myModel2.tcr = TCR_num;
+                    if (g_Character_TX != null) {
+                        Log.d(TAG, "onStopTrackingTouch: " + TCR_num);
+                        setUserDeviceSetting((byte) 0x08, TCR_num);
+                    }
                     myModel2.save();
                     break;
                 case R.id.seekBar_set_power:
-                    int sendData = seekBar.getProgress() + 50;
                     MyModel myModel3 = MyModel.getMyModelForGivenName(detail);
-                    myModel3.power = sendData;//需要发送的数据
+                    int power_num = seekBar.getProgress() + 50;
+                    myModel3.power = power_num;//需要发送的数据
                     myModel3.save();
-                    setPowerValue(sendData / 10, sendData % 10);
+                    if (g_Character_TX != null) {
+                        setPowerValueIn_Watts_Joule((byte) 0x0E, (byte) 0x01, power_num);
+                    }
+                    //                    setPowerValue(power_num / 10, power_num % 10);
 
                 case R.id.seekBar_set_joule:
                     MyModel myModel4 = MyModel.getMyModelForGivenName(detail);
-                    myModel4.joule = seekBar.getProgress() + 100;
+
+                    int joule_num = seekBar.getProgress() + 100;
+                    if (g_Character_TX != null) {
+                        setPowerValueIn_Watts_Joule((byte) 0x0E, (byte) 0x02, joule_num);
+                    }
+                    myModel4.joule = joule_num;
                     myModel4.save();
             }
 
@@ -513,6 +547,9 @@ public class SetDetailsActivity extends AppCompatActivity {
                             isCentigrade = true;
                             myModel_C.temperatureUnit = 0;
 
+                            if (g_Character_TX != null) {
+                                setUserDeviceSetting((byte) 0x03, (byte) 0x00);
+                            }
                             //温度调节的seekBar
                             unitC.setText(getResources().getString(R.string.temperature_C));
                             miniSkAt.setText("" + 100);
@@ -528,6 +565,9 @@ public class SetDetailsActivity extends AppCompatActivity {
                         case R.id.temp_unit_f:
                             isCentigrade = false;
                             myModel_C.temperatureUnit = 1;
+                            if (g_Character_TX != null) {
+                                setUserDeviceSetting((byte) 0x03, (byte) 0x01);
+                            }
                             //温度调节的seekBar
                             unitC.setText(getResources().getString(R.string.temperature_F));
                             miniSkAt.setText(100 * 9 / 5 + 32 + "");
@@ -551,7 +591,6 @@ public class SetDetailsActivity extends AppCompatActivity {
                             lineShowPower.setVisibility(View.VISIBLE);
                             lineShowJoule.setVisibility(View.GONE);
                             setUserDevicePowerOrJoule((byte) 0x01);
-
                             break;
                         case R.id.rb_joule:
                             myModel_C.JouleOrPower = 1;
@@ -565,30 +604,46 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case R.id.display_status:
                     if (i == R.id.rb_dis_left) {
                         myModel_C.display = 0;
+                        if (g_Character_TX != null) {
+                            setUserDeviceSetting((byte) 0x01, (byte) 0x00);
+                        }
                     } else if (i == R.id.rb_dis_right) {
                         myModel_C.display = 1;
+                        if (g_Character_TX != null) {
+                            setUserDeviceSetting((byte) 0x01, (byte) 0x01);
+                        }
                     } else if (i == R.id.rb_dis_auto) {
                         myModel_C.display = 2;
+                        if (g_Character_TX != null) {
+                            setUserDeviceSetting((byte) 0x01, (byte) 0x02);
+                        }
                     }
                     break;
                 case R.id.rg_memories:
                     if (i == R.id.rb_M1) {
                         myModel_C.memory = 0;
+                        setUserDeviceSetting((byte) 0x13, (byte) 0x00);
                     } else if (i == R.id.rb_M2) {
                         myModel_C.memory = 1;
+                        setUserDeviceSetting((byte) 0x13, (byte) 0x01);
                     } else if (i == R.id.rb_M3) {
                         myModel_C.memory = 2;
+                        setUserDeviceSetting((byte) 0x13, (byte) 0x02);
                     } else if (i == R.id.rb_M4) {
                         myModel_C.memory = 3;
-                    } else if (i == R.id.rb_M4) {
+                        setUserDeviceSetting((byte) 0x13, (byte) 0x03);
+                    } else if (i == R.id.rb_M5) {
                         myModel_C.memory = 4;
+                        setUserDeviceSetting((byte) 0x13, (byte) 0x04);
                     }
                     break;
-                case R.id.rg_operation:
+                case R.id.rg_operation:     //操作模式设置
                     if (i == R.id.rb_primary) {
-                        myModel_C.operation = 0;
-                    } else {
                         myModel_C.operation = 1;
+                        setUserDeviceSetting((byte) 0x10, (byte) 0x01);
+                    } else if (i == R.id.rb_senior) {
+                        myModel_C.operation = 1;
+                        setUserDeviceSetting((byte) 0x10, (byte) 0x01);
                     }
                     break;
 
@@ -715,9 +770,9 @@ public class SetDetailsActivity extends AppCompatActivity {
         switch (m_Command) {
             case 0x60://SettingPackage_AckReadData
                 if (m_Data[5] == 0x01) {
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 进行等待:   ");
+
                     final int waitTime = ((m_Data[8] & 0xff) << 8) | (m_Data[9] & 0xff);
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间为：" + waitTime);
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间：" +BinaryToHexString(m_Data) +"   "+ waitTime);
 
                     new Thread() {
                         @Override
@@ -733,29 +788,30 @@ public class SetDetailsActivity extends AppCompatActivity {
                     }.start();
 
                 } else if (m_Data[5] == 0x04) {
-                    //得到数据包  - SettingPackage
+                    //得到数据包  - SettingPackage        ---此处为合并的数据包
                     Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 处理数据包:  " + BinaryToHexString(m_Data) + "  int:  " + (int) m_Data[8]);
                     MyModel configPackage = MyModel.getMyModelForGivenName(detail);
                     configPackage.bypass = (int) m_Data[8];
                     configPackage.JouleOrPower = (int) m_Data[9] - 1;
+
                     configPackage.operation = (int) m_Data[10];
                     configPackage.display = (int) m_Data[12];
                     configPackage.coilSelect = (int) m_Data[13];
                     configPackage.temperatureUnit = (int) m_Data[14];
                     //   功率值
-                    int powerValue = (m_Data[15] & 0xff) << 24  | (m_Data[16] & 0xff) << 16  | (m_Data[17]&0xff)<<8  | m_Data[18]&0xff;
+                    int powerValue = (m_Data[15] & 0xff) << 24 | (m_Data[16] & 0xff) << 16 | (m_Data[17] & 0xff) << 8 | m_Data[18] & 0xff;
                     configPackage.power = powerValue;
                     //   焦耳值
-                    int jouleValue = (m_Data[19] & 0xff) << 24  | (m_Data[20] & 0xff) << 16  | (m_Data[21]&0xff)<<8  | m_Data[22]&0xff;
+                    int jouleValue = (m_Data[19] & 0xff) << 24 | (m_Data[20] & 0xff) << 16 | (m_Data[21] & 0xff) << 8 | m_Data[22] & 0xff;
                     configPackage.joule = jouleValue;
                     //   温度值
-                    int tempValue = (m_Data[23] & 0xff) << 24  | (m_Data[24] & 0xff) << 16  | (m_Data[25]&0xff)<<8  | m_Data[26]&0xff;
+                    int tempValue = (m_Data[23] & 0xff) << 24 | (m_Data[24] & 0xff) << 16 | (m_Data[25] & 0xff) << 8 | m_Data[26] & 0xff;
                     configPackage.temperature = tempValue;
                     //   温度补偿值
-                    int compensateTempValue = (m_Data[27] & 0xff) << 24  | (m_Data[28] & 0xff) << 16  | (m_Data[29]&0xff)<<8  | m_Data[30]&0xff;
+                    int compensateTempValue = (m_Data[27] & 0xff) << 24 | (m_Data[28] & 0xff) << 16 | (m_Data[29] & 0xff) << 8 | m_Data[30] & 0xff;
                     configPackage.temperature_c = compensateTempValue;
                     //   TCR_Value值
-                    int TCR_Value = (m_Data[31] & 0xff) << 24  | (m_Data[32] & 0xff) << 16  | (m_Data[33]&0xff)<<8  | m_Data[34]&0xff;
+                    int TCR_Value = (m_Data[31] & 0xff) << 24 | (m_Data[32] & 0xff) << 16 | (m_Data[33] & 0xff) << 8 | m_Data[34] & 0xff;
                     configPackage.tcr = TCR_Value;
                     //口感
                     configPackage.texture = (int) m_Data[35] - 1;
@@ -763,7 +819,28 @@ public class SetDetailsActivity extends AppCompatActivity {
                     configPackage.memory = (int) m_Data[36];
                     configPackage.save();
                     initUI();
-                    Log.d(TAG, "powerValue: " + powerValue +"  jouleValue: " + jouleValue+"  tempValue:  " +tempValue+"  compensateTempValue:  " +compensateTempValue+"  TCR_Value:  " +TCR_Value);
+                    Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + TCR_Value);
+
+                    //获得温度调节范围
+                    getUserDeviceSetting((byte)0x09);
+                }
+                break;
+            case 0x58:
+
+                if (m_Data[5] == 0x13 && jouleOrPower == 0) {
+                    int setPowerNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+                    seekBarSetPower.setProgress(setPowerNum - 50);
+                } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
+                    int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+                    seekBarSetJoule.setProgress(setJouleNum - 100);
+                }else if(m_Data[5]==0x09&&mergerDataOver==true){
+                    mergerDataOver=false;
+                    Log.d(TAG, "temperInfo: 温度范围合并后： "+m_Data.length);
+                    int tempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    int tempMin_C = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    int tempMax_F = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    int tempMin_F = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "temperInfo   "+tempMax_C+"  "+tempMin_C+"  "+tempMax_F+"  "+tempMin_F);
                 }
                 break;
         }
@@ -807,7 +884,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
 
-
+    //获得数据包
     private void getSettingPackage_ReadData_Exe(byte packNumber) {
         byte[] m_Data = new byte[32];
         int m_length = 0;
@@ -823,7 +900,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     }
 
     private void getSettingPackage_ReadData_GetResult() {
-        getPackageResult = "getResult";
+        mergerData = true;
         byte[] m_Data = new byte[32];
         int m_length = 0;
         m_Data[0] = 0x55;
@@ -835,5 +912,80 @@ public class SetDetailsActivity extends AppCompatActivity {
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
 
+    public void setUserDeviceSetting(byte nn, byte pp) {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x04;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = nn;
+        m_Data_DeviceSetting[6] = pp;
 
+        m_Length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    //seekBar的调节，发送给设备
+    public void setUserDeviceSetting(byte nn, int num) {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x07;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = nn;
+        byte p1 = (byte) (num >> 24 & 0xff);
+        byte p2 = (byte) (num >> 16 & 0xff);
+        byte p3 = (byte) (num >> 8 & 0xff);
+        byte p4 = (byte) (num & 0xff);
+        m_Data_DeviceSetting[6] = p1;
+        m_Data_DeviceSetting[7] = p2;
+        m_Data_DeviceSetting[8] = p3;
+        m_Data_DeviceSetting[9] = p4;
+
+        m_Length = 10;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    //设置功率或者焦耳模式下的功率值
+    public void setPowerValueIn_Watts_Joule(byte nn, byte model, int num) {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x08;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = nn;
+        m_Data_DeviceSetting[6] = model;
+        byte p1 = (byte) (num >> 24 & 0xff);
+        byte p2 = (byte) (num >> 16 & 0xff);
+        byte p3 = (byte) (num >> 8 & 0xff);
+        byte p4 = (byte) (num & 0xff);
+        m_Data_DeviceSetting[7] = p1;
+        m_Data_DeviceSetting[8] = p2;
+        m_Data_DeviceSetting[9] = p3;
+        m_Data_DeviceSetting[10] = p4;
+        m_Length = 11;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+    private byte getSetting;
+    //获取数据
+    public void getUserDeviceSetting(byte nn) {
+        getSetting = nn;
+        mergerData = true;
+        byte[] m_Data = new byte[32];
+        int m_length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[3] = 0x01; //Device ID
+        m_Data[2] = 0x03;
+        m_Data[4] = 0x57;
+        m_Data[5] = nn;
+        m_length = 6;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
 }

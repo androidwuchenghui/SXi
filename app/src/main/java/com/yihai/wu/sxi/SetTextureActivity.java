@@ -1,9 +1,17 @@
 package com.yihai.wu.sxi;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -15,6 +23,8 @@ import com.yihai.wu.util.DarkImageButton;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 
 /**
  * Created by ${Wu} on 2016/12/19.
@@ -104,12 +114,33 @@ public class SetTextureActivity extends AppCompatActivity {
     private MyModel myModel;
     private String model;
     private Intent curveIntent;
+    private static final String TAG = "SetTextureActivity";
+
+    private final BroadcastReceiver setDetailsActivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action) {
+                case BluetoothLeService.ACTION_DATA_RX:
+                    Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
+                    byte[] data = bundle.getByteArray("byteValues");
+                    String s = BinaryToHexString(data);
+                    Log.d(TAG, "口感选择收到数据: " + s);
+
+
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_texture);
         ButterKnife.bind(this);
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
         initUI();
     }
 
@@ -120,9 +151,33 @@ public class SetTextureActivity extends AppCompatActivity {
         myModel = MyModel.getMyModelForGivenName(model);
         int texture = myModel.texture;
         select_control(texture);
-        curveIntent = new Intent(SetTextureActivity.this,BezierActivity.class);
-        curveIntent.putExtra("modelName",model);
+        curveIntent = new Intent(SetTextureActivity.this, BezierActivity.class);
+        curveIntent.putExtra("modelName", model);
     }
+
+    private BluetoothLeService mBluetoothLeService;
+    private BluetoothGattCharacteristic g_Character_TX;
+    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("service", "Unable to initialize Bluetooth");
+                finish();
+            }
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
+            if (g_Character_TX!=null) {
+                settingPackage_PowerCurve_ReadData((byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x01);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            mBluetoothLeService = null;
+        }
+    };
 
     //点击事件
     @OnClick({R.id.btn_back, R.id.tv_power_save, R.id.tv_soft, R.id.tv_standard, R.id.tv_strong, R.id.tv_super_strong, R.id.tv_custom_s1, R.id.detail_s1, R.id.tv_custom_s2, R.id.detail_s2, R.id.tv_custom_s3, R.id.detail_s3, R.id.tv_custom_s4, R.id.detail_s4, R.id.tv_custom_s5, R.id.detail_s5})
@@ -132,55 +187,85 @@ public class SetTextureActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.tv_power_save:
-                pressed(0,getResources().getString(R.string.texture_power_save));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x00);
+                }
+                pressed(0, getResources().getString(R.string.texture_power_save));
                 break;
             case R.id.tv_soft:
-                pressed(1,getResources().getString(R.string.texture_soft));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x01);
+                }
+                pressed(1, getResources().getString(R.string.texture_soft));
                 break;
             case R.id.tv_standard:
-                pressed(2,getResources().getString(R.string.texture_standard));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x02);
+                }
+                pressed(2, getResources().getString(R.string.texture_standard));
                 break;
             case R.id.tv_strong:
-                pressed(3,getResources().getString(R.string.texture_strong));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x03);
+                }
+                pressed(3, getResources().getString(R.string.texture_strong));
                 break;
             case R.id.tv_super_strong:
-                pressed(4,getResources().getString(R.string.texture_super_strong));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x04);
+                }
+                pressed(4, getResources().getString(R.string.texture_super_strong));
                 break;
             case R.id.tv_custom_s1:
-                pressed(5,getResources().getString(R.string.texture_custom_s1));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x05);
+                }
+                pressed(5, getResources().getString(R.string.texture_custom_s1));
                 break;
             case R.id.detail_s1:
 
-                curveIntent.putExtra("custom","S1");
+                curveIntent.putExtra("custom", "S1");
                 startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s2:
-                pressed(6,getResources().getString(R.string.texture_custom_s2));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x06);
+                }
+                pressed(6, getResources().getString(R.string.texture_custom_s2));
                 break;
             case R.id.detail_s2:
 
-                curveIntent.putExtra("custom","S2");
+                curveIntent.putExtra("custom", "S2");
                 startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s3:
-                pressed(7,getResources().getString(R.string.texture_custom_s3));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x07);
+                }
+                pressed(7, getResources().getString(R.string.texture_custom_s3));
                 break;
             case R.id.detail_s3:
-                curveIntent.putExtra("custom","S3");
+                curveIntent.putExtra("custom", "S3");
                 startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s4:
-                pressed(8,getResources().getString(R.string.texture_custom_s4));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x08);
+                }
+                pressed(8, getResources().getString(R.string.texture_custom_s4));
                 break;
             case R.id.detail_s4:
-                curveIntent.putExtra("custom","S4");
+                curveIntent.putExtra("custom", "S4");
                 startActivity(curveIntent);//进入曲线界面
                 break;
             case R.id.tv_custom_s5:
-                pressed(9,getResources().getString(R.string.texture_custom_s5));
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x12, (byte) 0x09);
+                }
+                pressed(9, getResources().getString(R.string.texture_custom_s5));
                 break;
             case R.id.detail_s5:
-                curveIntent.putExtra("custom","S5");
+                curveIntent.putExtra("custom", "S5");
                 startActivity(curveIntent);//进入曲线界面
                 break;
         }
@@ -248,13 +333,83 @@ public class SetTextureActivity extends AppCompatActivity {
     }
 
     //选择点击
-    public void pressed (int i,String name){
+    public void pressed(int i, String name) {
         Intent intent = new Intent();
         select_control(i);
-        myModel.texture=i;
+        myModel.texture = i;
         myModel.save();
-        intent.putExtra(TEXTURE,name);
-        setResult(RESULT_OK,intent);
+
+        intent.putExtra(TEXTURE, name);
+        setResult(RESULT_OK, intent);
         finish();
+    }
+
+    public void setUserDeviceSetting(byte nn, byte pp) {
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x04;
+        m_Data_DeviceSetting[4] = 0x59;
+        m_Data_DeviceSetting[5] = nn;
+        m_Data_DeviceSetting[6] = pp;
+
+        m_Length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
+
+        byte[] m_MyData = new byte[m_Length];
+        for (int i = 0; i < m_Length; i++) {
+            m_MyData[i] = m_Data[i];
+        }
+
+        if (g_Character_TX == null) {
+            Log.e("SetDetailsActivity", "character TX is null");
+            return;
+        }
+
+        if (m_Length <= 0) {
+            return;
+        }
+        g_Character_TX.setValue(m_MyData);
+        mBluetoothLeService.writeCharacteristic(g_Character_TX);
+    }
+
+    private static IntentFilter makeBroadcastFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        return intentFilter;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+    }
+
+    //读取曲线数据                         Setting 包的序号     曲线      序号    数量    编号
+    public void settingPackage_PowerCurve_ReadData(byte pp, byte tt, byte mm, byte rr, byte ll) {
+        Log.d(TAG, "口感选择发出数据: " );
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[2] = 0x09;
+        m_Data_DeviceSetting[4] = 0x66;
+        m_Data_DeviceSetting[5] = pp;
+        m_Data_DeviceSetting[6] = tt;
+        m_Data_DeviceSetting[7] = mm;
+        m_Data_DeviceSetting[8] = rr;
+        m_Data_DeviceSetting[9] = ll;
+        m_Data_DeviceSetting[10] = (byte) (50 >> 8) & 0xff;
+        m_Data_DeviceSetting[11] = (byte) 50 & 0xff;
+
+        m_Length = 12;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
     }
 }
