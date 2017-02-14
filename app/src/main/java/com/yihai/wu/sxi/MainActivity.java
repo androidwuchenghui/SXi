@@ -37,7 +37,7 @@ import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Integer[] images = {R.mipmap.a, R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
-    String TAG = "print";
+    String TAG = "printInMainActivity";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
@@ -168,8 +168,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
         if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            mBluetoothAdapter.enable();
         }
 
     }
@@ -289,12 +290,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unbindService(mServiceConnection);
         mBluetoothLeService.close();
         mBluetoothLeService = null;
-
+        mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {
             connectedDevice.isConnected = false;
             connectedDevice.save();
         }
+
     }
 
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {

@@ -152,7 +152,7 @@ public class BezierActivity extends AppCompatActivity {
 
     int count = 0;
     private StringBuilder sb1 = new StringBuilder();
-    int j = 0;
+    int curveNum = 0;
     private final BroadcastReceiver setBezierActivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -163,20 +163,28 @@ public class BezierActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
                     if (startReadPowerCurveData) {
-                        handlerPowerCurveData(data, s);
+                        Log.d("ReadPowerCurveData",  s);
+                        //处理收到的功率曲线的数据
+                        handlerCurveData(data);
+                    }
+                    if (startReadTempCurveData) {
+                        Log.d("ReadTempCurveData",  s);
+                        //处理收到的温度曲线的数据
+                        handlerCurveData(data);
                     }
                     break;
             }
         }
     };
     private boolean secondInit;
+    private boolean startReadTempCurveData = false;
 
-    private void handlerPowerCurveData(byte[] data, String s) {
+    private void handlerCurveData(byte[] data) {
         Sys_YiHi_Protocol_RX_Porc(data);
         if (begin) {
             littleOrder++;
         }
-        Log.d(TAG, "曲线页面收到数据: " + s + "   R: " + littleOrder);
+
         if (TAG == "BezierActivity" && littleOrder == 1 && begin == true) {
             oneFirst = subBytes(data, 11, 9);
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
@@ -188,32 +196,49 @@ public class BezierActivity extends AppCompatActivity {
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
         } else if (TAG == "BezierActivity" && littleOrder == 4 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
-            Log.d(TAG, "onFirst: " + BinaryToHexString(oneFirst));
+//            Log.d(TAG, "onFirst: " + BinaryToHexString(oneFirst));
             //处理取到的50个数据
 
             for (int i = 0; i < oneFirst.length; i += 2) {
-                j++;
+
                 byte[] bs = new byte[2];
                 bs[0] = oneFirst[i];
                 bs[1] = oneFirst[i + 1];
                 int powerData = ((bs[0] & 0xff) << 8) | (bs[1] & 0xff);
                 count++;
                 if (count % 5 == 1) {
-                    sb1.append(powerData/10 + ",");
+                    sb1.append(powerData / 10 + ",");
                 } else if (bigOrder == 4 && i == 48) {
+
                     bigOrder = 0;
-                    sb1.append(powerData/10);
+                    sb1.append(powerData / 10);
+                    Log.d(TAG, "handlerCurveData: "+sb1);
                     count = 0;
-                    Textures texture = Textures.getTexture(modelName, customName);
-                    texture.arr1 = sb1.toString();
-                    texture.save();
+                    if(curveNum==0) {
+                        Textures texture = Textures.getTexture(modelName, customName);
+                        texture.arr1 = sb1.toString();
+                        texture.save();
+                        sb1.setLength(0);
+                    }else if(curveNum==1){
+                        Textures texture = Textures.getTexture(modelName, customName);
+                        texture.arr3 = sb1.toString();
+                        texture.save();
+                        sb1.setLength(0);
+                        init();
+                    }
                     startReadPowerCurveData = false;
                     secondInit = true;
-                    init();
+                    curveNum++;
+
+                    //功率曲线数据保存完毕、       准备读取温度曲线
+                    if (curveNum == 1) {
+                        startReadTempCurveData = true;
+                        settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x03, (byte) 0x00, (byte) 0x04, userOrder);
+                    }
                 }
 
             }
-            Log.d(TAG, "onReceive: " + littleOrder + "  " + begin + "   " + bigOrder + "  data--->SB:   " + sb1 + "   oneCurve: ");
+            Log.d(TAG, "onReceive: " + littleOrder + "  " + begin + "   " + bigOrder + "  data--->SB:   " + sb1);
         }
         if (littleOrder == 4 && begin && bigOrder == 1) {
             begin = false;
@@ -233,7 +258,6 @@ public class BezierActivity extends AppCompatActivity {
         }
 
 
-
     }
 
     private String modelName;
@@ -247,7 +271,7 @@ public class BezierActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_bezier);
         ButterKnife.bind(this);
-        secondInit=false;
+        secondInit = false;
         Intent intent = getIntent();
         modelName = intent.getStringExtra("modelName");
         customName = intent.getStringExtra("custom");
@@ -278,6 +302,7 @@ public class BezierActivity extends AppCompatActivity {
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {             //   功率曲线上的点的数据   序号00     第一组的25个点
+                startReadPowerCurveData = true;
                 settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x00, (byte) 0x04, userOrder);
             }
         }
@@ -342,15 +367,15 @@ public class BezierActivity extends AppCompatActivity {
 
         //        Log.d(TAG, "init: "+arr1);
         //功率曲线的数据
-        powerData1 = getLineData(texture.arr1);
+        powerData1 = getLineData(texture.arr1,5);
         powerMoveList.add(powerData1);
         //虚线1的数据
         dash1 = texture.dash;
         dashListInPower.add(dash1);
         //℃温度曲线的数据
-        temperData1 = getLineData(texture.arr3);
+        temperData1 = getLineData(texture.arr3,0);
         // J  焦耳曲线的数据
-        initJouleData = getLineData(texture.arr4);
+        initJouleData = getLineData(texture.arr4,5);
         //通过查询数据库判断是焦耳还是功率
         MyModel myMode = texture.myModel;
         //0代表功率曲线，1代表焦耳曲线
@@ -469,6 +494,7 @@ public class BezierActivity extends AppCompatActivity {
             for (float i = 0; i < 11 - 0.5; i += 0.5) {
                 powerValues.add(new PointValue(i, powerData1[(int) (i * 2)]));
             }
+
             powerLine = new Line(powerValues);
             setLineStyle(powerLine, POWER_HIGHLIGHT_CURVE);
         }
@@ -489,7 +515,7 @@ public class BezierActivity extends AppCompatActivity {
             }
             temperLine_back = new Line(temperValue_back);
             setLineStyle(temperLine_back, DARK_CURVE);
-        } else if(secondInit==false){
+        } else if (secondInit == false) {
             //温度曲线由明转暗
             temperLine_back = getLine_TemperChart_To_PowerChart(temperLine);
             setLineStyle(temperLine_back, DARK_CURVE);
@@ -643,11 +669,17 @@ public class BezierActivity extends AppCompatActivity {
         currentDashLineList = dashListInTemper;
     }
 
-    private int[] getLineData(String string) {
+    private int[] getLineData(String string,int limit) {
         String[] splited = string.split(",");
         int[] data = new int[splited.length];
         for (int i = 0; i < splited.length; i++) {
             data[i] = Integer.parseInt(splited[i]);
+            if(data[i]>200||data[i]<0){
+                for (int j = 0; j <splited.length ; j++) {
+                    data[j]=limit;
+                }
+                return data;
+            }
         }
         return data;
     }
@@ -1092,7 +1124,6 @@ public class BezierActivity extends AppCompatActivity {
     //读取曲线数据                         Setting 包的序号     曲线      序号    数量    编号
     public void settingPackage_PowerCurve_ReadData(byte pp, byte tt, byte mm, byte rr, byte ll) {
         Log.d(TAG, "口感选择发出数据: ");
-        startReadPowerCurveData = true;
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -1179,7 +1210,7 @@ public class BezierActivity extends AppCompatActivity {
                 Log.d(TAG, "口感选择准备处理数据: " + BinaryToHexString(m_Data));
                 int height = (m_Data[6] & 0xf0) >> 4;
                 int low = m_Data[6] & 0x0f;
-                //                Log.d(TAG, "口感选择准备处理数据: "+"低四位： "+low);
+                Log.d("low:","  "+low );
                 if (height == 1) {
                     final int waitTime = ((m_Data[9] & 0xff) << 8) | (m_Data[10] & 0xff);
                     Log.d(TAG, "等待时间: " + waitTime);
