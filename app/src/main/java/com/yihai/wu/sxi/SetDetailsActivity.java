@@ -814,7 +814,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     int TCR_Value = (m_Data[31] & 0xff) << 24 | (m_Data[32] & 0xff) << 16 | (m_Data[33] & 0xff) << 8 | m_Data[34] & 0xff;
                     configPackage.tcr = TCR_Value;
                     //口感
-                    configPackage.texture = (int) m_Data[35] - 1;
+                    configPackage.texture = (int) m_Data[35];
                     //记忆模式
                     configPackage.memory = (int) m_Data[36];
                     configPackage.save();
@@ -898,7 +898,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_length = 7;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
-
+    //读取setting包的处理结果
     private void getSettingPackage_ReadData_GetResult() {
         mergerData = true;
         byte[] m_Data = new byte[32];

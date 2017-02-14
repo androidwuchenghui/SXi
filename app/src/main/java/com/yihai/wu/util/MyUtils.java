@@ -71,4 +71,27 @@ public class MyUtils {
         System.arraycopy(byte_2, 0, byte_3, byte_1.length, byte_2.length);
         return byte_3;
     }
+
+    public static byte[] subBytes(byte[] src, int begin, int count) {
+        byte[] bs = new byte[count];
+        for (int i = begin; i < begin + count; i++)
+            bs[i - begin] = src[i];
+        return bs;
+    }
+
+    //从一百个点中每隔5个选出一个点
+    private static int[] getReadedCurveData(String string) {
+        int result[] = new int[21];
+        int index = 0;
+        String[] splited = string.split(",");
+        int[] data = new int[splited.length];
+        for (int i = 0; i < splited.length; i++) {
+            data[i] = Integer.parseInt(splited[i]);
+            if (i % 5 == 0) {
+                result[index] = data[i];
+                index++;
+            }
+        }
+        return result;
+    }
 }
