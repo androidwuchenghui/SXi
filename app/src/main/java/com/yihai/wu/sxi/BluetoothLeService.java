@@ -130,14 +130,15 @@ public class BluetoothLeService extends Service {
 
                             mBluetoothGatt.discoverServices();
 
-                Log.e("discovery", "Attempting to start service discovery:" +
-                        mBluetoothGatt.discoverServices());
+//                Log.e("discovery", "Attempting to start service discovery:" +
+//                        mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
                 Log.i("ConnectionStateChange", "   .发出---断开了--的广播--");
                 broadcastUpdate(intentAction);
+
             }
 
         }

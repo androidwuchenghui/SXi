@@ -174,33 +174,35 @@ public class SetDetailsActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
                     Log.d(TAG, "receiveInfo: " + s);
-                    if (mergerData ) {
-                        if (receiveCount == 1) {
-                            mergerDataOver = true;
-                            byte[] mergerBytes = byteMerger(firstByteArray, data);
-                            String result = first + s;
-                            receiveCount = 0;
-                            Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
-                            mergerData = false;
+                    if(TAG=="SetDetailsActivity") {
+                        if (mergerData) {
+                            if (receiveCount == 1) {
+                                mergerDataOver = true;
+                                byte[] mergerBytes = byteMerger(firstByteArray, data);
+                                String result = first + s;
+                                receiveCount = 0;
+                                Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
+                                mergerData = false;
 
-                            receiveCount=0;
-                            first = "";
-                            Sys_YiHi_Protocol_RX_Porc(mergerBytes);
+                                receiveCount = 0;
+                                first = "";
+                                Sys_YiHi_Protocol_RX_Porc(mergerBytes);
 
-                        } else {
-                            mergerDataOver = false;
-                            first += s;
-                            Log.d(TAG, "mergerBytes: 一段：" + first);
-                            firstByteArray = new byte[data.length];
-                            firstByteArray = data;
+                            } else {
+                                mergerDataOver = false;
+                                first += s;
+                                Log.d(TAG, "mergerBytes: 一段：" + first);
+                                firstByteArray = new byte[data.length];
+                                firstByteArray = data;
 
-                            receiveCount++;
+                                receiveCount++;
+                            }
+
                         }
+                        Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s + "     ");
 
+                        Sys_YiHi_Protocol_RX_Porc(data);
                     }
-                    Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s + "     ");
-
-                    Sys_YiHi_Protocol_RX_Porc(data);
                     break;
             }
         }
@@ -751,7 +753,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Command = m_Data[(m_Index + 4)];
         m_SecondCommand = m_Data[(m_Index + 5)];
         Log.d(TAG, "onReceiveMainActivity: " + m_Command);
-        if (m_Command == 0x58 && m_SecondCommand == 0x0F)
+        if (m_Command == 0x58 && m_SecondCommand == 0x0F&&m_Data.length==7)
         //获得功率焦耳切换
         {
             s = BinaryToHexString(m_Data);

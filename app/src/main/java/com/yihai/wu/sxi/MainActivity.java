@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
+
             Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState());
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
@@ -166,7 +167,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: "+mBluetoothLeService);
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
+//        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
+//            Log.d(TAG, "onStart: "+mBluetoothLeService);
+//            mBluetoothLeService.connect(ConnectedBleDevices.getConnectedDevice().deviceAddress);
+//        }
         if (!mBluetoothAdapter.isEnabled()) {
 //            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 //            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -290,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unbindService(mServiceConnection);
         mBluetoothLeService.close();
         mBluetoothLeService = null;
-        mBluetoothAdapter.disable();
+//        mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {
             connectedDevice.isConnected = false;

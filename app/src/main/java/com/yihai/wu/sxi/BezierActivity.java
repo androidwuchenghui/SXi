@@ -149,7 +149,9 @@ public class BezierActivity extends AppCompatActivity {
 
     private int littleOrder;
     private boolean begin = false;
-
+    private boolean waveInPowerIsTrue = true;
+    private boolean waveInJouleIsTrue = true;
+    private boolean waveInTemperIsTrue = true;
     int count = 0;
     private StringBuilder sb1 = new StringBuilder();
     int curveNum = 0;
@@ -163,12 +165,12 @@ public class BezierActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
                     if (startReadPowerCurveData) {
-                        Log.d("ReadPowerCurveData",  s);
+                        Log.d("ReadPowerCurveData", s);
                         //处理收到的功率曲线的数据
                         handlerCurveData(data);
                     }
                     if (startReadTempCurveData) {
-                        Log.d("ReadTempCurveData",  s);
+                        Log.d("ReadTempCurveData", s);
                         //处理收到的温度曲线的数据
                         handlerCurveData(data);
                     }
@@ -196,7 +198,7 @@ public class BezierActivity extends AppCompatActivity {
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
         } else if (TAG == "BezierActivity" && littleOrder == 4 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
-//            Log.d(TAG, "onFirst: " + BinaryToHexString(oneFirst));
+            //            Log.d(TAG, "onFirst: " + BinaryToHexString(oneFirst));
             //处理取到的50个数据
 
             for (int i = 0; i < oneFirst.length; i += 2) {
@@ -212,14 +214,15 @@ public class BezierActivity extends AppCompatActivity {
 
                     bigOrder = 0;
                     sb1.append(powerData / 10);
-                    Log.d(TAG, "handlerCurveData: "+sb1);
+                    Log.d(TAG, "handlerCurveData: " + sb1);
                     count = 0;
-                    if(curveNum==0) {
+                    if (curveNum == 0) {
                         Textures texture = Textures.getTexture(modelName, customName);
                         texture.arr1 = sb1.toString();
+                        texture.arr4 = sb1.toString();
                         texture.save();
                         sb1.setLength(0);
-                    }else if(curveNum==1){
+                    } else if (curveNum == 1) {
                         Textures texture = Textures.getTexture(modelName, customName);
                         texture.arr3 = sb1.toString();
                         texture.save();
@@ -367,15 +370,15 @@ public class BezierActivity extends AppCompatActivity {
 
         //        Log.d(TAG, "init: "+arr1);
         //功率曲线的数据
-        powerData1 = getLineData(texture.arr1,5);
+        powerData1 = getLineData(texture.arr1, 5);
         powerMoveList.add(powerData1);
         //虚线1的数据
         dash1 = texture.dash;
         dashListInPower.add(dash1);
         //℃温度曲线的数据
-        temperData1 = getLineData(texture.arr3,0);
+        temperData1 = getLineData(texture.arr3, 0);
         // J  焦耳曲线的数据
-        initJouleData = getLineData(texture.arr4,5);
+        initJouleData = getLineData(texture.arr4, 5);
         //通过查询数据库判断是焦耳还是功率
         MyModel myMode = texture.myModel;
         //0代表功率曲线，1代表焦耳曲线
@@ -482,6 +485,13 @@ public class BezierActivity extends AppCompatActivity {
         currentIndex = jouleIndex;
         currentMoveLineList = jouleDataList;
         currentDashLineList = dashListInJoule;
+        if(waveInJouleIsTrue){
+            btnWave.setVisibility(View.VISIBLE);
+            btn_waveBehind.setVisibility(View.GONE);
+        }else {
+            btnWave.setVisibility(View.GONE);
+            btn_waveBehind.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -581,6 +591,14 @@ public class BezierActivity extends AppCompatActivity {
         currentIndex = powerIndex;
         currentMoveLineList = powerMoveList;
         currentDashLineList = dashListInPower;
+
+        if(waveInPowerIsTrue){
+            btnWave.setVisibility(View.VISIBLE);
+            btn_waveBehind.setVisibility(View.GONE);
+        }else {
+            btnWave.setVisibility(View.GONE);
+            btn_waveBehind.setVisibility(View.VISIBLE);
+        }
     }
 
     //显示为温度Chart
@@ -667,16 +685,23 @@ public class BezierActivity extends AppCompatActivity {
         currentIndex = temperIndex;
         currentMoveLineList = temperDataList;
         currentDashLineList = dashListInTemper;
+        if(waveInTemperIsTrue){
+            btnWave.setVisibility(View.VISIBLE);
+            btn_waveBehind.setVisibility(View.GONE);
+        }else {
+            btnWave.setVisibility(View.GONE);
+            btn_waveBehind.setVisibility(View.VISIBLE);
+        }
     }
 
-    private int[] getLineData(String string,int limit) {
+    private int[] getLineData(String string, int limit) {
         String[] splited = string.split(",");
         int[] data = new int[splited.length];
         for (int i = 0; i < splited.length; i++) {
             data[i] = Integer.parseInt(splited[i]);
-            if(data[i]>200||data[i]<0){
-                for (int j = 0; j <splited.length ; j++) {
-                    data[j]=limit;
+            if (data[i] > 200 || data[i] < 0) {
+                for (int j = 0; j < splited.length; j++) {
+                    data[j] = limit;
                 }
                 return data;
             }
@@ -779,7 +804,6 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     //如果曲线有变动,记录存储
                     if (dataChanged) {
-
                         for (int i = 0; i < currentMoveLineList.size(); i++) {
                             if (i > currentIndex) {
                                 currentMoveLineList.remove(currentMoveLineList.get(i));
@@ -911,13 +935,13 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.btn_switch:
-                    if (touchInChart == TOUCH_FOR_POWER_CHART) {
+                    if (touchInChart == TOUCH_FOR_POWER_CHART) {                               //功率--->温度
                         generateInitialTemperChart();
-                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 0) {
+                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 0) {   //温度--->功率
                         generateInitialLineData();
-                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 1) {
+                    } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 1) {   //温度--->焦耳
                         generateJouleChart();
-                    } else if (touchInChart == TOUCH_FOR_JOULE_CHART) {
+                    } else if (touchInChart == TOUCH_FOR_JOULE_CHART) {                     // 焦耳--->温度
                         generateInitialTemperChart();
                     }
                     break;
@@ -926,23 +950,36 @@ public class BezierActivity extends AppCompatActivity {
                     btnWave.setVisibility(View.GONE);
                     btn_waveBehind.setVisibility(View.VISIBLE);
                     if (touchInChart == TOUCH_FOR_POWER_CHART) {
+                        waveInPowerIsTrue=false;
                         powerIndex++;
                         changeForWave(powerIndex, powerLine, powerDashLine);
                     } else if (touchInChart == TOUCH_FOR_TEMPER_CHART) {
+                        waveInTemperIsTrue = false;
                         temperIndex++;
                         changeForWave(temperIndex, temperLine, temperDashLine);
+                    }else if(touchInChart == TOUCH_FOR_JOULE_CHART){
+                        waveInJouleIsTrue = false;
+                        jouleIndex++;
+                        changeForWave(jouleIndex,jouleLine,jouleDashline);
                     }
                     //                    Log.d(TAG, "OnClick: pl: "+powerMoveList.size()+" index : "+powerIndex);
                     break;
                 case R.id.btn_waveBehind:
+
                     btn_waveBehind.setVisibility(View.GONE);
                     btnWave.setVisibility(View.VISIBLE);
                     if (touchInChart == TOUCH_FOR_POWER_CHART) {
+                        waveInPowerIsTrue=true;
                         powerIndex--;
                         changeForBehindWave(powerIndex, powerLine);
                     } else if (touchInChart == TOUCH_FOR_TEMPER_CHART) {
+                        waveInTemperIsTrue = true;
                         temperIndex--;
                         changeForBehindWave(temperIndex, temperLine);
+                    }else if(touchInChart==TOUCH_FOR_JOULE_CHART){
+                        waveInJouleIsTrue = true;
+                        jouleIndex--;
+                        changeForBehindWave(jouleIndex,jouleLine);
                     }
                     Log.d(TAG, "OnClick: powerMoveList: " + powerMoveList.size() + " index " + powerIndex);
                     break;
@@ -977,6 +1014,7 @@ public class BezierActivity extends AppCompatActivity {
         }
         currentMoveLineList.add(arr);
         currentDashLineList.add((int) dashLine.getValues().get(0).getY());
+
         setAboveAndNextButtonState(currentMoveLineList, index);
     }
 
@@ -1003,8 +1041,6 @@ public class BezierActivity extends AppCompatActivity {
             btnNext.setVisibility(View.VISIBLE);
             nextDisable.setVisibility(View.GONE);
         }
-
-
     }
 
     private void setLineStyle(Line line, int style) {
@@ -1210,7 +1246,7 @@ public class BezierActivity extends AppCompatActivity {
                 Log.d(TAG, "口感选择准备处理数据: " + BinaryToHexString(m_Data));
                 int height = (m_Data[6] & 0xf0) >> 4;
                 int low = m_Data[6] & 0x0f;
-                Log.d("low:","  "+low );
+                Log.d("low:", "  " + low);
                 if (height == 1) {
                     final int waitTime = ((m_Data[9] & 0xff) << 8) | (m_Data[10] & 0xff);
                     Log.d(TAG, "等待时间: " + waitTime);
