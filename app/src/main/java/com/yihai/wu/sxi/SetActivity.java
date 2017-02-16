@@ -65,10 +65,7 @@ public class SetActivity extends AppCompatActivity {
         MyModel selectedModel = MyModel.getSelectedModel();
         Log.d(TAG, "onCreate: init" + selectedModel);
         if (selectedModel != null) {
-            status.setText("已连接");
-
             select_control (selectedModel.model) ;
-
         } else {
             select_control("C1");
         }
@@ -108,6 +105,12 @@ public class SetActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
+            if (mBluetoothLeService.getTheConnectedState() == 0) {
+                status.setText("未连接");
+            } else if (mBluetoothLeService.getTheConnectedState() == 2) {
+                status.setText("已连接");
+            }
+
             Log.d("setActivity", "onServiceConnected: " + mBluetoothLeService);
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
 
@@ -352,6 +355,7 @@ public class SetActivity extends AppCompatActivity {
         unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
+
     }
 
     public void setSelectedData(String str) {
@@ -420,4 +424,16 @@ public class SetActivity extends AppCompatActivity {
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        g_Character_TX = mBluetoothLeService.getG_Character_TX();
+        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        if (mBluetoothLeService.getTheConnectedState() == 2) {
+            status.setText("已连接设备");
+
+        } else {
+            status.setText("未连接设备");
+        }
+    }
 }

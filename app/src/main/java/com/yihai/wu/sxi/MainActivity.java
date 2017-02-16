@@ -150,6 +150,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    connectedState.setText("设备未连接");
+                    break;
+                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                    connectedState.setText("已连接设备");
             }
         }
     };

@@ -204,6 +204,10 @@ public class SetDetailsActivity extends AppCompatActivity {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
                     break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    connectState.setText("未连接");
+                    break;
+
             }
         }
     };
@@ -211,6 +215,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     private static IntentFilter makeBroadcastFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         return intentFilter;
     }
 
@@ -224,6 +229,11 @@ public class SetDetailsActivity extends AppCompatActivity {
                 finish();
             }
 
+            if (mBluetoothLeService.getTheConnectedState() == 0) {
+                connectState.setText("未连接");
+            } else if (mBluetoothLeService.getTheConnectedState() == 2) {
+                connectState.setText("已连接");
+            }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {
                 //                getConnectedDevicePowerModel();
@@ -263,10 +273,10 @@ public class SetDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     private void initUI() {
+
         Intent intent = getIntent();
         detail = intent.getStringExtra("detail");
         modelName.setText(detail);
@@ -824,7 +834,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + TCR_Value);
 
                     //获得温度调节范围
-                    getUserDeviceSetting((byte)0x09);
+//                    getUserDeviceSetting((byte)0x09);
                 }
                 break;
             case 0x58:
@@ -978,7 +988,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     //获取数据
     public void getUserDeviceSetting(byte nn) {
         getSetting = nn;
-        mergerData = true;
+//        mergerData = true;
         byte[] m_Data = new byte[32];
         int m_length = 0;
         m_Data[0] = 0x55;
@@ -989,5 +999,17 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Data[5] = nn;
         m_length = 6;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        g_Character_TX = mBluetoothLeService.getG_Character_TX();
+        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        if (mBluetoothLeService.getTheConnectedState() == 2) {
+            connectState.setText("已连接");
+        } else {
+            connectState.setText("未连接");
+        }
     }
 }
