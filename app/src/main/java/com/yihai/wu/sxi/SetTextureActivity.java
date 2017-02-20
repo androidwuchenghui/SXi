@@ -216,6 +216,7 @@ public class SetTextureActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+
             if (!mBluetoothLeService.initialize()) {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
@@ -225,10 +226,8 @@ public class SetTextureActivity extends AppCompatActivity {
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectState.setText("已连接");
             }
-//            g_Character_TX = mBluetoothLeService.getG_Character_TX();
-//            if (g_Character_TX != null) {             //C1 、S1   功率曲线上的点的数据   序号00     第一组的25个点
-//                settingPackage_PowerCurve_ReadData((byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x04, (byte) 0x00);
-//            }
+            g_Character_TX = mBluetoothLeService.getG_Character_TX();
+            Log.d(TAG, "onServiceConnected: bind  : service: "+mBluetoothLeService+"    character:  "+g_Character_TX);
         }
 
         @Override
@@ -469,116 +468,5 @@ public class SetTextureActivity extends AppCompatActivity {
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
-
-   /* //读取曲线数据                         Setting 包的序号     曲线      序号    数量    编号
-    public void settingPackage_PowerCurve_ReadData(byte pp, byte tt, byte mm, byte rr, byte ll) {
-        Log.d(TAG, "口感选择发出数据: ");
-        send = TAG;
-        byte[] m_Data_DeviceSetting = new byte[32];
-        int m_Length = 0;
-        m_Data_DeviceSetting[0] = 0x55;
-        m_Data_DeviceSetting[1] = (byte) 0xFF;
-        m_Data_DeviceSetting[3] = 0x01; //Device ID
-        m_Data_DeviceSetting[2] = 0x09;
-        m_Data_DeviceSetting[4] = 0x66;
-        m_Data_DeviceSetting[5] = pp;           //C1 ~ C5
-        m_Data_DeviceSetting[6] = tt;           //1-W 点,2-W 线，3-temp 点，4-temp线
-        m_Data_DeviceSetting[7] = mm;           //      序号
-        m_Data_DeviceSetting[8] = rr;           //一条曲线分为4个数据包
-        m_Data_DeviceSetting[9] = ll;           //S1 ~ S5
-        m_Data_DeviceSetting[10] = (byte) (50 >> 8) & 0xff;
-        m_Data_DeviceSetting[11] = (byte) 50 & 0xff;
-
-        m_Length = 12;
-        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
-    }
-
-    private void Sys_YiHi_Protocol_RX_Porc(byte[] m_Data) {
-        int m_Length = 0;
-        int i;
-        int m_Index = 0xfe;
-        byte m_ValidData_Length = 0;
-        byte m_Command = 0;
-        byte m_SecondCommand = 0;
-        String s = null;
-        int m_iTemp_x10, m_iTemp_x1;
-        m_Length = m_Data.length;
-        if (m_Length < 5) {
-            return;
-        }
-        //Get sync code.
-        for (i = 0; i < m_Length; i++) {
-            //if (i<16)
-            //{
-            //	if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---Data["+i+"]="+m_Data[i]);
-            //}
-            //if ((m_Data[i]==0x55)&&(m_Data[(i+1)]==0xFF))
-            if (((m_Data[i] == 85) || (m_Data[i] == 0x55))
-                    && ((m_Data[(i + 1)] == -1) || (m_Data[(i + 1)] == 0xFF)
-                    || (m_Data[(i + 1)] == -3) || (m_Data[i + 1] == 0xFD))) {
-                //if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---i="+i);
-                m_Index = i;
-                //i=m_Length;
-                break;
-            }
-
-        }
-        if (m_Index == 0xfe) {
-            return;
-        }
-        if (m_Index > (m_Length - 2)) {
-            return;
-        }
-        //Get valid data length.
-        m_ValidData_Length = m_Data[(m_Index + 2)];
-        if ((m_Index + m_ValidData_Length) > m_Length) {
-            return;
-        }
-        //Get command code.
-        m_Command = m_Data[(m_Index + 4)];
-        switch (m_Command) {
-            case 0x67:
-//                Log.d(TAG, "口感选择准备处理数据: " + BinaryToHexString(m_Data));
-                int height = (m_Data[6] & 0xf0) >> 4;
-                int low = m_Data[6] & 0x0f;
-//                Log.d(TAG, "口感选择准备处理数据: "+"低四位： "+low);
-                if (height == 1) {
-                    final int waitTime = ((m_Data[9] & 0xff) << 8) | (m_Data[10] & 0xff);
-//                    Log.d(TAG, "等待时间: " + waitTime);
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                            try {
-                                Thread.sleep(waitTime);
-                                getSettingPackage_ReadData_GetResult();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }.start();
-                }
-
-                break;
-        }
-    }
-    private byte first25;
-    private int r ;
-    private int order = 0;
-    private boolean begin = false;
-    private void getSettingPackage_ReadData_GetResult() {
-        order++;
-        begin = true;
-        r=0;
-        byte[] m_Data = new byte[32];
-        int m_length = 0;
-        m_Data[0] = 0x55;
-        m_Data[1] = (byte) 0xFF;
-        m_Data[3] = 0x01; //Device ID
-        m_Data[2] = 0x03;
-        m_Data[4] = 0x69;
-        m_Data[5] = 0x02;
-        m_length = 6;
-        Sys_Proc_Charactor_TX_Send(m_Data, m_length);
-    }*/
+    
 }

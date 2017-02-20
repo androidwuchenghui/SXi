@@ -25,8 +25,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -108,7 +110,7 @@ public class BluetoothLeService extends Service {
             UUID.fromString(MyGattAttributes.C_UUID_Character_Device_CommBaudRate);
 
     private BluetoothGattCharacteristic g_Character_TX;
-
+    private BluetoothGattCharacteristic g_Character_DeviceName;
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     //连接回掉
@@ -123,22 +125,25 @@ public class BluetoothLeService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
 
             String intentAction = null;
+            Log.d(TAG, "ServiceOnConnectionStateChange:   gatt" + gatt + "   status:  " + status + "   newState:   " + newState + " = 2");
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
                 // Attempts to discover services after successful connection.
-                Log.d(TAG, "onConnectionStateChange: " + "连接状态   mBluetoothGatt：  " + mBluetoothGatt);
-
-                            mBluetoothGatt.discoverServices();
+                Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   ");
+                mBluetoothGatt.discoverServices();
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接");
+                close();
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
                 ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-                connectedDevice.isConnected = false;
-                connectedDevice.save();
-                Log.i("ConnectionStateChange", "   .发出---断开了--的广播--");
+                if (connectedDevice != null) {
+                    connectedDevice.isConnected = false;
+                    connectedDevice.save();
+                }
                 broadcastUpdate(intentAction);
 
             }
@@ -158,25 +163,27 @@ public class BluetoothLeService extends Service {
                     List<BluetoothGattCharacteristic> gattCharacteristics =
                             supportedGattService.getCharacteristics();
                     for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                        if(g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())){
+                        if (g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())) {
                             g_Character_TX = gattCharacteristic;
+                        }
+                        if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
+                            g_Character_DeviceName = gattCharacteristic;
                         }
                     }
                 }
-            } /*else if (status == 129) {
-                Log.d(TAG, "status = 129: -----发出129");
-                mBluetoothAdapter.disable();
-                Timer single_timer = new Timer();
-                single_timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        mBluetoothAdapter.enable();
-                        broadcastUpdate("129");
-                    }
-                }, 1500);
-            }*/ else {
-//                Log.w(TAG, "onServicesDiscovered received: " + status);
             }
+//            else if (status == 129) {
+//                Log.d(TAG, "status = 129: -----发出129");
+//                mBluetoothAdapter.disable();
+//                Timer single_timer = new Timer();
+//                single_timer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        mBluetoothAdapter.enable();
+//                        broadcastUpdate("129");
+//                    }
+//                }, 2500);
+//            }
         }
 
         /*
@@ -233,7 +240,7 @@ public class BluetoothLeService extends Service {
                 Log.d(TAG, "onCharacteristicChanged: 提交返回");
                 broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
             } else if (characteristic.getUuid().equals(g_UUID_Charater_ReadData)) {
-                Log.d(TAG, "onCharacteristicChanged:  RX"+ MyUtils.BinaryToHexString(characteristic.getValue()));
+                Log.d(TAG, "onCharacteristicChanged:  RX" + MyUtils.BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
             }
 
@@ -254,7 +261,7 @@ public class BluetoothLeService extends Service {
         final Intent intent = new Intent(action);
         final byte[] data = characteristic.getValue();
         Bundle bundle = new Bundle();
-        bundle.putByteArray("byteValues",data);
+        bundle.putByteArray("byteValues", data);
 
         intent.putExtra(EXTRA_DATA, bundle);
         sendBroadcast(intent);
@@ -311,13 +318,19 @@ public class BluetoothLeService extends Service {
         }
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        registerReceiver(bluetoothLeServiceReceiver, makeMainBroadcastFilter());
+    }
+
     /*======================================================================
-     *Purpose:与这个类进行绑定的窗口调用了bindService()时,就会触发这个函数.
-     *Parameter:
-     *Return:
-     *Remark:绑定时的标准流程.
-     *======================================================================
-     */
+         *Purpose:与这个类进行绑定的窗口调用了bindService()时,就会触发这个函数.
+         *Parameter:
+         *Return:
+         *Remark:绑定时的标准流程.
+         *======================================================================
+         */
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind: " + "BindService");
@@ -330,6 +343,7 @@ public class BluetoothLeService extends Service {
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
+        unregisterReceiver(bluetoothLeServiceReceiver);
         close();
         return super.onUnbind(intent);
     }
@@ -380,7 +394,7 @@ public class BluetoothLeService extends Service {
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection."+"   mBluetoothGatt.connect():"+mBluetoothGatt.connect());
+            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection." + "   mBluetoothGatt.connect():" + mBluetoothGatt.connect());
             /*必须有过BluetoothDevice的connectGatt()调用,并获得BluetoothGatt的实例对象后,才能调用这个函数.*/
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
@@ -401,7 +415,7 @@ public class BluetoothLeService extends Service {
         // parameter to false.
         /*如果参数2为true,指定的设备一旦进入有效连接范围就自动连接.*/
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection." + "  gatt:  " + mBluetoothGatt);
+        Log.d(TAG, "Trying to create a new connection.     getBluetoothGatt:    " + mBluetoothGatt);
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
 
@@ -428,12 +442,13 @@ public class BluetoothLeService extends Service {
      * released properly.
      */
     public void close() {
+
         if (mBluetoothGatt == null) {
             return;
         }
-
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+
     }
 
     /**
@@ -526,7 +541,36 @@ public class BluetoothLeService extends Service {
         return mConnectionState;
     }
 
-    public BluetoothGattCharacteristic getG_Character_TX(){
+    public BluetoothGattCharacteristic getG_Character_TX() {
         return g_Character_TX;
     }
+
+    public BluetoothGattCharacteristic getG_Character_DeviceName() {
+        return g_Character_DeviceName;
+    }
+
+    private final BroadcastReceiver bluetoothLeServiceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d("serviceBroadReceiver", "onReceive: " + action);
+            switch (action) {
+                case BluetoothDevice.ACTION_PAIRING_REQUEST:
+                    Log.d(TAG, "reConnectBluetooth: ");
+                    BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    break;
+
+            }
+        }
+    };
+
+    private static IntentFilter makeMainBroadcastFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        return intentFilter;
+    }
+
 }

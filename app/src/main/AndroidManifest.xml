@@ -13,9 +13,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!--只为BLE提供服务-->
-    <uses-feature
-       android:name="android.hardware.bluetooth_le" android:required="true"/>
-
+    <!--<uses-feature
+       android:name="android.hardware.bluetooth_le" android:required="true"/>-->
+    <uses-feature android:name="android.bluetooth.le" android:required="true"/>
     <application
         android:name="com.yihai.wu.appcontext.MyApplication"
         android:allowBackup="true"

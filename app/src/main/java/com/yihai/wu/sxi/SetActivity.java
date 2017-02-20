@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 
@@ -48,7 +49,9 @@ public class SetActivity extends AppCompatActivity {
     int select = 0;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
+    private BluetoothGattCharacteristic g_Character_DeviceName;
     private static final String TAG = "SetActivity";
+    private String deviceName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,7 +59,6 @@ public class SetActivity extends AppCompatActivity {
         setContentView(R.layout.activity_set);
         initView();
         status = (TextView) findViewById(R.id.connect_state);
-
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -105,16 +107,15 @@ public class SetActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
+            Log.d(TAG, "onServiceConnected: "+mBluetoothLeService);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 status.setText("未连接");
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 status.setText("已连接");
             }
-
-            Log.d("setActivity", "onServiceConnected: " + mBluetoothLeService);
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
-
-
+            g_Character_DeviceName = mBluetoothLeService.getG_Character_DeviceName();
+            Log.d("setActivityInService", "onServiceConnected: " + mBluetoothLeService+"  character_TX:  "+g_Character_TX+"    "+deviceName);
         }
 
         @Override
@@ -132,6 +133,18 @@ public class SetActivity extends AppCompatActivity {
         return intentFilter;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(!deviceName.equals(et.getText().toString())){
+            ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+            connectedDevice.deviceName = et.getText().toString();
+            connectedDevice.save();
+        }
+        if(g_Character_DeviceName!=null&&!deviceName.equals(et.getText().toString())){
+            Sys_SetMyDeviceName(et.getText().toString());
+        }
+    }
 
     private void select_control(String modelC) {
         //        share_editor.putInt("select", s);
@@ -243,6 +256,11 @@ public class SetActivity extends AppCompatActivity {
         btn_back = (DarkImageButton) findViewById(R.id.btn_back);
         btn_back.setOnClickListener(new clickEvent());
         et = (EditText) findViewById(R.id.et);
+        ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+        if(connectedDevice!=null) {
+            et.setText(connectedDevice.deviceName);
+        }
+        deviceName = et.getText().toString();
         et.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -253,6 +271,9 @@ public class SetActivity extends AppCompatActivity {
             }
         });
 
+
+
+
         //跳转到设置详情页
         intent = new Intent(SetActivity.this, SetDetailsActivity.class);
         toMainIntent = new Intent();
@@ -261,7 +282,6 @@ public class SetActivity extends AppCompatActivity {
     private class clickEvent implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            g_Character_TX = mBluetoothLeService.getG_Character_TX();
             switch (view.getId()) {
                 case R.id.btn_back:
                     finish();
@@ -352,6 +372,8 @@ public class SetActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("setActivityInService", "onDestroy: ");
+
         unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
@@ -434,6 +456,24 @@ public class SetActivity extends AppCompatActivity {
 
         } else {
             status.setText("未连接设备");
+        }
+    }
+
+    //修改设备可见名称
+    private void Sys_SetMyDeviceName(String m_MyDeviceName) {
+        // Send a message using content of the edit text widget
+        int m_Length = 0;
+        if (m_MyDeviceName.equals(deviceName) == true) {
+            return;
+        }
+        m_Length = m_MyDeviceName.length();
+        if (m_Length > 0) {
+
+            byte[] m_Data = m_MyDeviceName.getBytes();
+            if (g_Character_DeviceName != null) {
+                g_Character_DeviceName.setValue(m_Data);
+                mBluetoothLeService.writeCharacteristic(g_Character_DeviceName);
+            }
         }
     }
 }
