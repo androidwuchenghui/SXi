@@ -154,6 +154,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     @Override
     protected void init() {
         Log.d(TAG, "init: " + "初始化");
+
         initView();
 
 
