@@ -21,7 +21,7 @@ public class Textures extends Model {
     //功率虚线的数据（可动）
     @Column(name = "data2")
     public int dash = 50;
-    //功率虚线的数据（可动）
+    //温度虚线的数据（可动）
     @Column(name = "dashInTemper")
     public int dashValueInTemper = 200;
     //℃温度曲线的数据（不可动）

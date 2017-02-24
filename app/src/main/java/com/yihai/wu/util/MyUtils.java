@@ -114,4 +114,12 @@ public class MyUtils {
             return isClick2;
         }
     }
+    public static byte[] intToBytes(int num) {
+        byte[] b = new byte[2];
+        for (int i = 0; i < 2; i++) {
+            b[i] = (byte) (num >>> (8 - i * 8));
+        }
+
+        return b;
+    }
 }

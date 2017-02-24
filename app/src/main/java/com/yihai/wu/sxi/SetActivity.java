@@ -419,8 +419,8 @@ public class SetActivity extends AppCompatActivity {
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
         m_Data_DeviceSetting[1] = (byte) 0xFF;
-        m_Data_DeviceSetting[3] = 0x01; //Device ID
-        m_Data_DeviceSetting[2] = 0x04;
+        m_Data_DeviceSetting[3] = 0x01;
+        m_Data_DeviceSetting[2] = 0x04;         // ----
         m_Data_DeviceSetting[4] = 0x59;
         m_Data_DeviceSetting[5] = 0x11;
         m_Data_DeviceSetting[6] = b;
