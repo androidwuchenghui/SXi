@@ -157,7 +157,6 @@ public class BluetoothLeService extends Service {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
-
                 List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
                 for (BluetoothGattService supportedGattService : supportedGattServices) {
                     List<BluetoothGattCharacteristic> gattCharacteristics =
@@ -187,8 +186,8 @@ public class BluetoothLeService extends Service {
         }
 
         /*
-         *Remark:当BluetoothLeService执行了BluetoothGatt类的readCharacteristic(),会触发这个函数.
-         */
+                 *Remark:当BluetoothLeService执行了BluetoothGatt类的readCharacteristic(),会触发这个函数.
+                 */
         // Result of a characteristic read operation
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,

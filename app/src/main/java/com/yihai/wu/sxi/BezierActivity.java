@@ -183,7 +183,7 @@ public class BezierActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: allReceive   :    "+s);
+                    Log.d(TAG, "onReceive: allReceive   :    " + s);
                     if (startReadPowerCurveData) {
                         Log.d("ReadPowerCurveData", s);
                         //处理收到的功率曲线的数据
@@ -197,7 +197,7 @@ public class BezierActivity extends AppCompatActivity {
                     if (startReadMiddleLine) {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
-                    if(saveCurve){
+                    if (saveCurve) {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
                     break;
@@ -421,6 +421,7 @@ public class BezierActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
+            Log.d(TAG, "onServiceConnected: BezierActivity service connect");
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {             //   功率曲线上的点的数据   序号00     第一组的25个点
                 startReadPowerCurveData = true;
@@ -553,7 +554,7 @@ public class BezierActivity extends AppCompatActivity {
         myChart.setLineChartData(data);
         myChart.setViewportCalculationEnabled(false);
         //坐标的视图范围
-        Viewport v = new Viewport(0, 200, 10, 0);
+        Viewport v = new Viewport(0, 210, 10, 0);
         myChart.setMaximumViewport(v);
         myChart.setCurrentViewport(v);
         myChart.setZoomType(ZoomType.HORIZONTAL);
@@ -562,7 +563,7 @@ public class BezierActivity extends AppCompatActivity {
         vp.left = 0;
         vp.right = 4;//显示的点
         vp.bottom = 0;
-        vp.top = 200;
+        vp.top = 210;
         myChart.setCurrentViewport(vp);
         myChart.setZoomEnabled(false);
         myChart.setOnTouchListener(new myChartTouchListener());
@@ -657,7 +658,7 @@ public class BezierActivity extends AppCompatActivity {
 
         // And set initial max viewport and current viewport- remember to set viewports after data.
         //坐标的视图范围
-        Viewport v = new Viewport(0, 200, 10, 0);
+        Viewport v = new Viewport(0, 210, 10, 0);
         myChart.setMaximumViewport(v);
         myChart.setCurrentViewport(v);
         myChart.setZoomType(ZoomType.HORIZONTAL);
@@ -666,7 +667,7 @@ public class BezierActivity extends AppCompatActivity {
         vp.left = 0;
         vp.right = 4;//显示的点
         vp.bottom = 0;
-        vp.top = 200;
+        vp.top = 210;
         myChart.setCurrentViewport(vp);
         myChart.setZoomEnabled(false);
         myChart.setOnTouchListener(new myChartTouchListener());
@@ -757,7 +758,7 @@ public class BezierActivity extends AppCompatActivity {
         myChart.setLineChartData(lineChartData);
 
         myChart.setViewportCalculationEnabled(false);
-        Viewport v = new Viewport(0, 300, 10, 100);
+        Viewport v = new Viewport(0, 310, 10, 100);
         myChart.setMaximumViewport(v);
         myChart.setCurrentViewport(v);
         myChart.setZoomType(ZoomType.HORIZONTAL);
@@ -766,7 +767,7 @@ public class BezierActivity extends AppCompatActivity {
         vp.left = 0;
         vp.right = 4;//显示的点
         vp.bottom = 0;
-        vp.top = 300;
+        vp.top = 310;
         myChart.setCurrentViewport(vp);
         myChart.setZoomEnabled(false);
         myChart.setOnTouchListener(new myChartTouchListener());
@@ -1209,7 +1210,8 @@ public class BezierActivity extends AppCompatActivity {
             Thread powerThred = new Thread() {
 
 
-                public byte[] bytes;
+                private byte[] powerBytes;
+                private byte[] temperBytes;
 
                 @Override
                 public void run() {
@@ -1271,37 +1273,41 @@ public class BezierActivity extends AppCompatActivity {
                     arrTemp[99] = (int) line3.getValues().get(20).getY();
                     Log.d(TAG, "runInThread: k:  " + k + "   a:  " + a + "   b:  " + b + "   功率数据：  " + arrPower + "   温度数据：  " + arrTemp);
                     b = 0;
-                                        for (int i = 0; i < arrPower.length; i++) {
-                                            if (i == arrPower.length - 1) {
-                                                sb1 = sb1.append(arrPower[i]);
-                                            } else {
-                                                sb1 = sb1.append(arrPower[i] + ",");
-                                            }
-                                        }
-
-                    for (int i = 0; i <arrPower.length ; i++) {
-                        byte[] getBytes = intToBytes(arrPower[i]*10);
-                        if(i==0){
-                            bytes = getBytes;
-                        }else {
-                            bytes = byteMerger(bytes, getBytes);
+                    for (int i = 0; i < arrTemp.length; i++) {
+                        if (i == arrPower.length - 1) {
+                            sb1 = sb1.append(arrPower[i]);
+                        } else {
+                            sb1 = sb1.append(arrPower[i] + ",");
                         }
                     }
-//                    Log.d(TAG, "run: get100    :      " + sb1);
-                    Log.d(TAG, "run: subBytes   :   "+BinaryToHexString(bytes)+"   sb:   "+sb1+"   length:   "+ bytes.length);
+                    //把Power曲线的坐标值转换成  byte[]
+                    for (int i = 0; i < arrPower.length; i++) {
+                        byte[] getBytes = intToBytes(arrPower[i] * 10);
+                        if (i == 0) {
+                            powerBytes = getBytes;
+                        } else {
+                            powerBytes = byteMerger(powerBytes, getBytes);
+                        }
+                    }
+                    //把Temper曲线的坐标值转换成  byte[]
+                    for (int i = 0; i < arrTemp.length; i++) {
+                        byte[] getBytes = intToBytes(arrTemp[i] * 10);
+                        if (i == 0) {
+                            temperBytes = getBytes;
+                        } else {
+                            temperBytes = byteMerger(temperBytes, getBytes);
+                        }
+                    }
 
 
                     sb1.setLength(0);
                     //      发送数据-----
-                    if(g_Character_TX!=null) {
-//                        for (int i = 0; i < 4; i++) {
-                                int i = 0;
-                            byte[] bt = subBytes(bytes, i*50, 50);
-                            Log.d(TAG, "run:subBytes    i:    "+i+"     "+BinaryToHexString(bt)+"       "+bt.length);
-                            powerCurve_SendData((byte) i, (byte) 0x04,userOrder,bt);
-//                        }
-
+                    if (g_Character_TX != null) {
+                        sendCurveDataToDevice((byte) 0x4E,powerBytes);
+                        sendCurveDataToDevice((byte) 0x6A,temperBytes);
+                        sendMiddleLineDataToDevice();
                     }
+
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -1344,10 +1350,14 @@ public class BezierActivity extends AppCompatActivity {
                     super.run();
 
                 }
+
+
             };
             pool.execute(powerThred);
         }
     }
+
+
 
     private void changeForBehindWave(int index, Line line) {
         currentMoveLineList.remove(currentMoveLineList.size() - 1);
@@ -1558,7 +1568,7 @@ public class BezierActivity extends AppCompatActivity {
             return;
         }
         String s = BinaryToHexString(m_MyData);
-        Log.d(TAG, "sendData:  write into:    "+s+"    length:   "+m_Length);
+        Log.d(TAG, "send50Data:   write into:    " + s + "    length:   " + m_Length);
         g_Character_TX.setValue(m_MyData);
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
@@ -1645,7 +1655,7 @@ public class BezierActivity extends AppCompatActivity {
                 }
                 break;
             case 0x4F:
-                Log.d(TAG, "sendDataBack:   "+" "+BinaryToHexString(m_Data));
+                Log.d(TAG, "sendDataBack:   " + " " + BinaryToHexString(m_Data));
                 break;
         }
     }
@@ -1668,22 +1678,72 @@ public class BezierActivity extends AppCompatActivity {
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
 
-    public void powerCurve_SendData(byte mm,byte rr,byte ll,byte[] qq){
-        byte[] m_Data_DeviceSetting = new byte[80];
+    //发送曲线数据      手机  ---->  设备
+    private void curve_SendData(byte function,byte mm, byte rr, byte ll, byte[] qq) {
+
+        byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
         m_Data_DeviceSetting[1] = (byte) 0xFF;
         m_Data_DeviceSetting[3] = 0x01;
-        m_Data_DeviceSetting[2] =0x37;           //从3开始的个数   55
-        m_Data_DeviceSetting[4] = (byte) 0x4E;
+        m_Data_DeviceSetting[2] = 0x37;           //从3开始的个数   55
+        m_Data_DeviceSetting[4] = function;
         m_Data_DeviceSetting[5] = mm;           //  本次发送的数据块在整个功率曲线数据包中的序号
         m_Data_DeviceSetting[6] = rr;           //  本次要发送的整个功率曲线数据包含的数据块数量
         m_Data_DeviceSetting[7] = ll;           //  功率曲线的用户编号.(设备可能存储多条用户曲线.)  S1 ~ S5
-
-        for (int i = 0; i < qq.length; i++) {
-            m_Data_DeviceSetting[8+i] = qq[i];
+        for (int i = 0; i < 12; i++) {
+            m_Data_DeviceSetting[8 + i] = qq[i];
         }
-        m_Length = qq.length+8;
+        m_Length = 20;
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+    //曲线数据包2
+    private void sendQ2(byte[] qq) {
+        int m_Length = 20;
+        byte[] m_Data_DeviceSetting = new byte[32];
+        for (int i = 0; i < 20; i++) {
+            m_Data_DeviceSetting[i] = qq[i + 12];
+        }
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+    //曲线数据包3
+    private void sendQ3(byte[] qq) {
+        int m_Length = 18;
+        byte[] m_Data_DeviceSetting = new byte[32];
+        for (int i = 0; i < 18; i++) {
+            m_Data_DeviceSetting[i] = qq[i + 32];
+        }
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+    private void sendCurveDataToDevice(byte function,byte [] data) {
+        for (int i = 0; i < 4; i++) {
+            byte[] bt = subBytes(data, i * 50, 50);
+            Log.d(TAG, "run:send50Data  Prepare    i:    " + i + "     " + BinaryToHexString(bt) + "       " + bt.length);
+            //  开始发送
+            curve_SendData(function,(byte) i, (byte) 0x04, userOrder, bt);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //  第二个数据包
+            sendQ2(bt);
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //  第三个数据包
+            sendQ3(bt);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendMiddleLineDataToDevice() {
     }
 }
