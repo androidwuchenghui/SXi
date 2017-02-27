@@ -160,6 +160,7 @@
                 android:textSize="30sp"/>
 
             <TextView
+                android:id="@+id/coupleUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
@@ -171,7 +172,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/dash"
+            android:id="@+id/dashLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -188,6 +189,7 @@
                 android:textSize="30sp"/>
 
             <TextView
+                android:id="@+id/singleUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

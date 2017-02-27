@@ -78,10 +78,13 @@ public class MyModel extends Model {
         myModel.texture =2;
         //记忆模式选择
         myModel.memory = 0;
-
+        //温度单位
         myModel.temperatureUnit = 0;
+        //功率焦耳切换
         myModel.JouleOrPower = 0;
+        //操作模式
         myModel.operation = 1;
+
         myModel.temperature = 291;
         myModel.temperature_c = 25;
         myModel.tcr = 50;

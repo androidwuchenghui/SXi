@@ -18,10 +18,10 @@ public class Textures extends Model {
     //功率曲线的数据
     @Column(name = "data1")
     public String arr1;
-    //功率虚线的数据（可动）
+    //功率虚线的数据
     @Column(name = "data2")
     public int dash = 50;
-    //温度虚线的数据（可动）
+    //温度虚线的数据
     @Column(name = "dashInTemper")
     public int dashValueInTemper = 200;
     //℃温度曲线的数据（不可动）
