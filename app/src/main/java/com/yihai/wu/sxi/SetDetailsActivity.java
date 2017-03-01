@@ -141,6 +141,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     private boolean mergerData = false;
     private int jouleOrPower;
     private boolean mergerDataOver = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,35 +175,31 @@ public class SetDetailsActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
                     Log.d(TAG, "receiveInfo: " + s);
-                    if(TAG=="SetDetailsActivity") {
-                        if (mergerData) {
-                            if (receiveCount == 1) {
-                                mergerDataOver = true;
-                                byte[] mergerBytes = byteMerger(firstByteArray, data);
-                                String result = first + s;
-                                receiveCount = 0;
-                                Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
-                                mergerData = false;
 
-                                receiveCount = 0;
-                                first = "";
-                                Sys_YiHi_Protocol_RX_Porc(mergerBytes);
+                    if (mergerData) {
+                        if (receiveCount == 1) {
+                            mergerDataOver = true;
+                            byte[] mergerBytes = byteMerger(firstByteArray, data);
+                            String result = first + s;
+                            Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
+                            mergerData = false;
 
-                            } else {
-                                mergerDataOver = false;
-                                first += s;
-                                Log.d(TAG, "mergerBytes: 一段：" + first);
-                                firstByteArray = new byte[data.length];
-                                firstByteArray = data;
+                            receiveCount = 0;
+                            first = "";
+                            Sys_YiHi_Protocol_RX_Porc(mergerBytes);
 
-                                receiveCount++;
-                            }
-
+                        } else {
+                            mergerDataOver = false;
+                            first += s;
+                            Log.d(TAG, "mergerBytes: 一段：" + first);
+                            firstByteArray = new byte[data.length];
+                            firstByteArray = data;
+                            receiveCount++;
                         }
-                        Log.d(TAG, "onReceiveRX: 设置详情页收到的数据：  " + s + "     ");
-
+                    } else {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
+
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectState.setText("未连接");
@@ -318,7 +315,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         rb_M.setChecked(true);
         //温度单位选择
         int temperatureUnit = myModel.temperatureUnit;
-       RadioButton rb_TempUnit= (RadioButton) rgUnitTemperature.getChildAt(temperatureUnit);
+        RadioButton rb_TempUnit = (RadioButton) rgUnitTemperature.getChildAt(temperatureUnit);
         rb_TempUnit.setChecked(true);
         //功率焦耳切换
         jouleOrPower = myModel.JouleOrPower;
@@ -763,7 +760,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Command = m_Data[(m_Index + 4)];
         m_SecondCommand = m_Data[(m_Index + 5)];
         Log.d(TAG, "onReceiveMainActivity: " + m_Command);
-        if (m_Command == 0x58 && m_SecondCommand == 0x0F&&m_Data.length==7)
+        if (m_Command == 0x58 && m_SecondCommand == 0x0F && m_Data.length == 7)
         //获得功率焦耳切换
         {
             s = BinaryToHexString(m_Data);
@@ -784,7 +781,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                 if (m_Data[5] == 0x01) {
 
                     final int waitTime = ((m_Data[8] & 0xff) << 8) | (m_Data[9] & 0xff);
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间：" +BinaryToHexString(m_Data) +"   "+ waitTime);
+                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间：" + BinaryToHexString(m_Data) + "   " + waitTime);
 
                     new Thread() {
                         @Override
@@ -834,7 +831,8 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + TCR_Value);
 
                     //获得温度调节范围
-//                    getUserDeviceSetting((byte)0x09);
+                    getUserDeviceSetting((byte) 0x09);
+                    mergerData = true;
                 }
                 break;
             case 0x58:
@@ -845,14 +843,30 @@ public class SetDetailsActivity extends AppCompatActivity {
                 } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
                     int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
                     seekBarSetJoule.setProgress(setJouleNum - 100);
-                }else if(m_Data[5]==0x09&&mergerDataOver==true){
-                    mergerDataOver=false;
-                    Log.d(TAG, "temperInfo: 温度范围合并后： "+m_Data.length);
+                } else if (m_Data[5] == 0x09 && mergerDataOver) {
+                    mergerDataOver = false;
+                    Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length);
                     int tempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
                     int tempMin_C = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
                     int tempMax_F = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
                     int tempMin_F = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "temperInfo   "+tempMax_C+"  "+tempMin_C+"  "+tempMax_F+"  "+tempMin_F);
+                    Log.d(TAG, "获得温度调节范围： temperInfo   "+tempMax_C+"  "+tempMin_C+"  "+tempMax_F+"  "+tempMin_F);
+                    getUserDeviceSetting((byte) 0x0A);
+                    mergerData = true;
+                }else if(m_Data[5]==0x0A&&mergerDataOver){
+                    int compensateTempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    int compensateTempMin_C = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    int compensateTempMax_F = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    int compensateTempMin_F = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "获得补偿温度调节范围： temperInfo   "+compensateTempMax_C+"   "+compensateTempMin_C+"   "+compensateTempMax_F+"   "+compensateTempMin_F);
+                    getUserDeviceSetting((byte) 0x0D);
+                    mergerData = true;
+                }else if(m_Data[5]==0x0D&&mergerDataOver){
+                    int a = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    int b = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    int c = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    int d = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "功率焦耳切换时范围  temperInfo: "+ a+"   "+b+ "   "+"   "+c+"    "+d);
                 }
                 break;
         }
@@ -903,13 +917,14 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Data[0] = 0x55;
         m_Data[1] = (byte) 0xFF;
         m_Data[3] = 0x01; //Device ID
-        m_Data[2] = 0x4;
+        m_Data[2] = 0x04;
         m_Data[4] = 0x5F;
         m_Data[5] = packNumber;
         m_Data[6] = 0x01;
         m_length = 7;
         Sys_Proc_Charactor_TX_Send(m_Data, m_length);
     }
+
     //读取setting包的处理结果
     private void getSettingPackage_ReadData_GetResult() {
         mergerData = true;
@@ -984,11 +999,10 @@ public class SetDetailsActivity extends AppCompatActivity {
         m_Length = 11;
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
     }
-    private byte getSetting;
+
     //获取数据
     public void getUserDeviceSetting(byte nn) {
-        getSetting = nn;
-//        mergerData = true;
+        //        mergerData = true;
         byte[] m_Data = new byte[32];
         int m_length = 0;
         m_Data[0] = 0x55;

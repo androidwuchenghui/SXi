@@ -34,11 +34,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.activeandroid.query.Delete;
 import com.yihai.wu.appcontext.ConnectedBleDevices;
-import com.yihai.wu.util.MyUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -47,7 +53,7 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
-
+    ExecutorService pool = Executors.newFixedThreadPool(4);
     /*mBluetoothManager=蓝牙管理器.在initialize()创建.*/
     private BluetoothManager mBluetoothManager;
     /*mBluetoothAdapter=蓝牙适配器,在initialize()创建.*/
@@ -77,6 +83,15 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.PASSWORD";
     public final static String ACTION_DATA_RX =
             "com.example.bluetooth.le.RX";
+    public final static String ACTION_LAND_SUCCESS =
+            "com.example.bluetooth.le.LandingSuccess";
+    public final static String ACTION_LOGIN_FAILED =
+            "com.example.bluetooth.le.LoginFailed";
+    public final static String ACTION_NOT_BELONG =
+            "com.example.bluetooth.le.Does not belong to the company";
+     public final static String ACTION_THREE_SUBMISSION_FAILED=
+            "com.example.bluetooth.le.Three submission failed";
+
 
     /*自定义广播消息:一个特性的数据发送完成.*/
     public final static String ACTION_BLE_DATA_TX_OK =
@@ -111,6 +126,8 @@ public class BluetoothLeService extends Service {
 
     private BluetoothGattCharacteristic g_Character_TX;
     private BluetoothGattCharacteristic g_Character_DeviceName;
+    private BluetoothDevice device;
+
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     //连接回掉
@@ -145,6 +162,17 @@ public class BluetoothLeService extends Service {
                     connectedDevice.save();
                 }
                 broadcastUpdate(intentAction);
+                if(disconStatus==129){
+                    mBluetoothAdapter.disable();
+                    try {
+                        Thread.sleep(800);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mBluetoothAdapter.enable();
+
+                    connect(connectedAddress);
+                }
 
             }
 
@@ -154,35 +182,46 @@ public class BluetoothLeService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             Log.d("onServicesDiscovered", "onServicesDiscovered: status:  " + status + "    services:    " + gatt.getServices());
-
+            disconStatus = status;
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
-                List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
-                for (BluetoothGattService supportedGattService : supportedGattServices) {
-                    List<BluetoothGattCharacteristic> gattCharacteristics =
-                            supportedGattService.getCharacteristics();
-                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                        if (g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())) {
-                            g_Character_TX = gattCharacteristic;
-                        }
-                        if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
-                            g_Character_DeviceName = gattCharacteristic;
-                        }
+                //                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
+
+
+                //                for (BluetoothGattService supportedGattService : supportedGattServices) {
+                //                    List<BluetoothGattCharacteristic> gattCharacteristics =
+                //                            supportedGattService.getCharacteristics();
+                //                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                //                        if (g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())) {
+                //                            g_Character_TX = gattCharacteristic;
+                //                        }
+                //                        if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
+                //                            g_Character_DeviceName = gattCharacteristic;
+                //                        }
+                //                    }
+                //                }
+
+                 Thread serviceThread = new Thread(){
+                    @Override
+                    public void run() {
+                        List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
+                        displayGattServices(supportedGattServices);
+                        super.run();
                     }
-                }
+                };
+                pool.execute(serviceThread);
             }
-//            else if (status == 129) {
-//                Log.d(TAG, "status = 129: -----发出129");
-//                mBluetoothAdapter.disable();
-//                Timer single_timer = new Timer();
-//                single_timer.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        mBluetoothAdapter.enable();
-//                        broadcastUpdate("129");
-//                    }
-//                }, 2500);
-//            }
+            //            else if (status == 129) {
+            //                Log.d(TAG, "status = 129: -----发出129");
+            //                mBluetoothAdapter.disable();
+            //                Timer single_timer = new Timer();
+            //                single_timer.schedule(new TimerTask() {
+            //                    @Override
+            //                    public void run() {
+            //                        mBluetoothAdapter.enable();
+            //                        broadcastUpdate("129");
+            //                    }
+            //                }, 2500);
+            //            }
         }
 
         /*
@@ -193,12 +232,46 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
+            Log.d(TAG, "onCharacteristicRead: " + characteristic.getUuid() + ">>>：" + g_UUID_Charater_CustomerID);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-                Log.d(TAG, "onCharacteristicRead: " + characteristic.getUuid() + ">>>：" + g_UUID_Charater_CustomerID);
+
                 if (characteristic.getUuid().equals(g_UUID_Charater_CustomerID)) {
                     Log.d(TAG, "onCharacteristicRead: 发出广播");
-                    broadcastUpdate("com.id", characteristic);
+
+                    byte[] data = characteristic.getValue();
+                    readID = BinaryToHexString(data);
+
+                    if (readID.equals("0601")) {
+                        //确认为本公司产品之后，产生6位随机密码
+                        sb = new StringBuilder();
+                        for (int i = 0; i < 6; i++) {
+                            int random = (int) (Math.random() * 100);
+                            if (random % 3 == 0) {
+                                //number
+                                int n = (int) (Math.random() * 10);
+                                sb.append(n);
+                            } else if (random % 3 == 1) {
+                                //big letter
+                                int bl = (int) (Math.random() * 26) + 65;
+                                sb.append((char) bl);
+                            } else {
+                                // small letter
+                                int sl = (int) (Math.random() * 26) + 97;
+                                sb.append((char) sl);
+                            }
+                        }
+                        changeTo = DEFAULT_PASSWORD + sb.toString();
+                        Log.d(TAG, "onReceive: " + changeTo);
+                        commit_amount = 2;
+                        reChange++;
+                        commitPassword(changeTo);
+                    } else {
+                        //断开连接(流程结束)
+                        disconnect();
+                        new Delete().from(ConnectedBleDevices.class).execute();
+                        broadcastUpdate(BluetoothLeService.ACTION_NOT_BELONG);
+                    }
                 }
             }
         }
@@ -234,17 +307,48 @@ public class BluetoothLeService extends Service {
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
-            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + ">>>" + g_UUID_Charater_Password_C2);
+            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
             if (characteristic.getUuid().equals(g_UUID_Charater_Password_C2)) {
-                Log.d(TAG, "onCharacteristicChanged: 提交返回");
-                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
+                //                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
+
+                byte[] data = characteristic.getValue();
+                final String reply = BinaryToHexString(data);
+                Log.d(TAG, "onCharacteristicChanged:  reply : " + reply);
+                pool.execute(new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        try {
+                            sleep(0);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (commit_amount == 0) {
+                            handlePasswordCallbacks(reply);
+                        } else if (commit_amount == 1) {
+                            //      处理提交亿海产品密码后的返回
+                            handleSecondPasswordCallback(reply);
+                        } else if (commit_amount == 2) {
+                            //         处理修改密码的返回
+
+                            handleChangePassword(reply);
+                        } else if (commit_amount == 3) {
+                            Log.d(TAG, "handleChangePassword: " + "修改密码后再提交一次");
+                            handleLastPassword(reply);
+                        }
+                    }
+                });
+
             } else if (characteristic.getUuid().equals(g_UUID_Charater_ReadData)) {
-                Log.d(TAG, "onCharacteristicChanged:  RX" + MyUtils.BinaryToHexString(characteristic.getValue()));
+                Log.d(TAG, "onCharacteristicChanged:  RX" + BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
             }
 
         }
     };
+    private String readID;
+    private int disconStatus;
+
 
     /*======================================================================
      *Purpose:向外广播一个字符串信息.
@@ -321,6 +425,7 @@ public class BluetoothLeService extends Service {
     public void onCreate() {
         super.onCreate();
         registerReceiver(bluetoothLeServiceReceiver, makeMainBroadcastFilter());
+
     }
 
     /*======================================================================
@@ -384,7 +489,7 @@ public class BluetoothLeService extends Service {
      * callback.
      */
     public boolean connect(final String address) {
-
+        connectedAddress = address;
         if (mBluetoothAdapter == null || address == null) {
             Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
@@ -458,6 +563,7 @@ public class BluetoothLeService extends Service {
      * @param characteristic The characteristic to read from.
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        Log.d(TAG, "readCharacteristic: 读特征值    gatt:  "+mBluetoothGatt+"    "+characteristic.getUuid());
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -502,6 +608,7 @@ public class BluetoothLeService extends Service {
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+
 
         //FFC2特征值，获得通知
         //        if(g_UUID_Charater_Password_C2.equals(characteristic.getUuid())){
@@ -572,4 +679,335 @@ public class BluetoothLeService extends Service {
         return intentFilter;
     }
 
+    public void setBluetoothDevice(BluetoothDevice connectedDevice) {
+        device = connectedDevice;
+    }
+
+    public BluetoothDevice getDevice() {
+        return device;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------
+    private final String LIST_NAME = "NAME";
+    private final String LIST_UUID = "UUID";
+    private BluetoothGattCharacteristic g_Character_RX;
+    private BluetoothGattCharacteristic g_Character_CustomerID;
+    private BluetoothGattCharacteristic g_Character_Password;
+    private BluetoothGattCharacteristic g_Character_Password_Notify;
+    private String connectedAddress;
+    private StringBuilder sb;
+    private String changeTo;
+    private int reChange = 0;
+
+    private void displayGattServices(List<BluetoothGattService> gattServices) {
+        if (gattServices == null)
+            return;
+        String uuid = null;
+        boolean m_b_Check_TX = false;
+        boolean m_b_Check_RX = false;
+        boolean m_b_ConfigEnable = false;
+        boolean m_b_Check_DeviceName = false;
+        boolean m_b_Check_Password = false;
+        boolean m_b_Notify_Password = false;
+        String unknownServiceString = getResources().getString(R.string.unknown_service);
+        String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
+        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
+        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData
+                = new ArrayList<ArrayList<HashMap<String, String>>>();
+        //        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+        for (BluetoothGattService gattService : gattServices) {
+            HashMap<String, String> currentServiceData = new HashMap<String, String>();
+            uuid = gattService.getUuid().toString();
+            if (g_UUID_Service_SendData.equals(gattService.getUuid())) {
+                Log.e(TAG, "Service TX found");
+                m_b_Check_TX = true;
+            } else {
+                m_b_Check_TX = false;
+            }
+            if (g_UUID_Service_ReadData.equals(gattService.getUuid())) {
+                m_b_Check_RX = true;
+            } else {
+                m_b_Check_RX = false;
+            }
+            if (g_UUID_Service_DeviceConfig.equals(gattService.getUuid())) {
+                m_b_Check_DeviceName = true;
+            } else {
+                m_b_Check_DeviceName = false;
+            }
+
+            if (g_UUID_Service_Password.equals(gattService.getUuid())) {
+                m_b_Check_Password = true;
+            } else {
+                m_b_Check_Password = false;
+            }
+            //currentServiceData.put(
+            //        LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
+            currentServiceData.put(
+                    LIST_NAME, MyGattAttributes.lookup(uuid, unknownServiceString));
+
+            currentServiceData.put(LIST_UUID, uuid);
+            gattServiceData.add(currentServiceData);
+
+            ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
+                    new ArrayList<HashMap<String, String>>();
+            List<BluetoothGattCharacteristic> gattCharacteristics =
+                    gattService.getCharacteristics();
+            ArrayList<BluetoothGattCharacteristic> charas =
+                    new ArrayList<BluetoothGattCharacteristic>();
+
+            // Loops through available Characteristics.
+            for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                charas.add(gattCharacteristic);
+                HashMap<String, String> currentCharaData = new HashMap<String, String>();
+                uuid = gattCharacteristic.getUuid().toString();
+                //currentCharaData.put(
+                //        LIST_NAME, SampleGattAttributes.lookup(uuid, unknownCharaString));
+                currentCharaData.put(
+                        LIST_NAME, MyGattAttributes.lookup(uuid, unknownCharaString));
+
+                currentCharaData.put(LIST_UUID, uuid);
+                gattCharacteristicGroupData.add(currentCharaData);
+                /*???????????????????.*/
+                if (m_b_Check_TX == true) {
+                    if (g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())) {
+                        Log.e(TAG, "displayGattServices   TX found :  "+gattCharacteristic.getUuid());
+                        g_Character_TX = gattCharacteristic;
+                        m_b_Check_TX = false;
+                    }
+                }
+                /*???????????????????.*/
+                if (m_b_Check_RX == true) {
+                    if (g_UUID_Charater_ReadData.equals(gattCharacteristic.getUuid())) {
+                        g_Character_RX = gattCharacteristic;
+                        m_b_Check_RX = false;
+                        m_b_ConfigEnable = true;
+                    }
+                }
+                /*????豸?????????.*/
+                if (m_b_Check_DeviceName == true) //?ж??????????豸????????????
+                {
+                    if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
+                        g_Character_DeviceName = gattCharacteristic;//执行功。获得FF91特征。。
+                        Log.d(TAG, "displayGattServices: 设备名称----" + g_Character_DeviceName.getUuid());
+                        //                        Sys_SetMyDeviceName("BleDevice");
+                    } else if (g_UUID_Charater_CustomerID.equals(gattCharacteristic.getUuid())) {
+                        g_Character_CustomerID = gattCharacteristic;
+                        Log.d(TAG, "displayGattServices: 产品识别码：  " + g_Character_CustomerID.getUuid());
+                    }
+
+                }
+                if (m_b_Check_Password == true) {
+                    if (g_UUID_Charater_Password.equals(gattCharacteristic.getUuid())) {
+                        g_Character_Password = gattCharacteristic;
+                    } else if (g_UUID_Charater_Password_C2.equals(gattCharacteristic.getUuid())) {
+                        g_Character_Password_Notify = gattCharacteristic;
+                    }
+
+                }
+
+            }//for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics)-----------
+            //            mGattCharacteristics.add(charas);
+            //            gattCharacteristicData.add(gattCharacteristicGroupData);
+        } //for (BluetoothGattService gattService : gattServices)------------
+
+        /*
+        SimpleExpandableListAdapter gattServiceAdapter = new SimpleExpandableListAdapter(
+                this,
+                gattServiceData,
+                android.R.layout.simple_expandable_list_item_2,
+                new String[] {LIST_NAME, LIST_UUID},
+                new int[] { android.R.id.text1, android.R.id.text2 },
+                gattCharacteristicData,
+                android.R.layout.simple_expandable_list_item_2,
+                new String[] {LIST_NAME, LIST_UUID},
+                new int[] { android.R.id.text1, android.R.id.text2 }
+        );
+        mGattServicesList.setAdapter(gattServiceAdapter);
+        */
+        if (m_b_ConfigEnable == true) {
+            final int charaProp = g_Character_RX.getProperties();
+            Log.e(TAG, "displayGattServices:  RX: " + g_Character_RX.getUuid());
+            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                setCharacteristicNotification(
+                        g_Character_RX, true);
+            }
+        }
+
+        if (g_Character_Password_Notify != null) {
+            final int charaProp = g_Character_Password_Notify.getProperties();
+            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                setCharacteristicNotification(
+                        g_Character_Password_Notify, true);
+            }
+        }
+        //提交密码
+        ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+
+        //判断之前是否记录过设备A的密码
+        if (usedDevice != null) {
+            String password = usedDevice.password;
+            Log.d(TAG, "password: 提交保存的密码:  " + password);
+            commit_amount = 0;
+            commitPassword(password + password);
+
+        } else {
+            Log.d(TAG, "password: 提交默认密码---  000000");
+            commit_amount = 0;
+            ConnectedBleDevices current = new ConnectedBleDevices();
+            current.deviceName = mDeviceName;
+            current.deviceAddress = connectedAddress;
+            current.password = DEFAULT_PASSWORD;
+            current.save();
+            Log.d(TAG, "displayGattServices: " + ConnectedBleDevices.getConnectInfoByAddress(connectedAddress).deviceName);
+            commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
+        }
+    }//displayGattServices()------------------------END
+
+    private int commit_amount = 100;
+    private String mDeviceName;
+    private static final String DEFAULT_PASSWORD = "000000";
+    private static final String YIHI_DEFAULT_PASSWORD = "135246";
+
+    public void setmDeviceName(String mDeviceName) {
+        this.mDeviceName = mDeviceName;
+    }
+
+    public void commitPassword(String password) {
+        Log.d(TAG, "password: 提交密码： 特征值为：   " + g_Character_Password + "   密码为：  " + password);
+        byte[] m_Data = password.getBytes();
+        if (g_Character_Password != null) {
+            g_Character_Password.setValue(m_Data);
+            writeCharacteristic(g_Character_Password);
+        }
+    }
+
+    //首次连接的判断
+    private void isFirst() {
+
+        ConnectedBleDevices theDevice = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+        Log.d(TAG, "passWordisFirst: " + theDevice.isFirst + "  ***");
+        boolean isFirstRun = theDevice.isFirst;
+        if (isFirstRun || (step3 || step5) && commit_amount != 3) {
+            //      获取识别码
+            Log.d(TAG, " passWord    是第一次登陆 获取识别码: ");
+
+            readCharacteristic(g_Character_CustomerID);//读取产品识别码
+
+        } else {
+            //通过用户自己保存的密码，并且不是第一次进入，允许执行正常通信￥￥（流程OK）
+                        Log.d(TAG, "handleChangePassword: 用户通过保存的密码进入      over");
+            //发出登陆成功的广播
+            broadcastUpdate(ACTION_LAND_SUCCESS);
+        }
+
+    }
+
+    private boolean step3 = false;
+    private boolean step5 = false;
+
+    private void handlePasswordCallbacks(String reply) {
+        ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+        Log.d(TAG, "handlePasswordCallbacks: " + "处理返回的密码状态:" + reply);
+        if (reply != null) {
+            //提交密码后判断回馈的信息
+            switch (reply) {
+                case "00":
+                    Log.d(TAG, "handlePasswordCallbacks: 密码提交---正确---");
+                    if (devices.password.equals(DEFAULT_PASSWORD)) {
+                        step3 = true;
+                    }
+                    //判断是不是第一次连接
+                    isFirst();
+
+                    break;
+                case "01":
+                    Log.d(TAG, "displayData: 默认设备密码提交错误--- 开始提交产品密码");
+                    step3 = false;
+                    commit_amount = 1;
+                    devices.password = YIHI_DEFAULT_PASSWORD;
+                    devices.save();
+                    commitPassword(YIHI_DEFAULT_PASSWORD + YIHI_DEFAULT_PASSWORD);
+
+                    break;
+
+            }
+
+        }
+    }
+
+    //再次提交亿海产品默认密码返回结果的处理   5.
+    private void handleSecondPasswordCallback(String str) {
+        Log.d(TAG, "handleSecondPasswordCallback: " + "提交默认产品密码返回处理");
+        ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(device.getAddress());
+        switch (str) {
+            case "00"://正确
+                if (devices.password.equals(YIHI_DEFAULT_PASSWORD)) {
+                    step5 = true;
+                }
+                isFirst();
+
+                break;
+            case "01"://连接失败，删除数据，断开连接(流程结束)
+                disconnect();
+                broadcastUpdate(ACTION_LOGIN_FAILED);
+
+                break;
+        }
+    }
+
+    //修改密码的处理
+    private void handleChangePassword(String str) {
+        switch (str) {
+            case "01":
+                //提交错误，修改失败
+                Log.d(TAG, "handleChangePassword:修改失败 " + reChange);
+                if (reChange == 3) {
+                    disconnect();
+                    broadcastUpdate(BluetoothLeService.ACTION_THREE_SUBMISSION_FAILED);
+
+                } else {
+                    reChange++;
+                    commit_amount = 2;
+                    commitPassword(changeTo);
+                }
+                break;
+            case "02":
+                //修改成功,保存密码，并进行最终连接
+                ConnectedBleDevices changedPassword = ConnectedBleDevices.getConnectInfoByAddress(device.getAddress());
+                String lastPassword = sb.toString();
+                changedPassword.password = lastPassword;
+                changedPassword.isConnected = true;
+                changedPassword.isFirst = false;
+                changedPassword.save();
+
+                commit_amount = 3;
+                step3 = false;
+                step5 = false;
+
+                commitPassword(lastPassword + lastPassword);
+                //连接成功，执行正常通信￥￥ （流程OK）
+                Log.d(TAG, "handleChangePassword: 修改密码并保存     正常连接。。。");
+                //                getConnectedDeviceRealName();
+                //                LandDialog.cancel();
+                //                successDialog.show();
+
+                break;
+        }
+
+    }
+
+    private void handleLastPassword(String reply) {
+        switch (reply) {
+            case "00":
+                Log.d(TAG, "handleLastPassword: " + "终于OK");
+                isFirst();
+                //                getConnectedDeviceRealName();
+                //                LandDialog.cancel();
+                //                successDialog.show();
+                break;
+            case "01":
+
+                break;
+        }
+    }
 }

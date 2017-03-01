@@ -41,6 +41,8 @@ public class ConnectedBleDevices extends Model{
     @Column(name = "softVision")
     public String softVision;
 
+    @Column(name = "lastConnect")
+    public boolean lastConnect = false;
 
     public static ConnectedBleDevices getConnectInfoByName(String name) {
         return new Select().from(ConnectedBleDevices.class).where("deviceName = ?", name).executeSingle();
@@ -53,5 +55,9 @@ public class ConnectedBleDevices extends Model{
 
     public static ConnectedBleDevices getConnectedDevice(){
         return new Select().from(ConnectedBleDevices.class).where("isConnected = ?",true).executeSingle();
+    }
+
+    public static ConnectedBleDevices getLastConnectedDevice(){
+        return new Select().from(ConnectedBleDevices.class).where("lastConnect = ?",true).executeSingle();
     }
 }

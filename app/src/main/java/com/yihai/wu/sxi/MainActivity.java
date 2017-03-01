@@ -1,5 +1,6 @@
 package com.yihai.wu.sxi;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -14,6 +15,9 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -33,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.isGpsEnable;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -84,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 0x09;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -120,7 +126,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initButton();
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
+            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
 
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isGpsEnable(this) == false) {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            this.startActivityForResult(intent, 0x0A);
+        }
     }
 
     @Override
@@ -135,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             connectedState.setText("未连接设备");
         }
     }
-
 
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
         @Override
@@ -172,15 +188,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart: "+mBluetoothLeService);
+        Log.d(TAG, "onStart: " + mBluetoothLeService);
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
-//        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
-//            Log.d(TAG, "onStart: "+mBluetoothLeService);
-//            mBluetoothLeService.connect(ConnectedBleDevices.getConnectedDevice().deviceAddress);
-//        }
+        //        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
+        //            Log.d(TAG, "onStart: "+mBluetoothLeService);
+        //            mBluetoothLeService.connect(ConnectedBleDevices.getConnectedDevice().deviceAddress);
+        //        }
         if (!mBluetoothAdapter.isEnabled()) {
-//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            //            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            //            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             mBluetoothAdapter.enable();
         }
 
@@ -297,11 +313,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: MainActivity");
-//        unregisterReceiver(mainActivityReceiver);
+        //        unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService.close();
         mBluetoothLeService = null;
-//        mBluetoothAdapter.disable();
+        //        mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {
             connectedDevice.isConnected = false;
@@ -398,5 +414,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStop() {
         super.onStop();
         unregisterReceiver(mainActivityReceiver);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0x0A) {
+            if (isGpsEnable(this)) {
+                Log.i("fang", " request location permission success");
+                //Android6.0需要动态申请权限
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    //请求权限
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION},
+                            PERMISSION_REQUEST_COARSE_LOCATION);
+                }
+
+            } else {
+                //若未开启位置信息功能，则退出该应用
+                finish();
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

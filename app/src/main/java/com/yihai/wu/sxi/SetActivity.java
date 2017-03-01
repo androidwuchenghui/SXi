@@ -138,10 +138,13 @@ public class SetActivity extends AppCompatActivity {
         super.onPause();
         if(!deviceName.equals(et.getText().toString())){
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-            connectedDevice.deviceName = et.getText().toString();
-            connectedDevice.save();
+            Log.d(TAG, "onPause: connectedDevice   "+connectedDevice);
+            if(connectedDevice!=null) {
+                connectedDevice.deviceName = et.getText().toString();
+                connectedDevice.save();
+            }
         }
-        if(g_Character_DeviceName!=null&&!deviceName.equals(et.getText().toString())){
+        if(g_Character_DeviceName!=null&&!deviceName.equals(et.getText().toString())&&mBluetoothLeService.getTheConnectedState()==2){
             Sys_SetMyDeviceName(et.getText().toString());
         }
     }
