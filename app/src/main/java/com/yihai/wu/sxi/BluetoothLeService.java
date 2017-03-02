@@ -29,7 +29,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -53,6 +55,7 @@ import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 @SuppressWarnings("unused")
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
+    private SharedPreferences sharedPreferences;
     ExecutorService pool = Executors.newFixedThreadPool(4);
     /*mBluetoothManager=蓝牙管理器.在initialize()创建.*/
     private BluetoothManager mBluetoothManager;
@@ -128,6 +131,21 @@ public class BluetoothLeService extends Service {
     private BluetoothGattCharacteristic g_Character_DeviceName;
     private BluetoothDevice device;
 
+    // Device scan callback. 扫描回掉
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
+                        if(device.getAddress().toString().equals(lastAddress)){
+                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                            Log.d(TAG, "onLeScan: 通过servive自己搜索并连接");
+                            connect(lastAddress);
+                        }
+                }
+            };
+
+
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     //连接回掉
@@ -152,7 +170,7 @@ public class BluetoothLeService extends Service {
                 mBluetoothGatt.discoverServices();
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接");
+                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  "+mBluetoothAdapter);
                 close();
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
@@ -162,17 +180,8 @@ public class BluetoothLeService extends Service {
                     connectedDevice.save();
                 }
                 broadcastUpdate(intentAction);
-                if(disconStatus==129){
-                    mBluetoothAdapter.disable();
-                    try {
-                        Thread.sleep(800);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    mBluetoothAdapter.enable();
 
-                    connect(connectedAddress);
-                }
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
 
             }
 
@@ -348,6 +357,7 @@ public class BluetoothLeService extends Service {
     };
     private String readID;
     private int disconStatus;
+    private String lastAddress;
 
 
     /*======================================================================
@@ -425,7 +435,8 @@ public class BluetoothLeService extends Service {
     public void onCreate() {
         super.onCreate();
         registerReceiver(bluetoothLeServiceReceiver, makeMainBroadcastFilter());
-
+        sharedPreferences = getSharedPreferences("lastConnected",Context.MODE_PRIVATE);
+        lastAddress = sharedPreferences.getString("address",null);
     }
 
     /*======================================================================
@@ -496,17 +507,8 @@ public class BluetoothLeService extends Service {
         }
 
         // Previously connected device.  Try to reconnect.
-        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-                && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection." + "   mBluetoothGatt.connect():" + mBluetoothGatt.connect());
-            /*必须有过BluetoothDevice的connectGatt()调用,并获得BluetoothGatt的实例对象后,才能调用这个函数.*/
-            if (mBluetoothGatt.connect()) {
-                mConnectionState = STATE_CONNECTING;
-                return true;
-            } else {
-                return false;
-            }
-        }
+
+
 
         /*如果用户现在制定的BLE设备地址与先前的不一样,就会到这里执行.*/
         /*获取指定了MAC地址的外部蓝牙设备.*/
@@ -843,24 +845,26 @@ public class BluetoothLeService extends Service {
         //提交密码
         ConnectedBleDevices usedDevice = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
 
-        //判断之前是否记录过设备A的密码
-        if (usedDevice != null) {
-            String password = usedDevice.password;
-            Log.d(TAG, "password: 提交保存的密码:  " + password);
-            commit_amount = 0;
-            commitPassword(password + password);
 
-        } else {
-            Log.d(TAG, "password: 提交默认密码---  000000");
-            commit_amount = 0;
-            ConnectedBleDevices current = new ConnectedBleDevices();
-            current.deviceName = mDeviceName;
-            current.deviceAddress = connectedAddress;
-            current.password = DEFAULT_PASSWORD;
-            current.save();
-            Log.d(TAG, "displayGattServices: " + ConnectedBleDevices.getConnectInfoByAddress(connectedAddress).deviceName);
-            commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
-        }
+            //判断之前是否记录过设备A的密码
+            if (usedDevice != null) {
+                String password = usedDevice.password;
+                Log.d(TAG, "password: 提交保存的密码:  " + password);
+                commit_amount = 0;
+                commitPassword(password + password);
+
+            } else {
+                Log.d(TAG, "password: 提交默认密码---  000000");
+                commit_amount = 0;
+                ConnectedBleDevices current = new ConnectedBleDevices();
+                current.deviceName = mDeviceName;
+                current.deviceAddress = connectedAddress;
+                current.password = DEFAULT_PASSWORD;
+                current.save();
+                Log.d(TAG, "displayGattServices: " + ConnectedBleDevices.getConnectInfoByAddress(connectedAddress).deviceName);
+                commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
+            }
+
     }//displayGattServices()------------------------END
 
     private int commit_amount = 100;
@@ -917,10 +921,18 @@ public class BluetoothLeService extends Service {
                         step3 = true;
                     }
                     //判断是不是第一次连接
-                    isFirst();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        broadcastUpdate(ACTION_LAND_SUCCESS);
+                    }else {
+                        isFirst();
+                    }
 
                     break;
                 case "01":
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        broadcastUpdate(ACTION_LOGIN_FAILED);
+                        break;
+                    }
                     Log.d(TAG, "displayData: 默认设备密码提交错误--- 开始提交产品密码");
                     step3 = false;
                     commit_amount = 1;
@@ -999,7 +1011,7 @@ public class BluetoothLeService extends Service {
     private void handleLastPassword(String reply) {
         switch (reply) {
             case "00":
-                Log.d(TAG, "handleLastPassword: " + "终于OK");
+                Log.d(TAG, "handleLastPassword: " + "OK");
                 isFirst();
                 //                getConnectedDeviceRealName();
                 //                LandDialog.cancel();

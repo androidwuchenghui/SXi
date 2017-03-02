@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState());
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
+                mBluetoothLeService.connect(lastAddress);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectedState.setText("已连接设备");
             }
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 0x09;
+    private String lastAddress;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -138,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }
+        SharedPreferences sp = getSharedPreferences("lastConnected",Context.MODE_PRIVATE);
+        lastAddress = sp.getString("address",null);
     }
 
     @Override
@@ -438,5 +443,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: "+"InMainActivity    address "+lastAddress);
+
+        if(mBluetoothLeService!=null&&mBluetoothLeService.getTheConnectedState()==0&&lastAddress!=null){
+            mBluetoothLeService.connect(lastAddress);
+        }
     }
 }

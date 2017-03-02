@@ -43,7 +43,7 @@ public class DeviceInformationActivity extends BaseActivity {
         int state = getIntent.getIntExtra("connectState", 0);
         if (state == 2) {
             connectState.setText("已连接");
-            ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+            ConnectedBleDevices connectedDevice = ConnectedBleDevices.getLastConnectedDevice();
             nameAfter.setText(connectedDevice.realName);
             softAfter.setText(connectedDevice.softVision);
             idAfter.setText(connectedDevice.deviceID);
