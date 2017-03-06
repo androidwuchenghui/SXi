@@ -74,9 +74,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_char:  "+g_Character_TX);
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_char:  "+g_Character_TX+"   lastConnect  "+lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
+                //   try to connect
                 mBluetoothLeService.connect(lastAddress);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectedState.setText("已连接设备");
@@ -449,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-//        Log.d(TAG, "onResume: "+"InMainActivity    address "+lastAddress+"  s:  "+mBluetoothLeService+"   "+mBluetoothLeService.getTheConnectedState());
+        Log.d(TAG, "onResume: "+"InMainActivity    address "+lastAddress+"  s:  "+mBluetoothLeService+"   ");
 
         if(mBluetoothLeService!=null&&mBluetoothLeService.getTheConnectedState()==0&&lastAddress!=null){
             mBluetoothLeService.connect(lastAddress);
