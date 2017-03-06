@@ -358,6 +358,7 @@ public class BluetoothLeService extends Service {
     private String readID;
     private int disconStatus;
     private String lastAddress;
+    private BluetoothGattCharacteristic g_Character_Baud_Rate;
 
 
     /*======================================================================
@@ -790,11 +791,14 @@ public class BluetoothLeService extends Service {
                 {
                     if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
                         g_Character_DeviceName = gattCharacteristic;//执行功。获得FF91特征。。
-                        Log.d(TAG, "displayGattServices: 设备名称----" + g_Character_DeviceName.getUuid());
+                        Log.d(TAG, "displayGattServices: 设备名特征值----" + g_Character_DeviceName.getUuid());
                         //                        Sys_SetMyDeviceName("BleDevice");
                     } else if (g_UUID_Charater_CustomerID.equals(gattCharacteristic.getUuid())) {
                         g_Character_CustomerID = gattCharacteristic;
-                        Log.d(TAG, "displayGattServices: 产品识别码：  " + g_Character_CustomerID.getUuid());
+                        Log.d(TAG, "displayGattServices: 产品识别码特征值：  " + g_Character_CustomerID.getUuid());
+                    }else if(g_UUID_Charater_Baud_Rate.equals(gattCharacteristic.getUuid())){
+                        g_Character_Baud_Rate = gattCharacteristic;
+                        Log.d(TAG, "displayGattServices: 波特率特征值："+g_Character_Baud_Rate.getUuid());
                     }
 
                 }

@@ -493,7 +493,10 @@ public class SetDetailsActivity extends AppCompatActivity {
             switch (seekBar.getId()) {
                 case R.id.seekBar_adjust_temperature:
                     MyModel myModel = MyModel.getMyModelForGivenName(detail);
-                    int num = seekBar.getProgress() + 100;
+
+                     String str = showAdjustTemperature.getText().toString();
+                    int num = Integer.parseInt(str);
+                    Log.d(TAG, "onStopTrackingTouch: "+str);
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x06, num);
                     }
@@ -502,7 +505,8 @@ public class SetDetailsActivity extends AppCompatActivity {
                     break;
                 case R.id.seekBar_compensation_temperature:
                     MyModel myModel1 = MyModel.getMyModelForGivenName(detail);
-                    int compensation_temperature_num = seekBar.getProgress();
+                    String show_C = showCompensationTemperature.getText().toString();
+                    int compensation_temperature_num = Integer.parseInt(show_C);
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x07, compensation_temperature_num);
                     }
