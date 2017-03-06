@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState());
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_char:  "+g_Character_TX);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
                 mBluetoothLeService.connect(lastAddress);
@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         SharedPreferences sp = getSharedPreferences("lastConnected",Context.MODE_PRIVATE);
         lastAddress = sp.getString("address",null);
+        Log.d(TAG, "onCreate:         "+lastAddress);
     }
 
     @Override
@@ -448,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: "+"InMainActivity    address "+lastAddress);
+//        Log.d(TAG, "onResume: "+"InMainActivity    address "+lastAddress+"  s:  "+mBluetoothLeService+"   "+mBluetoothLeService.getTheConnectedState());
 
         if(mBluetoothLeService!=null&&mBluetoothLeService.getTheConnectedState()==0&&lastAddress!=null){
             mBluetoothLeService.connect(lastAddress);

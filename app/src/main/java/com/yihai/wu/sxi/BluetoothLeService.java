@@ -137,15 +137,16 @@ public class BluetoothLeService extends Service {
 
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
+                    Log.d(TAG, "onLeScan: "+device.getAddress());
                         if(device.getAddress().toString().equals(lastAddress)){
-                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                            keepSearch = false;
                             Log.d(TAG, "onLeScan: 通过servive自己搜索并连接");
                             connect(lastAddress);
                         }
                 }
             };
 
-
+private boolean keepSearch;
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     //连接回掉
@@ -170,7 +171,7 @@ public class BluetoothLeService extends Service {
                 mBluetoothGatt.discoverServices();
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  "+mBluetoothAdapter);
+
                 close();
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
@@ -180,8 +181,25 @@ public class BluetoothLeService extends Service {
                     connectedDevice.save();
                 }
                 broadcastUpdate(intentAction);
+                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  "+mBluetoothAdapter);
+                keepSearch = true;
+                pool.execute(new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        while (keepSearch) {
+                            mBluetoothAdapter.startLeScan(mLeScanCallback);
+                            try {
+                                sleep(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                        }
 
-                mBluetoothAdapter.startLeScan(mLeScanCallback);
+                    }
+                });
+
 
             }
 
@@ -462,6 +480,12 @@ public class BluetoothLeService extends Service {
         unregisterReceiver(bluetoothLeServiceReceiver);
         close();
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onServiceDestroy: ");
     }
 
     /*mBinder=要交给与这个类绑定的ServiceConnection.*/
@@ -920,17 +944,16 @@ public class BluetoothLeService extends Service {
             //提交密码后判断回馈的信息
             switch (reply) {
                 case "00":
+                    //判断是不是第一次连接
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        broadcastUpdate(ACTION_LAND_SUCCESS);
+                        break;
+                    }
                     Log.d(TAG, "handlePasswordCallbacks: 密码提交---正确---");
                     if (devices.password.equals(DEFAULT_PASSWORD)) {
                         step3 = true;
                     }
-                    //判断是不是第一次连接
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        broadcastUpdate(ACTION_LAND_SUCCESS);
-                    }else {
                         isFirst();
-                    }
-
                     break;
                 case "01":
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
