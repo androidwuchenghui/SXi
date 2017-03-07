@@ -133,4 +133,25 @@ public class MyUtils {
         }
         return false;
     }
+
+    public  static String getRandomSix(){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            int random = (int) (Math.random() * 100);
+            if (random % 3 == 0) {
+                //number
+                int n = (int) (Math.random() * 10);
+                sb.append(n);
+            } else if (random % 3 == 1) {
+                //big letter
+                int bl = (int) (Math.random() * 26) + 65;
+                sb.append((char) bl);
+            } else {
+                // small letter
+                int sl = (int) (Math.random() * 26) + 97;
+                sb.append((char) sl);
+            }
+        }
+        return sb.toString();
+    }
 }

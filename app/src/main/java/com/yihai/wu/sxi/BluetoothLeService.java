@@ -56,7 +56,7 @@ import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private SharedPreferences sharedPreferences;
-    ExecutorService pool = Executors.newFixedThreadPool(5);
+    ExecutorService pool = Executors.newFixedThreadPool(4);
     /*mBluetoothManager=蓝牙管理器.在initialize()创建.*/
     private BluetoothManager mBluetoothManager;
     /*mBluetoothAdapter=蓝牙适配器,在initialize()创建.*/
@@ -171,10 +171,9 @@ public class BluetoothLeService extends Service {
                                 Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   gatt.discoveryService   " );
                 mBluetoothGatt.discoverServices();
 
-
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 
-//                close();
+                close();
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
                 ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
@@ -217,22 +216,7 @@ public class BluetoothLeService extends Service {
             Log.d(TAG, "onServicesDiscovered:   status:  " + status + "    services:    " + gatt.getServices());
             disconStatus = status;
             if (status == BluetoothGatt.GATT_SUCCESS) {
-//                                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
-
-
-                //                for (BluetoothGattService supportedGattService : supportedGattServices) {
-                //                    List<BluetoothGattCharacteristic> gattCharacteristics =
-                //                            supportedGattService.getCharacteristics();
-                //                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                //                        if (g_UUID_Charater_SendData.equals(gattCharacteristic.getUuid())) {
-                //                            g_Character_TX = gattCharacteristic;
-                //                        }
-                //                        if (g_UUID_Charater_DeviceName.equals(gattCharacteristic.getUuid())) {
-                //                            g_Character_DeviceName = gattCharacteristic;
-                //                        }
-                //                    }
-                //                }
-
+                //                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
                 Thread serviceThread = new Thread() {
                     @Override
                     public void run() {
@@ -243,7 +227,7 @@ public class BluetoothLeService extends Service {
                 };
                 pool.execute(serviceThread);
             }
-            //            else if (status == 129) {
+                        else if (status == 129) {
             //                Log.d(TAG, "status = 129: -----发出129");
             //                mBluetoothAdapter.disable();
             //                Timer single_timer = new Timer();
@@ -255,11 +239,8 @@ public class BluetoothLeService extends Service {
             //                    }
             //                }, 2500);
             //            }
-            if (status == 129) {
-
-                Log.d(TAG, "onServicesDiscovered:    129 ");
+//            if (status == 129) {
                 broadcastUpdate(ACTION_LOGIN_FAILED);
-
             }
         }
 
@@ -994,7 +975,6 @@ public class BluetoothLeService extends Service {
                     break;
 
             }
-
         }
     }
 
@@ -1052,9 +1032,6 @@ public class BluetoothLeService extends Service {
                 commitPassword(lastPassword + lastPassword);
                 //连接成功，执行正常通信￥￥ （流程OK）
                 Log.d(TAG, "handleChangePassword: 修改密码并保存     正常连接。。。");
-                //                getConnectedDeviceRealName();
-                //                LandDialog.cancel();
-                //                successDialog.show();
 
                 break;
         }
@@ -1066,9 +1043,6 @@ public class BluetoothLeService extends Service {
             case "00":
                 Log.d(TAG, "handleLastPassword: " + "OK");
                 isFirst();
-                //                getConnectedDeviceRealName();
-                //                LandDialog.cancel();
-                //                successDialog.show();
                 break;
             case "01":
 

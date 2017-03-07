@@ -203,6 +203,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectState.setText("未连接");
+                    startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
                     connectState.setText("已连接");

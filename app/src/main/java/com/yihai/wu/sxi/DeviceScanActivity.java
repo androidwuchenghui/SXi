@@ -190,7 +190,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         }
         scanLeDevice(true);
 
-        sharedPreferences = getSharedPreferences("lastConnected",Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
     }
 
@@ -231,10 +231,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     mConnected = false;
                     Log.e("DeviceScanConnect", "onReceive: " + "GATT连接断开********");
                     break;
-                case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
-                    Log.e("discoveryService", "onReceive: " + "发现GATT中的服务********" + "  count:  " + mBluetoothLeService.getSupportedGattServices().size());
-                    //                    displayGattServices(mBluetoothLeService.getSupportedGattServices());
-                    break;
+                //                case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
+                //                    Log.e("discoveryService", "onReceive: " + "发现GATT中的服务********" + "  count:  " + mBluetoothLeService.getSupportedGattServices().size());
+                //                    displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                //                    break;
                 case BluetoothLeService.ACTION_DATA_AVAILABLE:
                     String string = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                     Log.d(TAG, "onReceive: 收到的一些信息：" + string);
@@ -243,10 +243,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 case BluetoothLeService.ACTION_NOT_BELONG://产品识别码的返回  FF96
                     Toast.makeText(DeviceScanActivity.this, "不是本公司产品!", Toast.LENGTH_SHORT).show();
                     LandDialog.dismiss();
-
-                    break;
-                case "129":
-                    Log.d(TAG, "status129: " + "收到129广播");
 
                     break;
                 case BluetoothLeService.ACTION_DATA_RX:
@@ -264,10 +260,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     //                    LandDialog.dismiss();
                     //                    successDialog.show();
 
-                    editor.putString("address",mDeviceAddress);
+                    editor.putString("address", mDeviceAddress);
                     editor.commit();
                     g_Character_TX = mBluetoothLeService.getG_Character_TX();
-                    Log.d(TAG, "commitPassword Ok: 修改登录成功"+" charac  "+g_Character_TX);
+                    Log.d(TAG, "commitPassword Ok: 修改登录成功" + " charac  " + g_Character_TX);
                     getConnectedDeviceRealName();
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
@@ -712,8 +708,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         intentFilter.addAction(BluetoothLeService.ACTION_BLE_DATA_TX_OK);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_COMMIT_PASSWORD_RESULT);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
-        intentFilter.addAction("com.id");
-        intentFilter.addAction("129");
         intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
         intentFilter.addAction(BluetoothLeService.ACTION_LOGIN_FAILED);
         intentFilter.addAction(BluetoothLeService.ACTION_NOT_BELONG);
