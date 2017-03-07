@@ -204,6 +204,10 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectState.setText("未连接");
                     break;
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                    connectState.setText("已连接");
+                    startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
+                    break;
 
             }
         }
@@ -213,6 +217,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
         return intentFilter;
     }
 

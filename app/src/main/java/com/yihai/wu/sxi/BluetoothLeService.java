@@ -56,7 +56,7 @@ import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private SharedPreferences sharedPreferences;
-    ExecutorService pool = Executors.newFixedThreadPool(4);
+    ExecutorService pool = Executors.newFixedThreadPool(5);
     /*mBluetoothManager=蓝牙管理器.在initialize()创建.*/
     private BluetoothManager mBluetoothManager;
     /*mBluetoothAdapter=蓝牙适配器,在initialize()创建.*/
@@ -168,13 +168,13 @@ public class BluetoothLeService extends Service {
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
                 // Attempts to discover services after successful connection.
-//                Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   gatt.getService   " + mBluetoothGatt.discoverServices());
-                                mBluetoothGatt.discoverServices();
+                                Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   gatt.discoveryService   " );
+                mBluetoothGatt.discoverServices();
 
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 
-                close();
+//                close();
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;//断开状态
                 ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
@@ -184,25 +184,28 @@ public class BluetoothLeService extends Service {
                 }
                 broadcastUpdate(intentAction);
                 Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  " + mBluetoothAdapter);
-                keepSearch = true;
-                pool.execute(new Thread() {
-                    @Override
-                    public void run() {
-                        super.run();
-                        while (keepSearch) {
-                            mBluetoothAdapter.startLeScan(mLeScanCallback);
-                            Log.d(TAG, "ServiceOnConnectionStateChange   run: 循环连接 ");
-                            try {
-                                sleep(4000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                if (!disConnectByMyself) {
+                    keepSearch = true;
+                    pool.execute(new Thread() {
+                        @Override
+                        public void run() {
+                            super.run();
+                            while (keepSearch) {
+                                mBluetoothAdapter.startLeScan(mLeScanCallback);
+                                Log.d(TAG, "ServiceOnConnectionStateChange   run: 循环连接 ");
+                                try {
+                                    sleep(4000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                mBluetoothAdapter.stopLeScan(mLeScanCallback);
                             }
-                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+
                         }
-
-                    }
-                });
-
+                    });
+                }else {
+                    broadcastUpdate(ACTION_LOGIN_FAILED);
+                }
 
             }
 
@@ -214,7 +217,7 @@ public class BluetoothLeService extends Service {
             Log.d(TAG, "onServicesDiscovered:   status:  " + status + "    services:    " + gatt.getServices());
             disconStatus = status;
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                //                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
+//                                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
 
 
                 //                for (BluetoothGattService supportedGattService : supportedGattServices) {
@@ -253,25 +256,9 @@ public class BluetoothLeService extends Service {
             //                }, 2500);
             //            }
             if (status == 129) {
-                keepSearch = false;
-                Log.d(TAG, "onServicesDiscovered: 129 " );
-/*
-                //提示用户
-                AlertDialog.Builder builder = new AlertDialog.Builder(BluetoothLeService.this);
-                    builder.setTitle("提示")
-                            .setMessage("您的连接失败，请尝试以下操作\n1.退出本程序\n2.手动操作设备A,进入\"设备配对\"菜单\n3.长按ENTER键,直到设备A显示蓝牙配对画面\n4.重新启动本程序,重新搜索,并点击连接搜索到的设备A,来完成配对.")
-                            .setCancelable(false)
-                            .setNegativeButton("关闭提示", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.getWindow().setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));
 
-                dialog.show();
-                */
+                Log.d(TAG, "onServicesDiscovered:    129 ");
+                broadcastUpdate(ACTION_LOGIN_FAILED);
 
             }
         }
@@ -320,6 +307,7 @@ public class BluetoothLeService extends Service {
                         commitPassword(changeTo);
                     } else {
                         //断开连接(流程结束)
+                        disConnectByMyself = true;
                         disconnect();
                         new Delete().from(ConnectedBleDevices.class).execute();
                         broadcastUpdate(BluetoothLeService.ACTION_NOT_BELONG);
@@ -400,8 +388,14 @@ public class BluetoothLeService extends Service {
     };
     private String readID;
     private int disconStatus;
+
+    public void setLastAddress(String lastAddress) {
+        this.lastAddress = lastAddress;
+    }
+
     private String lastAddress;
     private BluetoothGattCharacteristic g_Character_Baud_Rate;
+    private boolean disConnectByMyself;
 
 
     /*======================================================================
@@ -481,6 +475,7 @@ public class BluetoothLeService extends Service {
         registerReceiver(bluetoothLeServiceReceiver, makeMainBroadcastFilter());
         sharedPreferences = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
         lastAddress = sharedPreferences.getString("address", null);
+        Log.d(TAG, "serviceOnCreate:     lastAddress  "+lastAddress);
     }
 
     /*======================================================================
@@ -510,7 +505,7 @@ public class BluetoothLeService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onServiceDestroy: ");
+        Log.d(TAG, "onServiceDestroy: 后台服务关闭 ");
     }
 
     /*mBinder=要交给与这个类绑定的ServiceConnection.*/
@@ -955,6 +950,8 @@ public class BluetoothLeService extends Service {
             Log.d(TAG, "handleChangePassword: 用户通过保存的密码进入      over");
             //发出登陆成功的广播
             broadcastUpdate(ACTION_LAND_SUCCESS);
+            theDevice.isConnected = true;
+            theDevice.save();
         }
 
     }
@@ -972,6 +969,8 @@ public class BluetoothLeService extends Service {
                     //判断是不是第一次连接
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         broadcastUpdate(ACTION_LAND_SUCCESS);
+                        devices.isConnected = true;
+                        devices.save();
                         break;
                     }
                     Log.d(TAG, "handlePasswordCallbacks: 密码提交---正确---");
@@ -1001,8 +1000,8 @@ public class BluetoothLeService extends Service {
 
     //再次提交亿海产品默认密码返回结果的处理   5.
     private void handleSecondPasswordCallback(String str) {
-        Log.d(TAG, "handleSecondPasswordCallback: " + "提交默认产品密码返回处理");
-        ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(device.getAddress());
+        Log.d(TAG, "handleSecondPasswordCallback: " + "提交默认产品密码返回处理  " + str);
+        ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
         switch (str) {
             case "00"://正确
                 if (devices.password.equals(YIHI_DEFAULT_PASSWORD)) {
@@ -1012,6 +1011,7 @@ public class BluetoothLeService extends Service {
 
                 break;
             case "01"://连接失败，删除数据，断开连接(流程结束)
+                disConnectByMyself = true;
                 disconnect();
                 broadcastUpdate(ACTION_LOGIN_FAILED);
 
@@ -1026,6 +1026,7 @@ public class BluetoothLeService extends Service {
                 //提交错误，修改失败
                 Log.d(TAG, "handleChangePassword:修改失败 " + reChange);
                 if (reChange == 3) {
+                    disConnectByMyself = true;
                     disconnect();
                     broadcastUpdate(BluetoothLeService.ACTION_THREE_SUBMISSION_FAILED);
 
@@ -1037,7 +1038,7 @@ public class BluetoothLeService extends Service {
                 break;
             case "02":
                 //修改成功,保存密码，并进行最终连接
-                ConnectedBleDevices changedPassword = ConnectedBleDevices.getConnectInfoByAddress(device.getAddress());
+                ConnectedBleDevices changedPassword = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
                 String lastPassword = sb.toString();
                 changedPassword.password = lastPassword;
                 changedPassword.isConnected = true;

@@ -205,6 +205,12 @@ public class BezierActivity extends AppCompatActivity {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
                     break;
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                    startActivity(new Intent(BezierActivity.this,MainActivity.class));
+                    break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    startActivity(new Intent(BezierActivity.this,MainActivity.class));
+                    break;
             }
         }
     };
@@ -412,6 +418,9 @@ public class BezierActivity extends AppCompatActivity {
     private static IntentFilter makeBroadcastFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+
         return intentFilter;
     }
 

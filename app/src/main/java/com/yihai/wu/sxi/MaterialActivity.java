@@ -1,8 +1,11 @@
 package com.yihai.wu.sxi;
 
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,8 +23,6 @@ import com.yihai.wu.util.DarkImageButton;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.yihai.wu.sxi.R.id.stainless_steel;
 
 /**
  * Created by ${Wu} on 2016/12/14.
@@ -43,8 +44,6 @@ public class MaterialActivity extends AppCompatActivity {
     LinearLayout lineT;
     @Bind(R.id.check3)
     ImageView check3;
-    @Bind(stainless_steel)
-    TextView stainlessSteel;
     @Bind(R.id.line_b)
     LinearLayout lineB;
     @Bind(R.id.check4)
@@ -61,9 +60,27 @@ public class MaterialActivity extends AppCompatActivity {
     LinearLayout lineS;
     @Bind(R.id.btn_back)
     DarkImageButton btnBack;
+    @Bind(R.id.connect_state)
+    TextView connectState;
+    @Bind(R.id.stainless_steel)
+    TextView stainlessSteel;
     private int[] check_select = {0, 0, 0, 0, 0};
     private String title;
     private static final String TAG = "MaterialActivity";
+    private BroadcastReceiver materialActivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action) {
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                    startActivity(new Intent(MaterialActivity.this, MainActivity.class));
+                    break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    startActivity(new Intent(MaterialActivity.this, MainActivity.class));
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,8 +90,18 @@ public class MaterialActivity extends AppCompatActivity {
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         initView();
-
+        registerReceiver(materialActivityReceiver, makeBroadcastFilter());
     }
+
+
+    private static IntentFilter makeBroadcastFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
+        return intentFilter;
+    }
+
 
     private void initView() {
         Intent intent = getIntent();
@@ -84,6 +111,7 @@ public class MaterialActivity extends AppCompatActivity {
         int select = model.coilSelect;
         select_control(select);
     }
+
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -96,7 +124,11 @@ public class MaterialActivity extends AppCompatActivity {
                 finish();
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
-
+            if (mBluetoothLeService.getTheConnectedState() == 0) {
+                connectState.setText("未连接");
+            } else if (mBluetoothLeService.getTheConnectedState() == 2) {
+                connectState.setText("已连接");
+            }
             Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }
 
@@ -107,7 +139,7 @@ public class MaterialActivity extends AppCompatActivity {
         }
     };
 
-    @OnClick({R.id.line_n, R.id.line_t, R.id.line_b, R.id.line_c, R.id.line_s,R.id.btn_back})
+    @OnClick({R.id.line_n, R.id.line_t, R.id.line_b, R.id.line_c, R.id.line_s, R.id.btn_back})
     public void onClick(View view) {
         MyModel myModel = MyModel.getMyModelForGivenName(title);
         Intent intent = new Intent();
@@ -116,16 +148,16 @@ public class MaterialActivity extends AppCompatActivity {
                 select_control(0);
                 intent.putExtra(MATERIAL, nickel.getText().toString());
                 myModel.coilSelect = 0;
-                if(g_Character_TX!=null){
-                    setUserDeviceSetting((byte)0x02,(byte)0x00);
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x02, (byte) 0x00);
                 }
                 myModel.save();
                 break;
             case R.id.line_t:
                 select_control(1);
                 intent.putExtra(MATERIAL, titanium.getText().toString());
-                if(g_Character_TX!=null){
-                    setUserDeviceSetting((byte)0x02,(byte)0x01);
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x02, (byte) 0x01);
                 }
                 myModel.coilSelect = 1;
                 myModel.save();
@@ -134,8 +166,8 @@ public class MaterialActivity extends AppCompatActivity {
                 select_control(2);
 
                 intent.putExtra(MATERIAL, stainlessSteel.getText().toString());
-                if(g_Character_TX!=null){
-                    setUserDeviceSetting((byte)0x02,(byte)0x02);
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x02, (byte) 0x02);
                 }
                 myModel.coilSelect = 2;
                 myModel.save();
@@ -144,16 +176,16 @@ public class MaterialActivity extends AppCompatActivity {
                 select_control(3);
                 intent.putExtra(MATERIAL, alcohol.getText().toString());
                 myModel.coilSelect = 3;
-                if(g_Character_TX!=null){
-                    setUserDeviceSetting((byte)0x02,(byte)0x03);
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x02, (byte) 0x03);
                 }
                 myModel.save();
                 break;
             case R.id.line_s:
                 select_control(4);
                 intent.putExtra(MATERIAL, TRC.getText().toString());
-                if(g_Character_TX!=null){
-                    setUserDeviceSetting((byte)0x02,(byte)0x04);
+                if (g_Character_TX != null) {
+                    setUserDeviceSetting((byte) 0x02, (byte) 0x04);
                 }
                 myModel.coilSelect = 4;
                 myModel.save();
@@ -202,7 +234,7 @@ public class MaterialActivity extends AppCompatActivity {
         }
     }
 
-    public void setUserDeviceSetting(byte nn,byte pp) {
+    public void setUserDeviceSetting(byte nn, byte pp) {
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -240,6 +272,7 @@ public class MaterialActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+        unregisterReceiver(materialActivityReceiver);
         mBluetoothLeService = null;
     }
 }

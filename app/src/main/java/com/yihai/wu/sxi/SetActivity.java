@@ -79,9 +79,11 @@ public class SetActivity extends AppCompatActivity {
             String action = intent.getAction();
             switch (action) {
 
-                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
                     status.setText("已连接");
                     Log.e("log", "onReceive: " + "GATT连接成功*************");
+                    Intent intentBackToMain = new Intent(SetActivity.this,MainActivity.class);
+                    startActivity(intentBackToMain);
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     status.setText("未连接");

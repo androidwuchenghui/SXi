@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.base.BaseActivity;
+import com.yihai.wu.util.DarkImageButton;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -25,7 +26,7 @@ public class DeviceInformationActivity extends BaseActivity {
     @Bind(R.id.id_after)
     TextView idAfter;
     @Bind(R.id.btn_back)
-    TextView btnBack;
+    DarkImageButton btnBack;
     @Bind(R.id.connect_state)
     TextView connectState;
     private static final String TAG = "DeviceInformationActivi";

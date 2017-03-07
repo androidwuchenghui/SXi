@@ -126,10 +126,10 @@ public class SetTextureActivity extends AppCompatActivity {
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
 
-//                    if(begin){
-//                        r++;
-//                    }
-                    Log.d(TAG, "口感选择收到数据: " + s+"   R: " );
+                    //                    if(begin){
+                    //                        r++;
+                    //                    }
+                    Log.d(TAG, "口感选择收到数据: " + s + "   R: ");
                     /*if(TAG=="SetTextureActivity"&&r==1&&begin ==true){
                         oneFirst = subBytes(data, 11, 9);
                         Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
@@ -173,13 +173,18 @@ public class SetTextureActivity extends AppCompatActivity {
                         settingPackage_PowerCurve_ReadData((byte) 0x00, (byte) 0x01, (byte) 0x03, (byte) 0x04, (byte) 0x00);
                     }*/
 
-//                    if (send.equals(TAG)) {
-//                        Sys_YiHi_Protocol_RX_Porc(data);
-//                    }
+                    //                    if (send.equals(TAG)) {
+                    //                        Sys_YiHi_Protocol_RX_Porc(data);
+                    //                    }
 
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                        connectState.setText("未连接");
+                    connectState.setText("未连接");
+                    startActivity(new Intent(SetTextureActivity.this, MainActivity.class));
+                    break;
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                    connectState.setText("已连接");
+                    startActivity(new Intent(SetTextureActivity.this, MainActivity.class));
                     break;
             }
         }
@@ -227,7 +232,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 connectState.setText("已连接");
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
-            Log.d(TAG, "onServiceConnected: bind  : service: "+mBluetoothLeService+"    character:  "+g_Character_TX);
+            Log.d(TAG, "onServiceConnected: bind  : service: " + mBluetoothLeService + "    character:  " + g_Character_TX);
         }
 
         @Override
@@ -281,7 +286,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(5, getResources().getString(R.string.texture_custom_s1));
                 break;
             case R.id.detail_s1:
-                Intent s1ToCurve = new Intent(SetTextureActivity.this,BezierActivity.class);
+                Intent s1ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
                 s1ToCurve.putExtra("custom", "S1");
                 startActivity(s1ToCurve);//进入曲线界面
                 break;
@@ -293,7 +298,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 break;
             case R.id.detail_s2:
 
-                Intent s2ToCurve = new Intent(SetTextureActivity.this,BezierActivity.class);
+                Intent s2ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
                 s2ToCurve.putExtra("custom", "S2");
                 startActivity(s2ToCurve);//进入曲线界面
                 break;
@@ -304,7 +309,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(7, getResources().getString(R.string.texture_custom_s3));
                 break;
             case R.id.detail_s3:
-                Intent s3ToCurve = new Intent(SetTextureActivity.this,BezierActivity.class);
+                Intent s3ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
                 s3ToCurve.putExtra("custom", "S3");
                 startActivity(s3ToCurve);//进入曲线界面
                 break;
@@ -315,7 +320,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(8, getResources().getString(R.string.texture_custom_s4));
                 break;
             case R.id.detail_s4:
-                Intent s4ToCurve = new Intent(SetTextureActivity.this,BezierActivity.class);
+                Intent s4ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
                 s4ToCurve.putExtra("custom", "S4");
                 startActivity(s4ToCurve);//进入曲线界面
                 break;
@@ -326,7 +331,7 @@ public class SetTextureActivity extends AppCompatActivity {
                 pressed(9, getResources().getString(R.string.texture_custom_s5));
                 break;
             case R.id.detail_s5:
-                Intent s5ToCurve = new Intent(SetTextureActivity.this,BezierActivity.class);
+                Intent s5ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
                 s5ToCurve.putExtra("custom", "S5");
                 startActivity(s5ToCurve);//进入曲线界面
                 break;
@@ -445,6 +450,7 @@ public class SetTextureActivity extends AppCompatActivity {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
 
         return intentFilter;
     }
@@ -468,5 +474,5 @@ public class SetTextureActivity extends AppCompatActivity {
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
-    
+
 }

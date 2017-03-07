@@ -271,7 +271,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     getConnectedDeviceRealName();
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
-                    mBluetoothLeService.disconnect();
+
                     LandDialog.dismiss();
                     //删除保存的数据
                     new Delete().from(ConnectedBleDevices.class).execute();

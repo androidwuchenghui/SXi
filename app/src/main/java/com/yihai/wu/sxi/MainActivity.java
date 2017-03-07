@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -19,6 +20,7 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.query.Delete;
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
@@ -94,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 0x09;
     private String lastAddress;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor edit;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -142,9 +147,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }
-        SharedPreferences sp = getSharedPreferences("lastConnected",Context.MODE_PRIVATE);
+        sp = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
+        edit = sp.edit();
         lastAddress = sp.getString("address",null);
-        Log.d(TAG, "onCreate:         "+lastAddress);
+        Log.d(TAG, "MainActivityOnCreate:         "+lastAddress);
     }
 
     @Override
@@ -176,8 +182,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectedState.setText("设备未连接");
                     break;
-                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
                     connectedState.setText("已连接设备");
+                    break;
+                case BluetoothLeService.ACTION_LOGIN_FAILED:
+                    //删除保存的数据
+                    new Delete().from(ConnectedBleDevices.class).execute();
+                    mBluetoothLeService.setLastAddress(null);
+                    edit.putString("address",null);
+                    edit.commit();
+                    //提示用户
+                    AlertDialog remindDialog = new AlertDialog.Builder(MainActivity.this)
+                            .setIcon(R.mipmap.app_icon)
+                            .setTitle("提示")
+                            .setMessage("您的连接失败，请尝试以下操作\n1.退出本程序\n2.手动操作设备A,进入\"设备配对\"菜单\n3.长按ENTER键,直到设备A显示蓝牙配对画面\n4.重新启动本程序,重新搜索,并点击连接搜索到的设备A,来完成配对.")
+                            .setCancelable(false)
+                            .setNegativeButton("关闭提示", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    MainActivity.this.finish();
+                                }
+                            })
+                            .create();
+                    remindDialog.show();
+                    break;
             }
         }
     };
@@ -187,7 +215,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-
+        intentFilter.addAction(BluetoothLeService.ACTION_LOGIN_FAILED);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
         return intentFilter;
     }
 
