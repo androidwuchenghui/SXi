@@ -56,6 +56,7 @@ import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
     ExecutorService pool = Executors.newFixedThreadPool(4);
     /*mBluetoothManager=蓝牙管理器.在initialize()创建.*/
     private BluetoothManager mBluetoothManager;
@@ -181,6 +182,13 @@ public class BluetoothLeService extends Service {
                     connectedDevice.isConnected = false;
                     connectedDevice.save();
                 }
+
+                if(status==19){
+                    disConnectByMyself = true;
+                    disconnect();
+                    broadcastUpdate(ACTION_LOGIN_FAILED);
+                    return;
+                }
                 broadcastUpdate(intentAction);
                 Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  " + mBluetoothAdapter);
                 if (!disConnectByMyself) {
@@ -203,6 +211,8 @@ public class BluetoothLeService extends Service {
                         }
                     });
                 }else {
+                    disConnectByMyself = true;
+                    disconnect();
                     broadcastUpdate(ACTION_LOGIN_FAILED);
                 }
 
@@ -455,6 +465,7 @@ public class BluetoothLeService extends Service {
         super.onCreate();
         registerReceiver(bluetoothLeServiceReceiver, makeMainBroadcastFilter());
         sharedPreferences = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
         lastAddress = sharedPreferences.getString("address", null);
         Log.d(TAG, "serviceOnCreate:     lastAddress  "+lastAddress);
     }
@@ -962,6 +973,7 @@ public class BluetoothLeService extends Service {
                     break;
                 case "01":
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
                         broadcastUpdate(ACTION_LOGIN_FAILED);
                         break;
                     }

@@ -271,6 +271,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     LandDialog.dismiss();
                     //删除保存的数据
                     new Delete().from(ConnectedBleDevices.class).execute();
+                    mBluetoothLeService.setLastAddress(null);
                     step5 = false;
                     //提示用户
                     AlertDialog remindDialog = new AlertDialog.Builder(DeviceScanActivity.this)

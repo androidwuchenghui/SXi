@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectedState.setText("设备未连接");
                     break;
-                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                case BluetoothLeService.ACTION_GATT_CONNECTED:
                     connectedState.setText("已连接设备");
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
@@ -215,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+
         intentFilter.addAction(BluetoothLeService.ACTION_LOGIN_FAILED);
-        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
         return intentFilter;
     }
 
