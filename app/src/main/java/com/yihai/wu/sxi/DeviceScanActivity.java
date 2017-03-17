@@ -1122,7 +1122,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 String SoftwareData = back_Software.substring(10);
                 String Software_Version = hexStringToString(SoftwareData);
 
-
+                ConnectedBleDevices deviceSoftVision = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
+                deviceSoftVision.softVision = Software_Version;
+                deviceSoftVision.isConnected = true;
+                deviceSoftVision.lastConnect = true;
+                deviceSoftVision.save();
                 Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -1133,11 +1137,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     }
                 }, 1000);
 
-                ConnectedBleDevices deviceSoftVision = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
-                deviceSoftVision.softVision = Software_Version;
-                deviceSoftVision.isConnected = true;
-                deviceSoftVision.lastConnect = true;
-                deviceSoftVision.save();
+
                 break;
 
         }

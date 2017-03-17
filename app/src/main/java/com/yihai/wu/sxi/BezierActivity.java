@@ -472,12 +472,22 @@ public class BezierActivity extends AppCompatActivity {
         powerMoveList.add(powerData1);
         //虚线1的数据
         powerDashValue = texture.dash;
+        if(powerDashValue>200||powerDashValue<0){
+            powerDashValue = 5;
+        }
         jouleDashValue = texture.dash;
+        if(jouleDashValue>200||jouleDashValue<0){
+            jouleDashValue=5;
+        }
         if (dashListInPower.size() == 0) {
             dashListInPower.add(powerDashValue);
         }
         //虚线2的数据
         temperDashValue = texture.dashValueInTemper;
+        if(temperDashValue>300||temperDashValue<100){
+            temperDashValue = 105;
+        }
+
 
         //℃温度曲线的数据
         temperData1 = getLineData(texture.arr3, 0);
@@ -1715,6 +1725,7 @@ public class BezierActivity extends AppCompatActivity {
                     int i1 = ((m_Data[11] & 0xff) << 8) | (m_Data[12] & 0xff);
                     Log.d(TAG, " powerDashValue  功率曲线的中线的数据****  :  结果： " + i1);
                     readTexture.dash = i1 / 10;
+
                     //读取温度中线
                     settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x04, (byte) 0x00, (byte) 0x01, userOrder, 2);
 
