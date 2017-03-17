@@ -496,6 +496,7 @@ public class BluetoothLeService extends Service {
     public void onDestroy() {
         super.onDestroy();
         keepSearch = false;
+        mBluetoothAdapter.stopLeScan(mLeScanCallback);
         Log.d(TAG, "onServiceDestroy: 后台服务关闭 ");
     }
 

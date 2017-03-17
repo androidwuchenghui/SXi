@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.byteMerger;
 import static com.yihai.wu.util.MyUtils.hexStringToString;
 import static com.yihai.wu.util.MyUtils.isGpsEnable;
 
@@ -81,26 +82,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
      * GATT特性:用于发送数据到BLE设备.
      */
     private BluetoothGattCharacteristic g_Character_TX;
-    /**
-     * GATT特性:用于接收来自BLE设备的数据.
-     */
-    //    private BluetoothGattCharacteristic g_Character_RX;
-    //    private BluetoothGattCharacteristic g_Character_DeviceName;
-    //    private BluetoothGattCharacteristic g_Character_CustomerID;
-    //
-    //    private BluetoothGattCharacteristic g_Character_Password;
-    //    private BluetoothGattCharacteristic g_Character_Password_Notify;
 
-    //    public static final int C_SXi_CR_AckPowerValue = 0x06;
-    //    public static final int C_SXi_CR_SetPowerValue = 0x07;
-    //    public static final int C_SXi_CR_SetPower_StepUp = 0x08;
-    //    public static final int C_SXi_CR_SetPower_StepDown = 0x09;
-    //    public static final int C_SXi_CR_CheckParameter = 0x0B;
-    //    public static final int C_SXi_CR_AckParameter = 0x0C;
-    //    public static final int C_SXi_CR_SetBypass = 0x0D;
-    //    public static final int C_SXi_CR_Test_Transmit_RX = 0x11;
-    //    //-----------
-    //    public static final int C_SXi_CR_GetDeviceName = 0x01;
     public static final int C_SXi_CR_AskDeviceName = 0x02;
     public static final int C_SXi_CR_AckDevice_ID = 0x04;
     public static final int C_SXi_CR_AckProtocolVersion = 0x13;
@@ -121,6 +103,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private StringBuilder sb;
     private String changeTo;
     private BluetoothDevice device;
+    private boolean get_software_version = false;
     //    private ScanCallback mScanCallback;
 
     //    private static final int REQUEST_FINE_LOCATION = 0;
@@ -216,6 +199,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
+    private byte[] software_Version;
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -251,8 +235,19 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
                     String s = BinaryToHexString(data);
                     Log.d(TAG, "onReceiveRX: " + s);
-                    Sys_YiHi_Protocol_RX_Porc(data);
+                    if(get_software_version){
+                        if(software_Version==null) {
+                            software_Version = data;
+                        }else {
+                            software_Version = byteMerger(software_Version,data);
+                            get_software_version =false;
+                            Log.d(TAG, "onReceiveRX: "+BinaryToHexString(software_Version));
+                            Sys_YiHi_Protocol_RX_Porc(software_Version);
+                        }
 
+                    }else {
+                        Sys_YiHi_Protocol_RX_Porc(data);
+                    }
                     break;
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
@@ -1118,19 +1113,16 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 Log.d(TAG, ": cap :   " + tString + "    " + Protocol_Capability + "   ");
                 if (tString.substring(1, 2).equals(1 + "")) {
                     getConnectedDeviceSoftVision();
+                    get_software_version = true;
                 }
                 break;
             case C_SXi_CR_AckUserSoftware_Version:
 
-                String back_Software = BinaryToHexString(m_Data);
-                String SoftwareData = back_Software.substring(10, m_Data.length * 2);
+                String back_Software = BinaryToHexString(m_Data).toString();
+                String SoftwareData = back_Software.substring(10);
                 String Software_Version = hexStringToString(SoftwareData);
 
-                ConnectedBleDevices deviceSoftVision = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
-                deviceSoftVision.softVision = Software_Version;
-                deviceSoftVision.isConnected = true;
-                deviceSoftVision.lastConnect = true;
-                deviceSoftVision.save();
+
                 Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -1140,6 +1132,12 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         DeviceScanActivity.this.finish();
                     }
                 }, 1000);
+
+                ConnectedBleDevices deviceSoftVision = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
+                deviceSoftVision.softVision = Software_Version;
+                deviceSoftVision.isConnected = true;
+                deviceSoftVision.lastConnect = true;
+                deviceSoftVision.save();
                 break;
 
         }
