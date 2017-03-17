@@ -3,6 +3,7 @@ package com.yihai.wu.sxi;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -67,6 +68,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //一些特征值
     private BluetoothGattCharacteristic g_Character_TX;
 
+    // Device scan callback. 扫描回掉
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
+                    Log.d(TAG, "onLeScan: " + device.getAddress()+"    lastAddress:  "+lastAddress);
+                    if (device.getAddress().toString().equals(lastAddress)) {
+                        Log.d(TAG, "ServiceOnConnectionStateChange:   关闭搜索  并连接  ");
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                        mBluetoothLeService.connect(lastAddress);
+                    }
+                }
+            };
+
+
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -77,11 +94,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_char:  "+g_Character_TX+"   lastConnect  "+lastAddress);
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_TX_char:  "+g_Character_TX+"   lastConnect  "+lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText("设备未连接");
                 //   try to connect
-                mBluetoothLeService.connect(lastAddress);
+                if(lastAddress!=null) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            super.run();
+
+                                Log.d(TAG, "ServiceOnConnectionStateChange:   执行持续搜索。。。 ");
+                                mBluetoothAdapter.startLeScan(mLeScanCallback);
+                        }
+                    }.start();
+//                    mBluetoothLeService.connect(lastAddress);
+                }
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectedState.setText("已连接设备");
             }

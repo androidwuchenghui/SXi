@@ -841,19 +841,21 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + TCR_Value);
 
                     //获得温度调节范围
-                    getUserDeviceSetting((byte) 0x09);
-                    mergerData = true;
+//                    getUserDeviceSetting((byte) 0x09);
+//                    mergerData = true;
                 }
                 break;
             case 0x58:
 
-                if (m_Data[5] == 0x13 && jouleOrPower == 0) {
-                    int setPowerNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
-                    seekBarSetPower.setProgress(setPowerNum - 50);
-                } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
-                    int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
-                    seekBarSetJoule.setProgress(setJouleNum - 100);
-                } else if (m_Data[5] == 0x09 && mergerDataOver) {
+                break;
+        }
+        if (m_Data[5] == 0x13 && jouleOrPower == 0) {
+            int setPowerNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+            seekBarSetPower.setProgress(setPowerNum - 50);
+        } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
+            int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+            seekBarSetJoule.setProgress(setJouleNum - 100);
+        } else if (m_Data[5] == 0x09 && mergerDataOver) {
                     mergerDataOver = false;
                     Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length);
                     int tempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
@@ -878,8 +880,6 @@ public class SetDetailsActivity extends AppCompatActivity {
                     int d = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
                     Log.d(TAG, "功率焦耳切换时范围  temperInfo: "+ a+"   "+b+ "   "+"   "+c+"    "+d);
                 }
-                break;
-        }
 
     }
 

@@ -257,10 +257,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
                     LandDialog.setMessage("登录成功~");
-                    //                    LandDialog.dismiss();
-                    //                    successDialog.show();
 
                     editor.putString("address", mDeviceAddress);
+                    mBluetoothLeService.setLastAddress(mDeviceAddress);
                     editor.commit();
                     g_Character_TX = mBluetoothLeService.getG_Character_TX();
                     Log.d(TAG, "commitPassword Ok: 修改登录成功" + " charac  " + g_Character_TX);
