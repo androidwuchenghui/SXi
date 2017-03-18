@@ -51,7 +51,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="60dp"
         android:textSize="20sp"
-        android:text="设备未连接"
+        android:text="@string/have_been_not_connected"
         />
 
     <LinearLayout

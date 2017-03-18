@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState()+"  g_TX_char:  "+g_Character_TX+"   lastConnect  "+lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                connectedState.setText("设备未连接");
+                connectedState.setText(R.string.have_been_not_connected);
                 //   try to connect
                 if(lastAddress!=null) {
                     new Thread() {
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                    mBluetoothLeService.connect(lastAddress);
                 }
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
-                connectedState.setText("已连接设备");
+                connectedState.setText(R.string.have_been_connected);
             }
 
         }
@@ -187,10 +187,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
-            connectedState.setText("已连接设备");
+            connectedState.setText(R.string.have_been_connected);
             getUserDeviceSetting();
         } else {
-            connectedState.setText("未连接设备");
+            connectedState.setText(R.string.have_been_not_connected);
         }
     }
 
@@ -208,10 +208,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                    connectedState.setText("设备未连接");
+                    connectedState.setText(R.string.have_been_not_connected);
                     break;
                 case BluetoothLeService.ACTION_GATT_CONNECTED:
-                    connectedState.setText("已连接设备");
+                    connectedState.setText(R.string.have_been_connected);
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
                     //删除保存的数据
@@ -222,10 +222,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //提示用户
                     AlertDialog remindDialog = new AlertDialog.Builder(MainActivity.this)
                             .setIcon(R.mipmap.app_icon)
-                            .setTitle("提示")
-                            .setMessage("您的连接失败，请尝试以下操作\n1.退出本程序\n2.手动操作设备A,进入\"设备配对\"菜单\n3.长按ENTER键,直到设备A显示蓝牙配对画面\n4.重新启动本程序,重新搜索,并点击连接搜索到的设备A,来完成配对.")
+                            .setTitle(R.string.point_out_title)
+                            .setMessage(R.string.point_out_information_2)
                             .setCancelable(false)
-                            .setNegativeButton("关闭提示", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(R.string.close_the_tip, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     MainActivity.this.finish();
@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //关闭当前应用
                 this.finish();
             } else {
-                Toast.makeText(this, "再按一次退出应用", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.double_kill, Toast.LENGTH_SHORT).show();
                 end = System.currentTimeMillis();
             }
         }

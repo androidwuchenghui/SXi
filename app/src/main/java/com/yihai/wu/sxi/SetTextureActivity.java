@@ -179,11 +179,11 @@ public class SetTextureActivity extends AppCompatActivity {
 
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                    connectState.setText("未连接");
+                    connectState.setText(R.string.no_connect);
                     startActivity(new Intent(SetTextureActivity.this, MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
-                    connectState.setText("已连接");
+                    connectState.setText(R.string.connected);
                     startActivity(new Intent(SetTextureActivity.this, MainActivity.class));
                     break;
             }
@@ -227,9 +227,9 @@ public class SetTextureActivity extends AppCompatActivity {
                 finish();
             }
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                connectState.setText("未连接");
+                connectState.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
-                connectState.setText("已连接");
+                connectState.setText(R.string.connected);
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             Log.d(TAG, "onServiceConnected: bind  : service: " + mBluetoothLeService + "    character:  " + g_Character_TX);
@@ -461,9 +461,9 @@ public class SetTextureActivity extends AppCompatActivity {
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
-            connectState.setText("已连接");
+            connectState.setText(R.string.connected);
         } else {
-            connectState.setText("未连接");
+            connectState.setText(R.string.no_connect);
         }
     }
 

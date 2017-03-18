@@ -1,6 +1,9 @@
 package com.yihai.wu.sxi;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -29,7 +32,9 @@ public class DeviceInformationActivity extends BaseActivity {
     DarkImageButton btnBack;
     @Bind(R.id.connect_state)
     TextView connectState;
-    private static final String TAG = "DeviceInformationActivi";
+    private static final String TAG = "DeviceInfo";
+    @Bind(R.id.visionName)
+    TextView visionName;
 
     @Override
     protected int getContentId() {
@@ -39,15 +44,18 @@ public class DeviceInformationActivity extends BaseActivity {
     @Override
     protected void init() {
 
-
+        //版本号
+        String versionName = getVersionName(this);
         Intent getIntent = getIntent();
         int state = getIntent.getIntExtra("connectState", 0);
+        visionName.setText(versionName);
         if (state == 2) {
-            connectState.setText("已连接");
+            connectState.setText(R.string.connected);
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getLastConnectedDevice();
             nameAfter.setText(connectedDevice.realName);
             softAfter.setText(connectedDevice.softVision);
             idAfter.setText(connectedDevice.deviceID);
+
         }
 
     }
@@ -63,4 +71,32 @@ public class DeviceInformationActivity extends BaseActivity {
     public void onClick() {
         finish();
     }
+
+    //版本名
+    public static String getVersionName(Context context) {
+        return getPackageInfo(context).versionName;
+    }
+
+    //版本号
+    public static int getVersionCode(Context context) {
+        return getPackageInfo(context).versionCode;
+    }
+
+    private static PackageInfo getPackageInfo(Context context) {
+        PackageInfo pi = null;
+
+        try {
+            PackageManager pm = context.getPackageManager();
+            pi = pm.getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_CONFIGURATIONS);
+
+            return pi;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pi;
+    }
+
+
 }

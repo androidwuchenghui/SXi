@@ -125,9 +125,9 @@ public class MaterialActivity extends AppCompatActivity {
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                connectState.setText("未连接");
+                connectState.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
-                connectState.setText("已连接");
+                connectState.setText(R.string.connected);
             }
             Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }

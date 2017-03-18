@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">sxi_library</string>
+    <string name="footer_hint_load_normal">load more...</string>
+    <string name="footer_hint_load_ready">Release to load...</string>
+    <string name="header_hint_refresh_normal">Pull to refresh...</string>
+    <string name="header_hint_refresh_ready">Release to refresh...</string>
+    <string name="header_hint_refresh_loading">Loading&#8230;</string>
+    <string name="header_hint_refresh_time">Last update time : </string>
+</resources>

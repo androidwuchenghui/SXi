@@ -202,11 +202,11 @@ public class SetDetailsActivity extends AppCompatActivity {
 
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                    connectState.setText("未连接");
+                    connectState.setText(R.string.no_connect);
                     startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
-                    connectState.setText("已连接");
+                    connectState.setText(R.string.connected);
                     startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
                     break;
 
@@ -233,9 +233,9 @@ public class SetDetailsActivity extends AppCompatActivity {
             }
 
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                connectState.setText("未连接");
+                connectState.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
-                connectState.setText("已连接");
+                connectState.setText(R.string.connected);
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {
@@ -293,25 +293,25 @@ public class SetDetailsActivity extends AppCompatActivity {
         display_rbt.setChecked(true);
         //材料
         int material = myModel.coilSelect;
-        String coil = "";
+
         switch (material) {
             case 0:
-                coil = "镍丝";
+                selectedMaterial.setText(R.string.material_nickel_wire);
                 break;
             case 1:
-                coil = "钛丝";
+                selectedMaterial.setText(R.string.material_titanium_wire);
                 break;
             case 2:
-                coil = "不锈钢";
+                selectedMaterial.setText(R.string.material_stainless_steel_wire);
                 break;
             case 3:
-                coil = "百醇控制";
+                selectedMaterial.setText(R.string.material_alcohol_control);
                 break;
             case 4:
-                coil = "手动TCR";
+                selectedMaterial.setText(R.string.material_TCR_manual);
                 break;
         }
-        selectedMaterial.setText(coil);
+
         //口感
         int textured = myModel.texture;
         setShowText(textured);
@@ -1031,9 +1031,9 @@ public class SetDetailsActivity extends AppCompatActivity {
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
-            connectState.setText("已连接");
+            connectState.setText(R.string.connected);
         } else {
-            connectState.setText("未连接");
+            connectState.setText(R.string.no_connect);
         }
     }
 }

@@ -348,7 +348,7 @@
                     android:padding="6dp"
                     android:text="@string/temperature_C"
                     android:textColor="@color/radio_button"
-                    android:textSize="@dimen/text_small"/>
+                    android:textSize="@dimen/text_normal"/>
 
 
                 <RadioButton
@@ -362,7 +362,7 @@
                     android:padding="6dp"
                     android:text="@string/temperature_F"
                     android:textColor="@color/radio_button"
-                    android:textSize="@dimen/text_small"/>
+                    android:textSize="@dimen/text_normal"/>
 
             </RadioGroup>
 
@@ -475,7 +475,7 @@
                 android:layout_width="match_parent"
 
                 android:layout_height="38dp"
-                android:background="@color/colorGray"/>
+                android:background="@color/colorLittleGray"/>
 
             <LinearLayout
 

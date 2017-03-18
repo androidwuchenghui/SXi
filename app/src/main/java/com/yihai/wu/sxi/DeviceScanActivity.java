@@ -69,7 +69,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private Handler mHandler;
     private boolean mScanning;
     // Stops scanning after 5 seconds.
-    private static final long SCAN_PERIOD = 5000;
+    private static final long SCAN_PERIOD = 8000;
     private final static String TAG = "DeviceScanActivity";
     private boolean mConnected = false;
 
@@ -225,7 +225,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
 
                     break;
                 case BluetoothLeService.ACTION_NOT_BELONG://产品识别码的返回  FF96
-                    Toast.makeText(DeviceScanActivity.this, "不是本公司产品!", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(DeviceScanActivity.this, "不是本公司产品!", Toast.LENGTH_SHORT).show();
                     LandDialog.dismiss();
 
                     break;
@@ -251,7 +251,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     break;
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
-                    LandDialog.setMessage("登录成功~");
+                    LandDialog.setMessage(DeviceScanActivity.this.getString(R.string.connect_successfully));
 
                     editor.putString("address", mDeviceAddress);
                     mBluetoothLeService.setLastAddress(mDeviceAddress);
@@ -270,10 +270,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     //提示用户
                     AlertDialog remindDialog = new AlertDialog.Builder(DeviceScanActivity.this)
                             .setIcon(R.mipmap.app_icon)
-                            .setTitle("提示")
-                            .setMessage("您的连接失败，请尝试以下操作\n1.退出本程序\n2.手动操作设备A,进入\"设备配对\"菜单\n3.长按ENTER键,直到设备A显示蓝牙配对画面\n4.重新启动本程序,重新搜索,并点击连接搜索到的设备A,来完成配对.")
+                            .setTitle(R.string.point_out_title)
+                            .setMessage(DeviceScanActivity.this.getString(R.string.point_out_information_2))
                             .setCancelable(false)
-                            .setNegativeButton("关闭提示", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(R.string.close_the_tip, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     DeviceScanActivity.this.finish();
@@ -290,12 +290,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     reChange = 0;
                     AlertDialog remindDialog1 = new AlertDialog.Builder(DeviceScanActivity.this)
                             .setIcon(R.mipmap.app_icon)
-                            .setTitle("提示")
-                            .setMessage("登录失败！\n" + "这个设备可能不是我们的产品,\n" +
-                                    "也可能蓝牙模块的密码修改功能\n" +
-                                    "已经出现异常")
+                            .setTitle(R.string.point_out_title)
+                            .setMessage(DeviceScanActivity.this.getString(R.string.point_out_information_1))
                             .setCancelable(false)
-                            .setNegativeButton("关闭提示", null)
+                            .setNegativeButton(R.string.close_the_tip, null)
                             .create();
                     remindDialog1.show();
                     break;
@@ -495,13 +493,18 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    dialog.dismiss();
                     mScanning = false;
-
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 }
             }, SCAN_PERIOD);
             dialog.show();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                }
+            },3000);
+
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLeScanCallback);
         } else {
@@ -521,11 +524,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         mHandler = new Handler();
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);//设置进度条的样式
-        dialog.setMessage("搜索中...");
+        dialog.setMessage(DeviceScanActivity.this.getString(R.string.searching));
 
         LandDialog = new ProgressDialog(this);
         LandDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        LandDialog.setMessage("登录中~");
+        LandDialog.setMessage(DeviceScanActivity.this.getString(R.string.connecting));
 
         Log.d(TAG, "bbbbbb: 初始化: initView ");
 

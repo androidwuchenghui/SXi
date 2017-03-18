@@ -84,12 +84,12 @@ public class SetActivity extends AppCompatActivity {
             switch (action) {
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
-                    status.setText("已连接");
+                    status.setText(R.string.connected);
                     Log.e("log", "onReceive: " + "GATT连接成功*************");
                     startActivity(new Intent(SetActivity.this,MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                    status.setText("未连接");
+                    status.setText(R.string.no_connect);
                     Log.e("log", "onReceive: " + "GATT未连接********");
                     startActivity(new Intent(SetActivity.this,MainActivity.class));
                     break;
@@ -115,9 +115,9 @@ public class SetActivity extends AppCompatActivity {
             }
             Log.d(TAG, "onServiceConnected: "+mBluetoothLeService);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                status.setText("未连接");
+                status.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
-                status.setText("已连接");
+                status.setText(R.string.connected);
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             g_Character_DeviceName = mBluetoothLeService.getG_Character_DeviceName();
@@ -495,10 +495,10 @@ public class SetActivity extends AppCompatActivity {
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
-            status.setText("已连接");
+            status.setText(R.string.connected);
 
         } else {
-            status.setText("未连接");
+            status.setText(R.string.no_connect);
         }
     }
 

@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
@@ -352,10 +351,10 @@ public class BezierActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         waitingDialog = new ProgressDialog(BezierActivity.this);
-        waitingDialog.setTitle("提示");
+        waitingDialog.setTitle(R.string.point_out_title);
         waitingDialog.setIcon(R.mipmap.app_icon);
         waitingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        waitingDialog.setMessage("等待储存中...");
+        waitingDialog.setMessage(this.getString(R.string.wait_for_data_loading));
         waitingDialog.setIndeterminate(true);
         waitingDialog.setCancelable(false);
 
@@ -407,7 +406,7 @@ public class BezierActivity extends AppCompatActivity {
         if (connectedDevice != null) {
             initDialog = new ProgressDialog(BezierActivity.this);
             initDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            initDialog.setMessage("数据加载中...");
+            initDialog.setMessage(this.getString(R.string.wait_for_data_loading));
             initDialog.show();
         } else {
             init();
@@ -1194,21 +1193,21 @@ public class BezierActivity extends AppCompatActivity {
                         tempToJoule = false;
                         if (touchInChart == TOUCH_FOR_POWER_CHART) {
                             saveStyle = SAVE_STYLE_ONE;
-                            Toast.makeText(mBluetoothLeService, "  功率  曲线下保存  ", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mBluetoothLeService, "  功率  曲线下保存  ", Toast.LENGTH_SHORT).show();
                             saveCurveData();
                         } else if (touchInChart == TOUCH_FOR_JOULE_CHART) {
                             saveStyle = SAVE_STYLE_TWO;
-                            Toast.makeText(mBluetoothLeService, "  焦耳  曲线下保存   ", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mBluetoothLeService, "  焦耳  曲线下保存   ", Toast.LENGTH_SHORT).show();
                             saveCurveData();
                         } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 0) {
-                            Toast.makeText(mBluetoothLeService, "  温度-功率  曲线下保存   ", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mBluetoothLeService, "  温度-功率  曲线下保存   ", Toast.LENGTH_SHORT).show();
                             saveStyle = SAVE_STYLE_THREE;
                             tempToPower = true;
                             generateInitialLineData();
                             saveCurveData();
 
                         } else if (touchInChart == TOUCH_FOR_TEMPER_CHART && jouleOrPower == 1) {
-                            Toast.makeText(mBluetoothLeService, "  温度-焦耳  曲线下保存   ", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mBluetoothLeService, "  温度-焦耳  曲线下保存   ", Toast.LENGTH_SHORT).show();
                             saveStyle = SAVE_STYLE_FOUR;
                             tempToJoule = true;
                             generateJouleChart();
