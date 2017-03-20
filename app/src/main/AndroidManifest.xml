@@ -81,6 +81,10 @@
                   android:screenOrientation="portrait"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name=".BezierActivity"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="0a54562f6817efaf89b5ed4adc2e8f9a48169533"
+            />
     </application>
 
 </manifest>

@@ -1,8 +1,10 @@
 package com.yihai.wu.appcontext;
 
-import com.activeandroid.app.Application;
-
 import com.activeandroid.ActiveAndroid;
+import com.activeandroid.app.Application;
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by ${Wu} on 2016/12/15.
@@ -14,6 +16,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ActiveAndroid.initialize(this);
+        Fabric.with(this, new Crashlytics());
     }
 
     @Override

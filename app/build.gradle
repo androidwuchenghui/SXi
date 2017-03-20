@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+apply plugin: 'io.fabric'
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.1"
@@ -8,15 +10,29 @@ android {
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.2"
+        versionName "1.0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            // 6 disable crashlytics for debug
+            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            ext.enableCrashlytics = false
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // 7 enable crashlytics for release
+            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+            ext.enableCrashlytics = true
         }
     }
+}
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -32,5 +48,8 @@ dependencies {
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.github.lecho:hellocharts-android:v1.5.8'
     compile 'com.android.support:support-annotations:20.0.0'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.7@aar') {
+        transitive = true
+    }
 
 }

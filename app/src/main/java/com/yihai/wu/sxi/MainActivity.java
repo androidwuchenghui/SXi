@@ -52,7 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
     private DarkImageButton btn_reset;
+    private DarkImageButton btn_upgrade;
     private TextView connectedState;
+
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -277,6 +279,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_set.setOnClickListener(this);
         btn_reset = (DarkImageButton) findViewById(R.id.btn_reset);
         btn_reset.setOnClickListener(this);
+        btn_upgrade = (DarkImageButton) findViewById(R.id.btn_upgrade);
+        btn_upgrade.setOnClickListener(this);
     }
 
     private void initBanner() {
@@ -330,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, " modelName :  "+textures.modelName+"  name : "+textures.name+"  data:  "+textures.arr1+"    "+all.size()+"selected   "+textures.selected);
                 }*/
                 Log.d(TAG, "onClick: " + mBluetoothLeService);
+                break;
+            case R.id.btn_upgrade:
+
                 break;
         }
 
