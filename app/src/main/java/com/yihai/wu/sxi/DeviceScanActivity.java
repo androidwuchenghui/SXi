@@ -165,9 +165,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         Log.d(TAG, "permission6.0: adapter :" + mBluetoothAdapter.enable() + "   gps:  " + isGpsEnable(this) + "  -sdk:  " + Build.VERSION.SDK_INT);
         //android6.0动态权限
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isGpsEnable(this)) {
-            scanLeDevice(true);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isGpsEnable(this) == false) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isGpsEnable(this) == false) {
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }

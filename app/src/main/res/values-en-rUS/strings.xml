@@ -18,7 +18,7 @@
     <string name="reset_success">Reset Success</string>
     <string name="searching">Searching</string>
     <string name="connecting">Connecting</string>
-    <string name="wait_for_data_loading">loading</string>
+    <string name="Modifying">Modifying</string>
     <string name="connect_successfully">Connect Success</string>
 
     <string name="no_device_find">Not found</string>
@@ -42,7 +42,7 @@
 
     <string name="SXi_Q">SXi-Q</string>
     <string name="ID">ID</string>
-    <string name="Connection_status">Connect State </string>
+
     <string name="have_been_not_connected">Device disconnected</string>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>

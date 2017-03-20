@@ -1,0 +1,105 @@
+<resources>
+    <!--   UI元素     -->
+    <string name="app_name">SXi</string>
+    <string name="title">SXI</string>
+    <string name="connect">接続</string>
+    <string name="text_upgrade">アップグレード</string>
+    <string name="text_set">設定</string>
+    <string name="text_information">デバイス情報</string>
+    <string name="text_reset">リセット</string>
+    <string name="device_name">製品名称</string>
+    <string name="software_name">チップセット</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">リセットしますか？</string>
+    <string name="sure">YES</string>
+    <string name="cancel">NO</string>
+
+    <!--  UI HUD  -->
+    <string name="reset_success">リセット成功</string>
+    <string name="searching">検索中</string>
+    <string name="connecting">接続中</string>
+    <string name="connect_successfully">接続完了</string>
+    <string name="no_device_find">デバイスがありません</string>
+    <string name="disconnected">切断</string>
+    <string name="reconnect">再接続</string>
+    <string name="read">読み込み中</string>
+    <string name="reading">読み込み中</string>
+    <string name="out_of_limit">Beyond Constraint Too Much</string>
+    <string name="no_support">サポート対象外</string>
+    <string name="main_no_connect">デバイス未接続</string>
+    <string name="point_out_title">SXi</string>
+    <string name="point_out_information_1">接続失敗、パスワード変更異常</string>
+    <string name="point_out_information_2">Please follow the following steps to reset:\nA.Exit the Sxi App.\nB.Operate the device Manually,enter the 『Device Pairing』 interface.\nC.Press down the fire button and keep 5 seconds to enter the bluetooth pairing interface.\nD.Restart the App, search the device again,connect and pairing with the found device.</string>
+    <string name="close_the_tip">完成</string>
+
+    <string name="connect_fail">接続失敗</string>
+    <string name="have_been_connected">デバイス接続</string>
+    <string name="have_been_not_connected">デバイス未接続</string>
+    <string name="connected">接続完了</string>
+    <string name="no_connected">接続未完成</string>
+    <string name="save_success">保存完了</string>
+    <string name="double_kill">再按一次退出应用</string>
+    <string name="Modifying">更新中</string>
+
+    <string name="SXi_Q">SXi-Q</string>
+    <string name="ID">ID</string>
+
+    <string name="ble_not_supported">サポート対象外</string>
+    <string name="error_bluetooth_not_supported">サポート対象外</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+    <string name="no_connect">Desconectado</string>
+
+    <string name="set_detail_model">バイパスモード</string>
+    <string name="set_display_status">環境表示</string>
+    <string name="set_display_status_left">←</string>
+    <string name="set_display_status_right">→</string>
+    <string name="set_display_status_auto">自動</string>
+
+    <string name="set_material">ワイヤー選択</string>
+    <string name="material_nickel_wire">ニッケル　Ni</string>
+    <string name="material_titanium_wire">チタン Ti</string>
+    <string name="material_stainless_steel_wire">ステンレス SS</string>
+    <string name="material_alcohol_control">SX Pure</string>
+    <string name="material_TCR_manual">マニュアルTCR</string>
+
+    <string name="select_texture">出力モード</string>
+    <string name="texture_power_save">エコ</string>
+    <string name="texture_soft">ソフト</string>
+    <string name="texture_standard">ノーマル</string>
+    <string name="texture_strong">パワフル</string>
+    <string name="texture_super_strong">パワフル+</string>
+    <string name="texture_custom_s1">カスタム-S1</string>
+    <string name="texture_custom_s2">カスタム-S2</string>
+    <string name="texture_custom_s3">カスタム-S3</string>
+    <string name="texture_custom_s4">カスタム-S4</string>
+    <string name="texture_custom_s5">カスタム-S5</string>
+
+    <string name="select_memory_mode">メモリ選択</string>
+    <string name="memory_m1">M1</string>
+    <string name="memory_m2">M2</string>
+    <string name="memory_m3">M3</string>
+    <string name="memory_m4">M4</string>
+    <string name="memory_m5">M5</string>
+
+    <string name="select_temperature_unit">温度</string>
+    <string name="temperature_C">℃</string>
+    <string name="temperature_F">℉</string>
+
+    <string name="select_power_joule_switch">出力モード変更</string>
+    <string name="power">パワー</string>
+    <string name="joule">ジュール</string>
+
+    <string name="select_operation_mode">操作モード</string>
+    <string name="operation_mode_primary">ビギナー</string>
+    <string name="operation_mode_senior">エキスパート</string>
+
+    <string name="adjust_temperature">温度調節</string>
+    <string name="compensation_temperature">温度誤差許容範囲</string>
+    <string name="set_TCR">TCR設定</string>
+    <string name="power_regulation">パワー調節</string>
+    <string name="joule_regulation">ジュール調節</string>
+
+</resources>

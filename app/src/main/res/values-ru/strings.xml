@@ -1,0 +1,105 @@
+<resources>
+    <!--   UI元素     -->
+    <string name="app_name">SXi</string>
+    <string name="title">SXI</string>
+    <string name="connect">Соединение</string>
+    <string name="text_upgrade">Обновление</string>
+    <string name="text_set">Настройки</string>
+    <string name="text_information">Информация</string>
+    <string name="text_reset">Сброс</string>
+    <string name="device_name">Имя устройства</string>
+    <string name="software_name">Версия ПО</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">Точно сбросить?</string>
+    <string name="sure">Да</string>
+    <string name="cancel">Отмена</string>
+
+    <!--  UI HUD  -->
+    <string name="reset_success">Сброс завершен</string>
+    <string name="searching">Поиск</string>
+    <string name="connecting">Соединение</string>
+    <string name="connect_successfully">Соединено</string>
+    <string name="no_device_find">Не найден</string>
+    <string name="disconnected">Отключен</string>
+    <string name="reconnect">Retrieved</string>
+    <string name="read">Чтение</string>
+    <string name="reading">Чтение</string>
+    <string name="out_of_limit">Beyond Constraint Too Much</string>
+    <string name="no_support">Версия не поддерживается</string>
+    <string name="main_no_connect">Нет соединения</string>
+    <string name="point_out_title">SXi</string>
+    <string name="point_out_information_1">Соединение не удалось, возможно неверный пароль или проблемы с Bluetooth</string>
+    <string name="point_out_information_2">Для сброса выполните: \n1) Выйдите из приложения\n2) На устройстве войдите в режим соединения\n3) Зажмите одновременно кнопки 『вниз』 и 『включения』 на 5 секунд для перехода в режим соединения\n4) Перезапустите приложение и установите соединение с найденным устройством</string>
+    <string name="close_the_tip">Завершить</string>
+
+    <string name="connect_fail">Загрузка не удалась</string>
+    <string name="have_been_connected">Устройство подключено</string>
+    <string name="have_been_not_connected">Устройство отключено</string>
+    <string name="connected">Соединено</string>
+    <string name="no_connected">Отключено</string>
+    <string name="save_success">Успешно сохранено</string>
+    <string name="double_kill">再按一次退出应用</string>
+    <string name="Modifying">Изменить</string>
+
+    <string name="SXi_Q">SXi-Q</string>
+    <string name="ID">ID</string>
+
+    <string name="ble_not_supported">Версия не поддерживается</string>
+    <string name="error_bluetooth_not_supported">Версия не поддерживается</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+    <string name="no_connect">Desconectado</string>
+
+    <string name="set_detail_model">BYPASS</string>
+    <string name="set_display_status">Настройка экрана</string>
+    <string name="set_display_status_left">Лево</string>
+    <string name="set_display_status_right">Право</string>
+    <string name="set_display_status_auto">Авто</string>
+
+    <string name="set_material">Выбор спирали</string>
+    <string name="material_nickel_wire">Никель Ni200</string>
+    <string name="material_titanium_wire">Титан Ti01</string>
+    <string name="material_stainless_steel_wire">Сталь SS316</string>
+    <string name="material_alcohol_control">SX_PURE</string>
+    <string name="material_TCR_manual">Ручной TCR</string>
+
+    <string name="select_texture">Режим разогрева</string>
+    <string name="texture_power_save">Экономичный</string>
+    <string name="texture_soft">Мягкий</string>
+    <string name="texture_standard">Стандарт</string>
+    <string name="texture_strong">Мощный</string>
+    <string name="texture_super_strong">Супер</string>
+    <string name="texture_custom_s1">SXiQ_S1</string>
+    <string name="texture_custom_s2">SXiQ_S2</string>
+    <string name="texture_custom_s3">SXiQ_S3</string>
+    <string name="texture_custom_s4">SXiQ_S4</string>
+    <string name="texture_custom_s5">SXiQ_S5</string>
+
+    <string name="select_memory_mode">Выбор режима</string>
+    <string name="memory_m1">M1</string>
+    <string name="memory_m2">M2</string>
+    <string name="memory_m3">M3</string>
+    <string name="memory_m4">M4</string>
+    <string name="memory_m5">M5</string>
+
+    <string name="select_temperature_unit">Температура</string>
+    <string name="temperature_C">℃</string>
+    <string name="temperature_F">℉</string>
+
+    <string name="select_power_joule_switch">Режим мощности</string>
+    <string name="power">Ватты</string>
+    <string name="joule">Джоули</string>
+
+    <string name="select_operation_mode">Сложность</string>
+    <string name="operation_mode_primary">Новичок</string>
+    <string name="operation_mode_senior">Эксперт</string>
+
+    <string name="adjust_temperature">Температура</string>
+    <string name="compensation_temperature">Компенсация</string>
+    <string name="set_TCR">Ручной TCR</string>
+    <string name="power_regulation">Мощность</string>
+    <string name="joule_regulation">Джоули</string>
+
+</resources>

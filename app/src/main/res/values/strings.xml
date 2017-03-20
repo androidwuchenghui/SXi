@@ -18,7 +18,7 @@
     <string name="reset_success">重置成功</string>
     <string name="searching">搜索中...</string>
     <string name="connecting">连接中...</string>
-    <string name="wait_for_data_loading">数据加载中...</string>
+
     <string name="connect_successfully">连接成功</string>
 
     <string name="no_device_find">未找到设备</string>
@@ -28,21 +28,22 @@
     <string name="out_of_limit">超出约束太多</string>
     <string name="no_support">本型号不支持</string>
     <string name="main_no_connect">未连接设备</string>
-    <string name="point_out_title"> </string>
+    <string name="point_out_title">提示</string>
     <string name="point_out_information_1">连接不成功，可能蓝牙模块的密码修改功能出现异常</string>
     <string name="point_out_information_2">请按照以下操作进行重置：\n1.退出App\n2.手动操作设备,进入『设备配对』菜单\n3.长按Enter键,直到设备显示蓝牙配对画面\n4.重新启动App,重新搜索,并点击连接搜索到的设备来完成配对</string>
+    <string name="close_the_tip">关闭</string>
     <string name="connect_fail">连接失败</string>
     <string name="have_been_connected">设备已连接</string>
     <string name="have_been_not_connected">设备未连接</string>
     <string name="connected">已连接</string>
     <string name="no_connected">未连接</string>
     <string name="save_success">保存成功</string>
-
+    <string name="double_kill">再按一次退出应用</string>
 
 
     <string name="SXi_Q">SXi-Q</string>
     <string name="ID">ID</string>
-    <string name="Connection_status">连接状态</string>
+
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
 

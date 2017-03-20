@@ -175,6 +175,7 @@ public class BluetoothLeService extends Service {
                 mBluetoothGatt.discoverServices();
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+
                 disconnect();
                 close();
 

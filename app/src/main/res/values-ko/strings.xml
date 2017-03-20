@@ -1,0 +1,105 @@
+<resources>
+    <!--   UI元素     -->
+    <string name="app_name">SXi</string>
+    <string name="title">SXI</string>
+    <string name="connect">연결</string>
+    <string name="text_upgrade">업그레이드</string>
+    <string name="text_set">세팅</string>
+    <string name="text_information">정보</string>
+    <string name="text_reset">초기화</string>
+    <string name="device_name">제품명</string>
+    <string name="software_name">칩셋 소프트웨어</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">재설정 준비</string>
+    <string name="sure">승인</string>
+    <string name="cancel">취소</string>
+
+    <!--  UI HUD  -->
+    <string name="reset_success">초기화 성공</string>
+    <string name="searching">찾는중</string>
+    <string name="connecting">연결중</string>
+    <string name="connect_successfully">연결 성공</string>
+    <string name="no_device_find">찾을수 없음</string>
+    <string name="disconnected">연결끊김</string>
+    <string name="reconnect">복구됨</string>
+    <string name="read">읽기</string>
+    <string name="reading">읽기</string>
+    <string name="out_of_limit">제약사항에서 벗어났습니다</string>
+    <string name="no_support">이버전을 지원하지 않습니다</string>
+    <string name="main_no_connect">주변에 연결되는것이 없습니다</string>
+    <string name="point_out_title">SXi</string>
+    <string name="point_out_information_1">연결실패 블루투스 모듈의 비밀번호 변경기능이 정상인지 확인해 보세요</string>
+    <string name="point_out_information_2">초기화를 위해 다음과 같은 단계를 따라해 주세요\nA. Sxi 앱을 종료합니다.\nB. 기기를 수동으로 조작하여 기기 페어링 상태로 들어갑니다.\nC. 파이어버튼을 5초간 누르면 블르투스 페어링 상태로 들어갑니다.\nD. 앱을 재시작 하여 기기를 다시 찾고,  찾은 기기를 연결하고 페어링합니다.</string>
+    <string name="close_the_tip">완료</string>
+
+    <string name="connect_fail">로드 실패</string>
+    <string name="have_been_connected">기기연결됨</string>
+    <string name="have_been_not_connected">기기연결끊김</string>
+    <string name="connected">연결됨</string>
+    <string name="no_connected">연결끊김</string>
+    <string name="save_success">저장완료</string>
+    <string name="double_kill">再按一次退出应用</string>
+    <string name="Modifying">수정</string>
+
+    <string name="SXi_Q">SXi-Q</string>
+    <string name="ID">ID</string>
+
+    <string name="ble_not_supported">이버전을 지원하지 않습니다</string>
+    <string name="error_bluetooth_not_supported">이버전을 지원하지 않습니다</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+    <string name="no_connect">Desconectado</string>
+
+    <string name="set_detail_model">바이패스</string>
+    <string name="set_display_status">화면방향전환</string>
+    <string name="set_display_status_left">왼쪽 방향</string>
+    <string name="set_display_status_right">오른쪽 방향</string>
+    <string name="set_display_status_auto">자동</string>
+
+    <string name="set_material">코일 선택</string>
+    <string name="material_nickel_wire">니켈</string>
+    <string name="material_titanium_wire">티타늄</string>
+    <string name="material_stainless_steel_wire">스텐레스</string>
+    <string name="material_alcohol_control">SX Pure</string>
+    <string name="material_TCR_manual">사용자 코일 선택</string>
+
+    <string name="select_texture">출력 모드</string>
+    <string name="texture_power_save">에코 모드</string>
+    <string name="texture_soft">소프트 모드</string>
+    <string name="texture_standard">기본 모드</string>
+    <string name="texture_strong">파워 모드</string>
+    <string name="texture_super_strong">파워플러스 모드</string>
+    <string name="texture_custom_s1">SXiQ_S1</string>
+    <string name="texture_custom_s2">SXiQ_S2</string>
+    <string name="texture_custom_s3">SXiQ_S3</string>
+    <string name="texture_custom_s4">SXiQ_S4</string>
+    <string name="texture_custom_s5">SXiQ_S5</string>
+
+    <string name="select_memory_mode">조절 모드</string>
+    <string name="memory_m1">M1</string>
+    <string name="memory_m2">M2</string>
+    <string name="memory_m3">M3</string>
+    <string name="memory_m4">M4</string>
+    <string name="memory_m5">M5</string>
+
+    <string name="select_temperature_unit">온도</string>
+    <string name="temperature_C">℃</string>
+    <string name="temperature_F">℉</string>
+
+    <string name="select_power_joule_switch">작동모드</string>
+    <string name="power">와트</string>
+    <string name="joule">쥴</string>
+
+    <string name="select_operation_mode">운영방식선택</string>
+    <string name="operation_mode_primary">간편모드</string>
+    <string name="operation_mode_senior">고급모드</string>
+
+    <string name="adjust_temperature">온도 설정</string>
+    <string name="compensation_temperature">주변 온도설정</string>
+    <string name="set_TCR">사용자 온도설정</string>
+    <string name="power_regulation">파워 모드</string>
+    <string name="joule_regulation">쥴 모드</string>
+
+</resources>

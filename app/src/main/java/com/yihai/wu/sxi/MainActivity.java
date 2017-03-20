@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //关闭当前应用
                 this.finish();
             } else {
-                Toast.makeText(this, R.string.double_kill, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, R.string.double_kill, Toast.LENGTH_SHORT).show();
                 end = System.currentTimeMillis();
             }
         }

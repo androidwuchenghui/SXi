@@ -1,0 +1,105 @@
+<resources>
+    <!-- 西班牙版    UI元素     -->
+    <string name="app_name">SXi</string>
+    <string name="title">SXI</string>
+    <string name="connect">Conexión</string>
+    <string name="text_upgrade">Actualización</string>
+    <string name="text_set">Ajustes</string>
+    <string name="text_information">Información</string>
+    <string name="text_reset">Restauración</string>
+    <string name="device_name">Nombre del producto</string>
+    <string name="software_name">Software del chip</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">Listo para resetear? Ok</string>
+    <string name="sure">OK</string>
+    <string name="cancel">Cancelar</string>
+
+    <!--  UI HUD  -->
+    <string name="reset_success">Reseteado completado</string>
+    <string name="searching">Buscando</string>
+    <string name="connecting">Conectando</string>
+    <string name="connect_successfully">Conexión con éxito</string>
+    <string name="no_device_find">No encontrado</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="reconnect">Recuperado</string>
+    <string name="read">Leyendo</string>
+    <string name="reading">Leyendo</string>
+    <string name="out_of_limit">Más allá de la restricción</string>
+    <string name="no_support">Versión periférica no encontrada</string>
+    <string name="main_no_connect">No conectado al periférico</string>
+    <string name="point_out_title">SXi</string>
+    <string name="point_out_information_1">Conexión fallida, quizás el cambio de contraseña ha fallado</string>
+    <string name="point_out_information_2">Porfavor siga los siguientes pasos para resetear:\nA.Salir de SXi App\nB.Operacion del dispositivo Manual. Entrar en Conexión del dispositivo [interface].\nC.Presione 5 segundos  el botón de dispario y entre en el emparejado via bluetooth.\nD.Reinicie la Aplicación , conecte y busque de nuevo el dispositivo</string>
+    <string name="close_the_tip">Hecho</string>
+
+    <string name="connect_fail">Cargado fallido</string>
+    <string name="have_been_connected">Dispositivo conectado</string>
+    <string name="have_been_not_connected">Dispositivo desconectado</string>
+    <string name="connected">Conectado</string>
+    <string name="no_connected">Desconectado</string>
+    <string name="save_success">Guardado con éxito</string>
+    <string name="double_kill">再按一次退出应用</string>
+    <string name="Modifying">Modificando</string>
+
+    <string name="SXi_Q">SXi-Q</string>
+    <string name="ID">ID</string>
+
+    <string name="ble_not_supported">Versión periférica no encontrada</string>
+    <string name="error_bluetooth_not_supported">Versión periférica no encontrada</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+    <string name="no_connect">Desconectado</string>
+
+    <string name="set_detail_model">BYPASS</string>
+    <string name="set_display_status">MODO DE PANTALLA</string>
+    <string name="set_display_status_left">IZQUIERDA</string>
+    <string name="set_display_status_right">DERECHA</string>
+    <string name="set_display_status_auto">AUTOMÁTICO</string>
+
+    <string name="set_material">SELECCIÓN DE RESISTENCIA</string>
+    <string name="material_nickel_wire">NI200</string>
+    <string name="material_titanium_wire">TI01</string>
+    <string name="material_stainless_steel_wire">SS316</string>
+    <string name="material_alcohol_control">SX_PURE</string>
+    <string name="material_TCR_manual">TCR_MANUAL</string>
+
+    <string name="select_texture">OUTPUT MODE</string>
+    <string name="texture_power_save">ECO</string>
+    <string name="texture_soft">SOFT</string>
+    <string name="texture_standard">STANDARD</string>
+    <string name="texture_strong">POWERFUL</string>
+    <string name="texture_super_strong">POWERFUL+</string>
+    <string name="texture_custom_s1">SXiQ_S1</string>
+    <string name="texture_custom_s2">SXiQ_S2</string>
+    <string name="texture_custom_s3">SXiQ_S3</string>
+    <string name="texture_custom_s4">SXiQ_S4</string>
+    <string name="texture_custom_s5">SXiQ_S5</string>
+
+    <string name="select_memory_mode">MODO AJUSTE</string>
+    <string name="memory_m1">M1</string>
+    <string name="memory_m2">M2</string>
+    <string name="memory_m3">M3</string>
+    <string name="memory_m4">M4</string>
+    <string name="memory_m5">M5</string>
+
+    <string name="select_temperature_unit">TEMPERATURA</string>
+    <string name="temperature_C">℃</string>
+    <string name="temperature_F">℉</string>
+
+    <string name="select_power_joule_switch">MODO DE TRABAJO</string>
+    <string name="power">Vatios</string>
+    <string name="joule">Julios</string>
+
+    <string name="select_operation_mode">MODO DE OPERACIÓN</string>
+    <string name="operation_mode_primary">Novice</string>
+    <string name="operation_mode_senior">Advanced</string>
+
+    <string name="adjust_temperature">Temperatura</string>
+    <string name="compensation_temperature">Compensación</string>
+    <string name="set_TCR">MANUAL TCR</string>
+    <string name="power_regulation">Vatios</string>
+    <string name="joule_regulation">Julios</string>
+
+</resources>

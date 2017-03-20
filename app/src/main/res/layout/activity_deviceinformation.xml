@@ -84,7 +84,7 @@
             android:layout_alignRight="@+id/device_name"
             android:layout_below="@+id/tv_id"
             android:padding="6dp"
-            android:text="@string/Connection_status"
+            android:text="@string/connectedState"
             android:textColor="@color/colorPrimaryDark"/>
 
     </RelativeLayout>

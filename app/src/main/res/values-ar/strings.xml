@@ -1,0 +1,107 @@
+<resources>
+    <!-- 阿拉伯版    UI元素     -->
+    <string name="app_name">SXi</string>
+    <string name="title">SXI</string>
+    <string name="connect">أتصال أو صلة</string>
+    <string name="text_upgrade">تطوير أو تحديث</string>
+    <string name="text_set">ا عدادات</string>
+    <string name="text_information">معلومات</string>
+    <string name="text_reset">أعاده الضبط</string>
+    <string name="device_name">أسم المنتج</string>
+    <string name="software_name">برنامج الرقاقة</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">على استعداد  عادة؟</string>
+    <string name="sure">موافق</string>
+    <string name="cancel">ألغاء</string>
+
+    <!--  UI HUD  -->
+    <string name="reset_success">تم أعاده الضبط</string>
+    <string name="searching">بحث</string>
+    <string name="connecting">Connecting</string>
+    <string name="Modifying">تعديل</string>
+    <string name="connect_successfully">تم ا تصال</string>
+
+    <string name="no_device_find">لم يتم التحقق</string>
+    <string name="disconnected">تم الفصل</string>
+    <string name="reconnect">استرجاع</string>
+    <string name="read">يتم التعرف</string>
+    <string name="reading">يتم التعرف</string>
+    <string name="out_of_limit">خارج القيد كثيرا</string>
+    <string name="no_support">  يدعم نسخة خارجيه</string>
+    <string name="main_no_connect">ليس أتصال خارجي</string>
+    <string name="point_out_title">SXi</string>
+    <string name="point_out_information_1">فشل في ا تصال ربما وظيفة كلمة السر تعديل وحدة بلوتوث بها خطأ</string>
+    <string name="point_out_information_2">برجاء أتباع هذه الخطوات  عادة تعيين الجهاز:\nA.أخرج من تطبيق الجهاز\nB.تشغيل الجهاز يدويا، أدخل علي ربط ا فتران مع الجهاز\nC.أضغط  سفل علي زر التشغيل لمده 5 ثواني للدخول علي ا فتران مع البلوتوث\nD.أعد تشغيل الطتبيق ثم أبحث عن الجهاز مره أخري ثم قم بعمل أقتران مع الجهاز الذي وجدته</string>
+    <string name="close_the_tip">ألغاء</string>
+
+    <string name="connect_fail">فشل التحميل</string>
+    <string name="have_been_connected">الجهاز متصل</string>
+    <string name="have_been_not_connected">الجهاز غير متصل</string>
+    <string name="connected">منصل</string>
+    <string name="no_connected">أنقطع ا تصال</string>
+    <string name="save_success">تم الحفظ بنجاح</string>
+    <string name="double_kill">再按一次退出应用</string>
+
+
+    <string name="SXi_Q">SXi-Q</string>
+    <string name="ID">ID</string>
+
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+    <string name="no_connect">أنقطع ا تصال</string>
+
+    <string name="set_detail_model">مجري جنبي</string>
+    <string name="set_display_status">وضع العرض</string>
+    <string name="set_display_status_left">البسار</string>
+    <string name="set_display_status_right">اليمين</string>
+    <string name="set_display_status_auto">ذاتي الحركه</string>
+
+    <string name="set_material">أختيار السلك الملفوف</string>
+    <string name="material_nickel_wire">نيكل</string>
+    <string name="material_titanium_wire">تيتنيم</string>
+    <string name="material_stainless_steel_wire">استالستيل</string>
+    <string name="material_alcohol_control">sx_طبيعي</string>
+    <string name="material_TCR_manual">TCR_MANUAL</string>
+
+    <string name="select_texture">طريقة ا خراج</string>
+    <string name="texture_power_save">أفتصادي</string>
+    <string name="texture_soft">ناعم</string>
+    <string name="texture_standard">قياسي</string>
+    <string name="texture_strong">قوي</string>
+    <string name="texture_super_strong">قوي+</string>
+    <string name="texture_custom_s1">SXiQ_S1</string>
+    <string name="texture_custom_s2">SXiQ_S2</string>
+    <string name="texture_custom_s3">SXiQ_S3</string>
+    <string name="texture_custom_s4">SXiQ_S4</string>
+    <string name="texture_custom_s5">SXiQ_S5</string>
+
+    <string name="select_memory_mode">وضع الضبط</string>
+    <string name="memory_m1">M1</string>
+    <string name="memory_m2">M2</string>
+    <string name="memory_m3">M3</string>
+    <string name="memory_m4">M4</string>
+    <string name="memory_m5">M5</string>
+
+    <string name="select_temperature_unit">درجة الحرارة</string>
+    <string name="temperature_C">℃</string>
+    <string name="temperature_F">℉</string>
+
+    <string name="select_power_joule_switch">طريقة العمل</string>
+    <string name="power">واط</string>
+    <string name="joule">جول</string>
+
+    <string name="select_operation_mode">عملية \ تشغيل</string>
+    <string name="operation_mode_primary">صغير</string>
+    <string name="operation_mode_senior">كبير</string>
+
+    <string name="adjust_temperature">درجة الحرارة</string>
+    <string name="compensation_temperature">تعويض</string>
+    <string name="set_TCR">دليل TCR</string>
+    <string name="power_regulation">قدرة</string>
+    <string name="joule_regulation">جول</string>
+
+</resources>

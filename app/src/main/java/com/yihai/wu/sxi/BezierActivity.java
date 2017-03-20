@@ -354,7 +354,7 @@ public class BezierActivity extends AppCompatActivity {
         waitingDialog.setTitle(R.string.point_out_title);
         waitingDialog.setIcon(R.mipmap.app_icon);
         waitingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        waitingDialog.setMessage(this.getString(R.string.wait_for_data_loading));
+        waitingDialog.setMessage(this.getString(R.string.Modifying));
         waitingDialog.setIndeterminate(true);
         waitingDialog.setCancelable(false);
 
@@ -406,7 +406,7 @@ public class BezierActivity extends AppCompatActivity {
         if (connectedDevice != null) {
             initDialog = new ProgressDialog(BezierActivity.this);
             initDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            initDialog.setMessage(this.getString(R.string.wait_for_data_loading));
+            initDialog.setMessage(this.getString(R.string.reading));
             initDialog.show();
         } else {
             init();
@@ -489,7 +489,7 @@ public class BezierActivity extends AppCompatActivity {
 
 
         //℃温度曲线的数据
-        temperData1 = getLineData(texture.arr3, 0);
+        temperData1 = getLineData(texture.arr3, 5);
         // J  焦耳曲线的数据
         initJouleData = getLineData(texture.arr4, 5);
         //通过查询数据库判断是焦耳还是功率
@@ -498,8 +498,8 @@ public class BezierActivity extends AppCompatActivity {
         jouleOrPower = myMode.JouleOrPower;
         //单位
         temperatureUnit = myMode.temperatureUnit;
-
-        Log.d(TAG, "init: powerDashValue    j/p: " + jouleOrPower + "   powerDashValue  " + powerDashValue + "  temperDashValue   " + temperDashValue);
+        Log.d(TAG, "temperatureUnit init: "+temperatureUnit);
+//        Log.d(TAG, "init: powerDashValue    j/p: " + jouleOrPower + "   powerDashValue  " + powerDashValue + "  temperDashValue   " + temperDashValue);
         switch (jouleOrPower) {
             case 0:
                 generateInitialLineData();//生成功率曲线
@@ -908,8 +908,8 @@ public class BezierActivity extends AppCompatActivity {
                         for (PointValue value : dashLineValues) {
                             float currentY = value.getY() - move / rate;
 
-                            if (currentY < currentAxisY_Values.get(0).getValue()) {
-                                currentY = currentAxisY_Values.get(0).getValue();
+                            if (currentY < currentAxisY_Values.get(0).getValue()+5) {
+                                currentY = currentAxisY_Values.get(0).getValue()+5;
                             } else if (currentY > currentAxisY_Values.get(5).getValue()) {
                                 currentY = currentAxisY_Values.get(5).getValue();
                             }
@@ -933,7 +933,14 @@ public class BezierActivity extends AppCompatActivity {
                                 tvDashY.setText(translateY + "");
                                 break;
                             case 1:
-                                String result = String.format("%.1f", translateY * 9 / 5 + 32);
+                                String result="";
+                                if(touchInChart==TOUCH_FOR_TEMPER_CHART){
+                                     result = String.format("%.1f", translateY * 9 / 5 + 32);
+                                }else {
+                                     result =  translateY +"";
+                                }
+
+
                                 tvDashY.setText(result);
                                 break;
                         }
@@ -958,7 +965,12 @@ public class BezierActivity extends AppCompatActivity {
                                 valueY.setText(translateY + "");
                                 break;
                             case 1:
-                                String result = String.format("%.1f", translateY * 9 / 5 + 32);
+                                String result="";
+                                if(touchInChart==TOUCH_FOR_TEMPER_CHART){
+                                    result = String.format("%.1f", translateY * 9 / 5 + 32);
+                                }else {
+                                    result = translateY + "";
+                                }
                                 valueY.setText(result);
                                 break;
                         }
