@@ -18,13 +18,15 @@
     <string name="reset_success">重置成功</string>
     <string name="searching">搜索中...</string>
     <string name="connecting">连接中...</string>
-
+    <string name="Modifying">修改中</string>
     <string name="connect_successfully">连接成功</string>
 
     <string name="no_device_find">未找到设备</string>
     <string name="disconnected">已断开连接</string>
     <string name="reconnect">已重新连接</string>
     <string name="read">读取</string>
+    <string name="reading">读取中</string>
+
     <string name="out_of_limit">超出约束太多</string>
     <string name="no_support">本型号不支持</string>
     <string name="main_no_connect">未连接设备</string>

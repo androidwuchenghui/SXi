@@ -1,5 +1,5 @@
 <resources>
-    <!-- 法语版    UI元素     -->
+    <!-- 法版    UI元素     -->
     <string name="app_name">SXi</string>
     <string name="title">SXI</string>
     <string name="connect">Connexion</string>
@@ -29,7 +29,7 @@
     <string name="main_no_connect">Périphérique Non Connecté</string>
     <string name="point_out_title">SXi</string>
     <string name="point_out_information_1">La connexion a échoué, peut être dû à la modification anormale du mot de passe du module Bluetooth</string>
-    <string name="point_out_information_2">Veuillez suivre les instructions suivantes pour un reset : \n1.Sorter de l'application Sxi\n2.Entrer manuellement dans le menu 『Device Pairing』 sur la Box\n3.Appuyer 5 secondes sur le bouton Fire pour entrer dans la fonction d'apparainage\n4.redémarer l'applicationSXi, rechercher à nouveau la Box, connecter et apparainer avec le périphérique trouvé.</string>
+    <string name="point_out_information_2">Veuillez suivre les instructions suivantes pour un reset : \n1.Sorter de l\'application Sxi\n2.Entrer manuellement dans le menu 『Device Pairing』 sur la Box\n3.Appuyer 5 secondes sur le bouton Fire pour entrer dans la fonction d\'apparainage\n4.redémarer l\'applicationSXi, rechercher à nouveau la Box, connecter et apparainer avec le périphérique trouvé.</string>
     <string name="close_the_tip">Fait</string>
 
     <string name="connect_fail">Chargement à échoué</string>
@@ -53,7 +53,7 @@
     <string name="no_connect">Desconectado</string>
 
     <string name="set_detail_model">BYPASS</string>
-    <string name="set_display_status">Orientation de l'écran</string>
+    <string name="set_display_status">Orientation de l\'écran</string>
     <string name="set_display_status_left">GAUCHE</string>
     <string name="set_display_status_right">DROITE</string>
     <string name="set_display_status_auto">AUTO</string>
