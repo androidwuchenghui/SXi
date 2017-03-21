@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart: " + mBluetoothLeService);
+        Log.d(TAG, "screenLock:   onStart" + mBluetoothLeService);
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
         //        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
         //            Log.d(TAG, "onStart: "+mBluetoothLeService);
@@ -386,9 +387,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "onDestroy: MainActivity");
         //        unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
+        mBluetoothLeService.disconnect();
         mBluetoothLeService.close();
         mBluetoothLeService = null;
-        //        mBluetoothAdapter.disable();
+
+        mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {
             connectedDevice.isConnected = false;
@@ -514,10 +517,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: " + "InMainActivity    address " + lastAddress + "  s:  " + mBluetoothLeService + "   ");
-
-        if (mBluetoothLeService != null && mBluetoothLeService.getTheConnectedState() == 0 && lastAddress != null) {
-            mBluetoothLeService.connect(lastAddress);
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
         }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mBluetoothLeService != null && mBluetoothLeService.getTheConnectedState() == 0 && lastAddress != null && mBluetoothAdapter.isEnabled()) {
+                    mBluetoothAdapter.startLeScan(mLeScanCallback);
+                }
+            }
+        }, 500);
+
     }
 }

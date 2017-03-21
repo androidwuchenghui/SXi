@@ -703,6 +703,15 @@ public class BluetoothLeService extends Service {
                     Log.d(TAG, "reConnectBluetooth: ");
                     BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     break;
+                case Intent.ACTION_SCREEN_OFF:
+                    Log.d(TAG, "screenLock:    关闭屏幕  ");   //屏幕熄灭后需要断开连接，关闭蓝牙
+                    disconnect();
+                    mBluetoothAdapter.disable();
+                    break;
+                case Intent.ACTION_SCREEN_ON:
+                    Log.d(TAG, "screenLock:    屏幕亮起  ");
+//                    mBluetoothAdapter.enable();
+                    break;
 
             }
         }
@@ -713,7 +722,8 @@ public class BluetoothLeService extends Service {
         intentFilter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);//  clock the screen
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);//  clock the screen
         return intentFilter;
     }
 

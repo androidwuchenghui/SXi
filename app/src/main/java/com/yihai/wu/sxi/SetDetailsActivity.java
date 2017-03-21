@@ -153,6 +153,7 @@ public class SetDetailsActivity extends AppCompatActivity {
 
         Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
     }
 
     @Override

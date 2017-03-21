@@ -539,6 +539,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:max="200"
+                android:progressDrawable="@drawable/seekbar_color"
+                android:maxHeight="3dip"
+                android:thumb="@drawable/seekbar_thumb"
                 />
 
             <View
@@ -608,6 +611,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:max="50"
+                android:progressDrawable="@drawable/seekbar_color"
+                android:maxHeight="3dip"
+                android:thumb="@drawable/seekbar_thumb"
                 />
 
             <View
@@ -669,6 +675,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:max="650"
+                android:progressDrawable="@drawable/seekbar_color"
+                android:maxHeight="3dip"
+                android:thumb="@drawable/seekbar_thumb"
                 />
 
             <View
@@ -731,11 +740,16 @@
                 </LinearLayout>
 
                 <SeekBar
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:id="@+id/seekBar_set_power"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:max="1950"
+                    android:progressDrawable="@drawable/seekbar_color"
+                    android:maxHeight="3dip"
+                    android:thumb="@drawable/seekbar_thumb"
                     />
 
             </LinearLayout>
@@ -801,6 +815,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:max="1100"
+                    android:progressDrawable="@drawable/seekbar_color"
+                    android:maxHeight="3dip"
+                    android:thumb="@drawable/seekbar_thumb"
                     />
 
             </LinearLayout>
