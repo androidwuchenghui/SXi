@@ -2,106 +2,108 @@
     <!-- 中文版    UI元素     -->
     <string name="app_name">SXi</string>
     <string name="title">SXI</string>
-    <string name="connect">连接</string>
-    <string name="text_upgrade">升级</string>
-    <string name="text_set">设置</string>
-    <string name="text_information">设备信息</string>
-    <string name="text_reset">重置</string>
-    <string name="device_name">产品名称</string>
-    <string name="software_name">芯片软件</string>
-    <string name="connectedState">连接状态</string>
-    <string name="Be_sure_to_reset">确定要重置？</string>
-    <string name="sure">确定</string>
-    <string name="cancel">取消</string>
+    <string name="connect">Connection</string>
+    <string name="text_upgrade">Upgrade</string>
+    <string name="text_set">Setting</string>
+    <string name="text_information">Information</string>
+    <string name="text_reset">Reset</string>
+    <string name="device_name">Product Name</string>
+    <string name="software_name">Chip Software</string>
+    <string name="connectedState">Connect State</string>
+    <string name="Be_sure_to_reset">Ready for resetting?</string>
+    <string name="sure">OK</string>
+    <string name="cancel">Cancel</string>
 
     <!--  UI HUD  -->
-    <string name="reset_success">重置成功</string>
-    <string name="searching">搜索中...</string>
-    <string name="connecting">连接中...</string>
-    <string name="Modifying">修改中</string>
-    <string name="connect_successfully">连接成功</string>
+    <string name="reset_success">Reset Success</string>
+    <string name="searching">Searching</string>
+    <string name="connecting">Connecting</string>
+    <string name="Modifying">Modifying</string>
+    <string name="connect_successfully">Connect Success</string>
 
-    <string name="no_device_find">未找到设备</string>
-    <string name="disconnected">已断开连接</string>
-    <string name="reconnect">已重新连接</string>
-    <string name="read">读取</string>
-    <string name="reading">读取中</string>
+    <string name="no_device_find">Not found</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="reconnect">Retrieved</string>
+    <string name="read">Reading</string>
+    <string name="reading">Reading</string>
+    <string name="out_of_limit">Beyond Constraint Too Much</string>
+    <string name="no_support">Peripheral version not support</string>
+    <string name="main_no_connect">No Peripheral connected</string>
+    <string name="point_out_title">Tips</string>
+    <string name="point_out_information_1">Connect failed, may be the password modification function of Bluetooth module is abnormal</string>
+    <string name="point_out_information_2">Please follow the following steps to reset:\nA.Exit the Sxi App.\nB.Operate the device Manually,enter the 『Device Pairing』 interface.\nC.Press down the fire button and keep 5 seconds to enter the bluetooth pairing interface.\nD.Restart the App, search the device again,connect and pairing with the found device.</string>
+    <string name="connect_fail">Load failed</string>
+    <string name="have_been_connected">Device Connected</string>
 
-    <string name="out_of_limit">超出约束太多</string>
-    <string name="no_support">本型号不支持</string>
-    <string name="main_no_connect">未连接设备</string>
-    <string name="point_out_title">提示</string>
-    <string name="point_out_information_1">连接不成功，可能蓝牙模块的密码修改功能出现异常</string>
-    <string name="point_out_information_2">请按照以下操作进行重置：\n1.退出App\n2.手动操作设备,进入『设备配对』菜单\n3.长按Enter键,直到设备显示蓝牙配对画面\n4.重新启动App,重新搜索,并点击连接搜索到的设备来完成配对</string>
-    <string name="close_the_tip">关闭</string>
-    <string name="connect_fail">连接失败</string>
-    <string name="have_been_connected">设备已连接</string>
-    <string name="have_been_not_connected">设备未连接</string>
-    <string name="connected">已连接</string>
-    <string name="no_connected">未连接</string>
-    <string name="save_success">保存成功</string>
-    <string name="double_kill">再按一次退出应用</string>
+    <string name="connected">Connected</string>
+    <string name="no_connected">Device disconnected</string>
+    <string name="save_success">Save success</string>
+    <string name="double_kill">Double click to exit this application</string>
 
 
     <string name="SXi_Q">SXi-Q</string>
     <string name="ID">ID</string>
 
+    <string name="have_been_not_connected">Device disconnected</string>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
 
     <string name="unknown_device">Unknown device</string>
     <string name="unknown_characteristic">Unknown characteristic</string>
     <string name="unknown_service">Unknown service</string>
-    <string name="no_connect">未连接</string>
+    <string name="no_connect">Disconnected</string>
 
-    <string name="set_detail_model">直通模式</string>
-    <string name="set_display_status">显示状态</string>
-    <string name="set_display_status_left">左边</string>
-    <string name="set_display_status_right">右边</string>
-    <string name="set_display_status_auto">自动</string>
+    <string name="set_detail_model">BYPASS</string>
+    <string name="set_display_status">DISPLAY MODE</string>
+    <string name="set_display_status_left">LEFT</string>
+    <string name="set_display_status_right">RIGHT</string>
+    <string name="set_display_status_auto">AUTO</string>
 
-    <string name="set_material">材质选择</string>
-    <string name="material_nickel_wire">镍丝</string>
-    <string name="material_titanium_wire">钛丝</string>
-    <string name="material_stainless_steel_wire">不锈钢丝</string>
-    <string name="material_alcohol_control">百醇控制</string>
-    <string name="material_TCR_manual">手动TCR</string>
+    <string name="set_material">COIL SELECT</string>
+    <string name="material_nickel_wire">NI200</string>
+    <string name="material_titanium_wire">TI01</string>
+    <string name="material_stainless_steel_wire">SS316</string>
+    <string name="material_alcohol_control">SX_PURE</string>
+    <string name="material_TCR_manual">TCR_MANUAL</string>
 
-    <string name="select_texture">口感选择</string>
-    <string name="texture_power_save">省电</string>
-    <string name="texture_soft">柔和</string>
-    <string name="texture_standard">标准</string>
-    <string name="texture_strong">强劲</string>
-    <string name="texture_super_strong">超强劲</string>
-    <string name="texture_custom_s1">自定义口感-S1</string>
-    <string name="texture_custom_s2">自定义口感-S2</string>
-    <string name="texture_custom_s3">自定义口感-S3</string>
-    <string name="texture_custom_s4">自定义口感-S4</string>
-    <string name="texture_custom_s5">自定义口感-S5</string>
+    <string name="select_texture">OUTPUT MODE</string>
+    <string name="texture_power_save">ECO</string>
+    <string name="texture_soft">SOFT</string>
+    <string name="texture_standard">STANDARD</string>
+    <string name="texture_strong">POWERFUL</string>
+    <string name="texture_super_strong">POWERFUL+</string>
+    <string name="texture_custom_s1">SXiQ_S1</string>
+    <string name="texture_custom_s2">SXiQ_S2</string>
+    <string name="texture_custom_s3">SXiQ_S3</string>
+    <string name="texture_custom_s4">SXiQ_S4</string>
+    <string name="texture_custom_s5">SXiQ_S5</string>
 
-    <string name="select_memory_mode">记忆模式选择</string>
+    <string name="select_memory_mode">ADJUST MODE</string>
     <string name="memory_m1">M1</string>
     <string name="memory_m2">M2</string>
     <string name="memory_m3">M3</string>
     <string name="memory_m4">M4</string>
     <string name="memory_m5">M5</string>
 
-    <string name="select_temperature_unit">温度单位</string>
+    <string name="select_temperature_unit">TEMPERATURE</string>
     <string name="temperature_C">℃</string>
     <string name="temperature_F">℉</string>
 
-    <string name="select_power_joule_switch">功率焦耳切换</string>
-    <string name="power">功率</string>
-    <string name="joule">焦耳</string>
+    <string name="select_power_joule_switch">WORK MODE</string>
+    <string name="power">Watts</string>
+    <string name="joule">Joule</string>
 
-    <string name="select_operation_mode">操作模式</string>
-    <string name="operation_mode_primary">初级</string>
-    <string name="operation_mode_senior">高级</string>
+    <string name="select_operation_mode">OPERATION</string>
+    <string name="operation_mode_primary">Novice</string>
+    <string name="operation_mode_senior">Advanced</string>
 
-    <string name="adjust_temperature">温度调节</string>
-    <string name="compensation_temperature">补偿温度</string>
-    <string name="set_TCR">TCR设置</string>
-    <string name="power_regulation">功率调节</string>
-    <string name="joule_regulation">焦耳调节</string>
+    <string name="adjust_temperature">Temperature</string>
+    <string name="compensation_temperature">Compensate</string>
+    <string name="set_TCR">MANUAL TCR</string>
+    <string name="power_regulation">POWER</string>
+    <string name="joule_regulation">JOULE</string>
+    <string name="close_the_tip">close</string>
+
+
 
 </resources>
