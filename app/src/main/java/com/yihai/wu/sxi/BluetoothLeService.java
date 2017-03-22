@@ -314,7 +314,7 @@ public class BluetoothLeService extends Service {
                                           BluetoothGattCharacteristic characteristic, int status) {
             // TODO Auto-generated method stub
             if (g_UUID_Charater_SendData.equals(characteristic.getUuid())) {
-                //Log.d(TAG, "write characteristic=Done");
+                Log.d(TAG, "write characteristic=Done");
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     broadcastUpdate(ACTION_BLE_DATA_TX_OK);
                 }

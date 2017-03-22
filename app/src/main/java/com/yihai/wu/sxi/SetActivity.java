@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
@@ -55,7 +52,7 @@ public class SetActivity extends AppCompatActivity {
     private BluetoothGattCharacteristic g_Character_DeviceName;
     private static final String TAG = "SetActivity";
     private String deviceName;
-    private boolean isLetterStart = false;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,9 +148,19 @@ public class SetActivity extends AppCompatActivity {
                 connectedDevice.save();
             }
         }
-        if(g_Character_DeviceName!=null&&!deviceName.equals(et.getText().toString())&&mBluetoothLeService.getTheConnectedState()==2&&isLetterStart){
-
-            Sys_SetMyDeviceName(et.getText().toString());
+        if(g_Character_DeviceName!=null&&!deviceName.equals(et.getText().toString())&&mBluetoothLeService.getTheConnectedState()==2){
+            String name  = et.getText().toString();
+           //此处为了解决 6.0.1系统改变设备名后搜不到bug（发现是命名不能低于6位）
+            boolean name_Ok = true;
+            while (name_Ok){
+                int name_length = name.length();
+                if(name_length<6){
+                    name+=" ";
+                }else {
+                    name_Ok = false;
+                }
+            }
+            Sys_SetMyDeviceName(name);
         }
     }
 
@@ -281,36 +288,6 @@ public class SetActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        et.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG, "TextChanged:   before:  "+et.getText().toString());
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG, "TextChanged:   on:  "+et.getText().toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                String name = et.getText().toString();
-                int length = name.length();
-
-                if(length>0){
-                    isLetterStart = Character.isLetter(name.charAt(0));
-                }else {
-                    isLetterStart = false;
-                }
-                if(!isLetterStart){
-                    Toast.makeText(SetActivity.this, " 请以字母开头 ", Toast.LENGTH_SHORT).show();
-                }
-                Log.d(TAG, "TextChanged:   after:  "+et.getText().toString()+"  length : "+length+"   isLetter  :  "+ isLetterStart);
-
-            }
-        });
-
 
         //跳转到设置详情页
 
