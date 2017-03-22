@@ -52,10 +52,11 @@ public class DeviceInformationActivity extends BaseActivity {
         if (state == 2) {
             connectState.setText(R.string.connected);
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getLastConnectedDevice();
-            nameAfter.setText(connectedDevice.realName);
-            softAfter.setText(connectedDevice.softVision);
-            idAfter.setText(connectedDevice.deviceID);
-
+            if(connectedDevice!=null) {
+                nameAfter.setText(connectedDevice.realName);
+                softAfter.setText(connectedDevice.softVision);
+                idAfter.setText(connectedDevice.deviceID);
+            }
         }
 
     }

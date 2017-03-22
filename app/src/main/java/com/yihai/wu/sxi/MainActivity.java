@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
-                    Log.d(TAG, "onLeScan: " + device.getAddress() + "    lastAddress:  " + lastAddress);
-                    if (device.getAddress().toString().equals(lastAddress)) {
-                        Log.d(TAG, "ServiceOnConnectionStateChange:   关闭搜索  并连接  ");
+//                    Log.d(TAG, "onLeScan: " + device.getAddress() + "    lastAddress:  " + lastAddress);
+                    if (device.getAddress().toString().equals(lastAddress)&&lastAddress!=null) {
+//                        Log.d(TAG, "ServiceOnConnectionStateChange:   关闭搜索  并连接  ");
                         mBluetoothAdapter.stopLeScan(mLeScanCallback);
                         mBluetoothLeService.connect(lastAddress);
                     }
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect  " + lastAddress);
+//            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect  " + lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText(R.string.have_been_not_connected);
                 //   try to connect
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
-            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
+//            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
+//            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
 
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
@@ -386,11 +386,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         Log.d(TAG, "onDestroy: MainActivity");
         //        unregisterReceiver(mainActivityReceiver);
-        unbindService(mServiceConnection);
         mBluetoothLeService.disconnect();
         mBluetoothLeService.close();
+        unbindService(mServiceConnection);
         mBluetoothLeService = null;
-
         mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {

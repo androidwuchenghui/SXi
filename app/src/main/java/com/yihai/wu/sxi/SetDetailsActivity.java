@@ -856,7 +856,8 @@ public class SetDetailsActivity extends AppCompatActivity {
         } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
             int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
             seekBarSetJoule.setProgress(setJouleNum - 100);
-        } else if (m_Data[5] == 0x09 && mergerDataOver) {
+        }
+        /*else if (m_Data[5] == 0x09 && mergerDataOver) {
                     mergerDataOver = false;
                     Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length);
                     int tempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
@@ -881,7 +882,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                     int d = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
                     Log.d(TAG, "功率焦耳切换时范围  temperInfo: "+ a+"   "+b+ "   "+"   "+c+"    "+d);
                 }
-
+*/
     }
 
     public void setUserDevicePowerOrJoule(byte b) {

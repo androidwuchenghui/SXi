@@ -1128,12 +1128,12 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 deviceSoftVision.isConnected = true;
                 deviceSoftVision.lastConnect = true;
                 deviceSoftVision.save();
-                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
+//                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         LandDialog.dismiss();
-                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
+//                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
                         DeviceScanActivity.this.finish();
                     }
                 }, 1000);
