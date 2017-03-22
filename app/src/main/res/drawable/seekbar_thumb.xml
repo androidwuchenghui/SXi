@@ -3,8 +3,22 @@
 	<!-- normal -->
 	<item>
 		<layer-list>
+			<!--<item android:top="2dp" android:right="1dp" >
+				<shape android:shape="oval"  >
+					<solid android:color="#665e5d5d"/>
+					<gradient
+						android:startColor="@color/colorGray"
+						android:centerColor="@color/colorPrimaryDark"
+						android:endColor="@color/colorLittleGray"
+						android:angle="180"
+						/>
+				</shape>
+			</item>-->
+
 			<item>
+
 				<shape android:shape="oval">
+
 					<stroke
 						android:width="0.6dp"
 						android:color="@color/colorGray"
@@ -13,7 +27,16 @@
 						android:width="22dp"
 						android:height="22dp"/>
 					<solid android:color="@color/colorWhite"/>
+
+					<gradient
+						android:startColor="@color/colorWhite"
+						android:endColor="@color/colorLittleGray"
+
+						android:angle="-45"
+						/>
 				</shape>
+
+
 			</item>
 
 		</layer-list>

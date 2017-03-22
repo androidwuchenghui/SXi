@@ -520,10 +520,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!mBluetoothAdapter.isEnabled()) {
             mBluetoothAdapter.enable();
         }
+        lastAddress = sp.getString("address", null);
+        Log.d(TAG, "clockScreen: "+ mBluetoothAdapter.isEnabled()+"  service  "+mBluetoothLeService+"  state "+ "  last: "+lastAddress);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (mBluetoothLeService != null && mBluetoothLeService.getTheConnectedState() == 0 && lastAddress != null && mBluetoothAdapter.isEnabled()) {
+                    Log.d(TAG, "clockScreen: "+"  Resume 开始搜索  ");
                     mBluetoothAdapter.startLeScan(mLeScanCallback);
                 }
             }

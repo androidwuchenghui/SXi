@@ -816,7 +816,7 @@
                     android:layout_marginBottom="10dp"
                     android:max="1100"
                     android:progressDrawable="@drawable/seekbar_color"
-                    android:maxHeight="3dip"
+                    android:maxHeight="2dip"
                     android:thumb="@drawable/seekbar_thumb"
                     />
 
