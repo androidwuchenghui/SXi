@@ -3,7 +3,6 @@ package com.yihai.wu.sxi;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -17,7 +16,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -71,21 +69,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //一些特征值
     private BluetoothGattCharacteristic g_Character_TX;
 
-    // Device scan callback. 扫描回掉
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
-//                    Log.d(TAG, "onLeScan: " + device.getAddress() + "    lastAddress:  " + lastAddress);
-                    if (device.getAddress().toString().equals(lastAddress)&&lastAddress!=null) {
-//                        Log.d(TAG, "ServiceOnConnectionStateChange:   关闭搜索  并连接  ");
-                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                        mBluetoothLeService.connect(lastAddress);
-                    }
-                }
-            };
-
 
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -97,20 +80,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-//            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect  " + lastAddress);
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress );
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText(R.string.have_been_not_connected);
                 //   try to connect
-                if (lastAddress != null) {
-                    new Thread() {
+                if (lastAddress != null ) {
+                    Log.d(TAG, "doScan:  绑定成功后    叫后台去搜索   ");
+                    mBluetoothLeService.serviceScan();
+
+                   /* new Thread() {
                         @Override
                         public void run() {
                             super.run();
-
-                            Log.d(TAG, "ServiceOnConnectionStateChange:   执行持续搜索。。。 ");
+                            Log.d(TAG, "ServiceOnConnectionStateChange:   执行持续搜索。。。 " + scaning + "   mBluetoothAdapter " + mBluetoothAdapter);
                             mBluetoothAdapter.startLeScan(mLeScanCallback);
+                            scaning = true;
                         }
-                    }.start();
+                    }.start();*/
                     //                    mBluetoothLeService.connect(lastAddress);
                 }
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
@@ -131,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
 
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
+        sp = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
+        edit = sp.edit();
+        lastAddress = sp.getString("address", null);
+        Log.d(TAG, "life :-----onCreate-----     lastAddress " + lastAddress);
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -162,13 +153,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
+
         initBanner();
         initButton();
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
-//            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
+            //            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
+            //            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
 
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
@@ -178,17 +172,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }
-        sp = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
-        edit = sp.edit();
-        lastAddress = sp.getString("address", null);
-        Log.d(TAG, "MainActivityOnCreate:         " + lastAddress);
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
-        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        Log.d(TAG, "life:----onRestart---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             connectedState.setText(R.string.have_been_connected);
             getUserDeviceSetting();
@@ -255,8 +247,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "screenLock:   onStart" + mBluetoothLeService);
+
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
+        lastAddress = sp.getString("address", null);
         //        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
         //            Log.d(TAG, "onStart: "+mBluetoothLeService);
         //            mBluetoothLeService.connect(ConnectedBleDevices.getConnectedDevice().deviceAddress);
@@ -267,6 +260,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBluetoothAdapter.enable();
         }
 
+        Log.d(TAG, "life:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
+        while (!mBluetoothAdapter.isEnabled()){
+        }
+        Log.d(TAG, "life: onStart: "+mBluetoothAdapter.isEnabled());
+        if (mBluetoothLeService != null  && mBluetoothAdapter != null&& lastAddress != null&& mBluetoothAdapter.isEnabled()) {
+            Log.d(TAG, "onResume:   state  "+mBluetoothLeService.getTheConnectedState());
+            if (mBluetoothLeService.getTheConnectedState() == 0  ) {
+                Log.d(TAG, "doScan:  onStart  -->   让后台去连接 "+mBluetoothAdapter);
+                mBluetoothLeService.setDisConnectByMyself(false);
+                mBluetoothLeService.connect(lastAddress);
+            }
+        }
     }
 
 
@@ -384,13 +389,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: MainActivity");
+        Log.d(TAG, "life: ---onDestroy---: ");
         //        unregisterReceiver(mainActivityReceiver);
         mBluetoothLeService.disconnect();
         mBluetoothLeService.close();
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
-        mBluetoothAdapter.disable();
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
         if (connectedDevice != null) {
             connectedDevice.isConnected = false;
@@ -486,6 +490,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "life:-----onStop: ");
         unregisterReceiver(mainActivityReceiver);
     }
 
@@ -516,20 +521,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mBluetoothAdapter.isEnabled()) {
-            mBluetoothAdapter.enable();
-        }
-        lastAddress = sp.getString("address", null);
-        Log.d(TAG, "clockScreen: "+ mBluetoothAdapter.isEnabled()+"  service  "+mBluetoothLeService+"  state "+ "  last: "+lastAddress);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mBluetoothLeService != null && mBluetoothLeService.getTheConnectedState() == 0 && lastAddress != null && mBluetoothAdapter.isEnabled()) {
-                    Log.d(TAG, "clockScreen: "+"  Resume 开始搜索  ");
-                    mBluetoothAdapter.startLeScan(mLeScanCallback);
-                }
-            }
-        }, 500);
+        Log.d(TAG, "life:---- onResume");
 
     }
 }

@@ -138,19 +138,37 @@ public class BluetoothLeService extends Service {
 
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
-                    Log.d(TAG, "onLeScan: " + device.getAddress()+"    lastAddress:  "+lastAddress);
+                    Log.d(TAG, "onLeScan: " + device.getAddress() + "    lastAddress:  " + lastAddress);
                     if (device.getAddress().toString().equals(lastAddress)) {
-                        Log.d(TAG, "ServiceOnConnectionStateChange:   关闭搜索。。。 ");
+                        Log.d(TAG, "onLeScan: stopLeScan ");
                         mBluetoothAdapter.stopLeScan(mLeScanCallback);
                         keepSearch = false;
-                        Log.d(TAG, "onLeScan: 通过servive自己搜索并连接");
                         connect(lastAddress);
                     }
                 }
             };
 
+    private Thread scanThread = new Thread() {
+        @Override
+        public void run() {
+            super.run();
+            Log.d(TAG, "ServiceOnConnectionStateChange:   执行   后台搜索。。。   "+mBluetoothAdapter);
 
-    private boolean keepSearch;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+
+        }
+    };
+
+    private Thread serviceThread = new Thread() {
+        @Override
+        public void run() {
+            List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
+            displayGattServices(supportedGattServices);
+            super.run();
+        }
+    };
+
+    private boolean keepSearch = true;
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     //连接回掉
@@ -171,12 +189,11 @@ public class BluetoothLeService extends Service {
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
                 // Attempts to discover services after successful connection.
-                                Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   gatt.discoveryService   " );
+                Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接状态     ");
                 mBluetoothGatt.discoverServices();
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-
-                disconnect();
+                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接    " + disConnectByMyself);
                 close();
 
                 intentAction = ACTION_GATT_DISCONNECTED;
@@ -186,31 +203,23 @@ public class BluetoothLeService extends Service {
                     connectedDevice.isConnected = false;
                     connectedDevice.save();
                 }
-//
-                if(status==19){
+                //
+                if (status == 19) {
                     disConnectByMyself = true;
-                    disconnect();
                     broadcastUpdate(ACTION_LOGIN_FAILED);
                     return;
                 }
+                if (status == 133) {
+                    connect(lastAddress);
+                    return;
+                }
                 broadcastUpdate(intentAction);
-                Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接   adapter :  " + disConnectByMyself);
+
                 if (!disConnectByMyself) {
                     keepSearch = true;
-                    pool.execute(new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                            if(keepSearch){
-                                Log.d(TAG, "ServiceOnConnectionStateChange:   执行断开后持续搜索。。。 ");
-                                mBluetoothAdapter.startLeScan(mLeScanCallback);
-                            }
-
-                        }
-                    });
-                }else {
+                    serviceScan();
+                } else {
                     disConnectByMyself = true;
-                    disconnect();
                     broadcastUpdate(ACTION_LOGIN_FAILED);
                 }
 
@@ -225,30 +234,22 @@ public class BluetoothLeService extends Service {
             disconStatus = status;
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED); //发现服务
-                Thread serviceThread = new Thread() {
-                    @Override
-                    public void run() {
-                        List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
-                        displayGattServices(supportedGattServices);
-                        super.run();
-                    }
-                };
+
                 pool.execute(serviceThread);
-            }
-                        else if (status == 129) {
-            //                Log.d(TAG, "status = 129: -----发出129");
-            //                mBluetoothAdapter.disable();
-            //                Timer single_timer = new Timer();
-            //                single_timer.schedule(new TimerTask() {
-            //                    @Override
-            //                    public void run() {
-            //                        mBluetoothAdapter.enable();
-            //                        broadcastUpdate("129");
-            //                    }
-            //                }, 2500);
-            //            }
-//            if (status == 129) {
-//                broadcastUpdate(ACTION_LOGIN_FAILED);
+            } else if (status == 129) {
+                //                Log.d(TAG, "status = 129: -----发出129");
+                //                mBluetoothAdapter.disable();
+                //                Timer single_timer = new Timer();
+                //                single_timer.schedule(new TimerTask() {
+                //                    @Override
+                //                    public void run() {
+                //                        mBluetoothAdapter.enable();
+                //                        broadcastUpdate("129");
+                //                    }
+                //                }, 2500);
+                //            }
+                //            if (status == 129) {
+                //                broadcastUpdate(ACTION_LOGIN_FAILED);
             }
         }
 
@@ -363,7 +364,6 @@ public class BluetoothLeService extends Service {
 
                             handleChangePassword(reply);
                         } else if (commit_amount == 3) {
-                            Log.d(TAG, "handleChangePassword: " + "修改密码后再提交一次");
                             handleLastPassword(reply);
                         }
                     }
@@ -385,6 +385,12 @@ public class BluetoothLeService extends Service {
 
     private String lastAddress;
     private BluetoothGattCharacteristic g_Character_Baud_Rate;
+
+
+    public void setDisConnectByMyself(boolean disConnectByMyself) {
+        this.disConnectByMyself = disConnectByMyself;
+    }
+
     private boolean disConnectByMyself;
 
 
@@ -466,7 +472,8 @@ public class BluetoothLeService extends Service {
         sharedPreferences = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         lastAddress = sharedPreferences.getString("address", null);
-        Log.d(TAG, "serviceOnCreate:     lastAddress  "+lastAddress);
+        initialize();
+        Log.d(TAG, "serviceOnCreate:     lastAddress  " + lastAddress);
     }
 
     /*======================================================================
@@ -705,12 +712,12 @@ public class BluetoothLeService extends Service {
                     break;
                 case Intent.ACTION_SCREEN_OFF:
                     Log.d(TAG, "screenLock:    关闭屏幕  ");   //屏幕熄灭后需要断开连接，关闭蓝牙
+                    disConnectByMyself = true;
                     disconnect();
-                    mBluetoothAdapter.disable();
                     break;
                 case Intent.ACTION_SCREEN_ON:
                     Log.d(TAG, "screenLock:    屏幕亮起  ");
-//                    mBluetoothAdapter.enable();
+                    //                    mBluetoothAdapter.enable();
                     break;
 
             }
@@ -949,11 +956,12 @@ public class BluetoothLeService extends Service {
         } else {
             //通过用户自己保存的密码，并且不是第一次进入，允许执行正常通信￥￥（流程OK）
             Log.d(TAG, "handleChangePassword: 用户通过保存的密码进入      over");
+            theDevice.isConnected = true;
+            theDevice.save();
             //发出登陆成功的广播
             broadcastUpdate(ACTION_LAND_SUCCESS);
 
-            theDevice.isConnected = true;
-            theDevice.save();
+
         }
 
     }
@@ -968,7 +976,7 @@ public class BluetoothLeService extends Service {
             //提交密码后判断回馈的信息
             switch (reply) {
                 case "00":
-                   //////////////////////////////////////////////
+                    //////////////////////////////////////////////
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         broadcastUpdate(ACTION_LAND_SUCCESS);
@@ -1054,10 +1062,11 @@ public class BluetoothLeService extends Service {
                 commit_amount = 3;
                 step3 = false;
                 step5 = false;
+                //连接成功，执行正常通信￥￥ （流程OK）
+                Log.d(TAG, "handleChangePassword: 修改密码成功     提交最终正确密码。。。");
 
                 commitPassword(lastPassword + lastPassword);
-                //连接成功，执行正常通信￥￥ （流程OK）
-                Log.d(TAG, "handleChangePassword: 修改密码并保存     正常连接。。。");
+
 
                 break;
         }
@@ -1067,7 +1076,7 @@ public class BluetoothLeService extends Service {
     private void handleLastPassword(String reply) {
         switch (reply) {
             case "00":
-                Log.d(TAG, "handleLastPassword: " + "OK");
+                Log.d(TAG, "handleLastPassword: " + "OK  -->  isFirst");
                 isFirst();
                 break;
             case "01":
@@ -1075,4 +1084,9 @@ public class BluetoothLeService extends Service {
                 break;
         }
     }
+
+    public void serviceScan() {
+        pool.execute(scanThread);
+    }
+
 }
