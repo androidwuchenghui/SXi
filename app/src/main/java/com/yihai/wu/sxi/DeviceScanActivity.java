@@ -450,7 +450,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-
                 onLoad();
             }
         }, 5000);
