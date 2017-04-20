@@ -20,6 +20,9 @@
     <string name="connecting">Connecting</string>
     <string name="Modifying">Modifying</string>
     <string name="connect_successfully">Connect Success</string>
+    <string name="submit_password">Submit password</string>
+    <string name="submit_password_success"> Password submit success</string>
+    <string name="submit_password_failed"> Password submit failed</string>
 
     <string name="no_device_find">Not found</string>
     <string name="disconnected">Disconnected</string>

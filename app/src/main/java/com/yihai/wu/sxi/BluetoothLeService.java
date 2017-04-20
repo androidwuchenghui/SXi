@@ -89,6 +89,9 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.RX";
     public final static String ACTION_LAND_SUCCESS =
             "com.example.bluetooth.le.LandingSuccess";
+    public final static String ACTION_LANDING =
+            "com.example.bluetooth.le.LANDING";
+
     public final static String ACTION_LOGIN_FAILED =
             "com.example.bluetooth.le.LoginFailed";
     public final static String ACTION_NOT_BELONG =
@@ -152,7 +155,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void run() {
             super.run();
-            Log.d(TAG, "ServiceOnConnectionStateChange:   执行   后台搜索。。。   "+mBluetoothAdapter);
+            Log.d(TAG, "ServiceOnConnectionStateChange:   执行   后台搜索。。。   " + mBluetoothAdapter);
 
             mBluetoothAdapter.startLeScan(mLeScanCallback);
 
@@ -191,7 +194,7 @@ public class BluetoothLeService extends Service {
                 // Attempts to discover services after successful connection.
                 Log.d(TAG, "ServiceOnConnectionStateChange: " + "     连接状态     ");
                 mBluetoothGatt.discoverServices();
-
+                // 提交密码
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "ServiceOnConnectionStateChange:     断开连接    " + disConnectByMyself);
                 close();
@@ -249,7 +252,7 @@ public class BluetoothLeService extends Service {
                 //                }, 2500);
                 //            }
                 //            if (status == 129) {
-                //                broadcastUpdate(ACTION_LOGIN_FAILED);
+//                                broadcastUpdate(ACTION_LOGIN_FAILED);
             }
         }
 
@@ -262,6 +265,7 @@ public class BluetoothLeService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             Log.d(TAG, "onCharacteristicRead: " + characteristic.getUuid() + ">>>：" + g_UUID_Charater_CustomerID);
+
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
@@ -384,6 +388,11 @@ public class BluetoothLeService extends Service {
     }
 
     private String lastAddress;
+
+    public BluetoothGattCharacteristic getG_Character_Baud_Rate() {
+        return g_Character_Baud_Rate;
+    }
+
     private BluetoothGattCharacteristic g_Character_Baud_Rate;
 
 
@@ -567,7 +576,7 @@ public class BluetoothLeService extends Service {
         Log.d(TAG, "Trying to create a new connection.     getBluetoothGatt:    " + mBluetoothGatt);
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
-
+        broadcastUpdate(ACTION_LANDING);
         return true;
     }
 
@@ -960,8 +969,6 @@ public class BluetoothLeService extends Service {
             theDevice.save();
             //发出登陆成功的广播
             broadcastUpdate(ACTION_LAND_SUCCESS);
-
-
         }
 
     }

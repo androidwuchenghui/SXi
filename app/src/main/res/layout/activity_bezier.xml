@@ -115,8 +115,11 @@
     </LinearLayout>
 
     <FrameLayout
+
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        >
 
         <lecho.lib.hellocharts.view.LineChartView
             android:id="@+id/myChart"
@@ -200,6 +203,13 @@
         </LinearLayout>
 
     </FrameLayout>
-
-
+<TextView
+    android:id="@+id/myName"
+   android:gravity="center"
+    android:textColor="@color/colorWhite"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="16sp"
+    android:paddingBottom="2dp"
+    />
 </LinearLayout>

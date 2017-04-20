@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 
@@ -64,6 +65,9 @@ public class MaterialActivity extends AppCompatActivity {
     TextView connectState;
     @Bind(R.id.stainless_steel)
     TextView stainlessSteel;
+    @Bind(R.id.myName)
+    TextView myName;
+
     private int[] check_select = {0, 0, 0, 0, 0};
     private String title;
     private static final String TAG = "MaterialActivity";
@@ -126,8 +130,15 @@ public class MaterialActivity extends AppCompatActivity {
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectState.setText(R.string.no_connect);
+                myName.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectState.setText(R.string.connected);
+                ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+                if(connectedDevice!=null){
+                  String  deviceName = connectedDevice.deviceName;
+                    myName.setText(deviceName);
+                }
+
             }
             Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }

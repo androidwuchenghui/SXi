@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 
@@ -108,6 +109,8 @@ public class SetTextureActivity extends AppCompatActivity {
     ImageView detailS5;
     @Bind(R.id.line_custom_s5)
     LinearLayout lineCustomS5;
+    @Bind(R.id.myName)
+    TextView myName;
 
     private int[] checked_arr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private final static String TEXTURE = "texture";
@@ -191,7 +194,6 @@ public class SetTextureActivity extends AppCompatActivity {
     };
     private byte[] oneFirst;
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,6 +232,12 @@ public class SetTextureActivity extends AppCompatActivity {
                 connectState.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectState.setText(R.string.connected);
+
+                ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+                if(connectedDevice!=null){
+                    String  deviceName = connectedDevice.deviceName;
+                    myName.setText(deviceName);
+                }
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             Log.d(TAG, "onServiceConnected: bind  : service: " + mBluetoothLeService + "    character:  " + g_Character_TX);
@@ -287,7 +295,11 @@ public class SetTextureActivity extends AppCompatActivity {
                 break;
             case R.id.detail_s1:
                 Intent s1ToCurve = new Intent(SetTextureActivity.this, BezierActivity.class);
+//                Intent s1ToCurve = new Intent(SetTextureActivity.this, HelloChartActivity.class);
+//                Intent s1ToCurve = new Intent(SetTextureActivity.this, HelloActivity.class);
+                s1ToCurve.putExtra("state",mBluetoothLeService.getTheConnectedState());
                 s1ToCurve.putExtra("custom", "S1");
+                Log.d(TAG, "detailClick: "+mBluetoothLeService.getTheConnectedState());
                 startActivity(s1ToCurve);//进入曲线界面
                 break;
             case R.id.tv_custom_s2:

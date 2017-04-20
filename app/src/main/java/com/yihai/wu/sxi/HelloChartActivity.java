@@ -56,11 +56,11 @@ import static com.yihai.wu.util.MyUtils.intToBytes;
 import static com.yihai.wu.util.MyUtils.subBytes;
 
 /**
- * Created by ${Wu} on 2016/12/23.
+ * Created by ${Wu} on 2017/3/24.
  */
 
-public class BezierActivity extends AppCompatActivity {
-    private static final String TAG = "BezierActivity";
+public class HelloChartActivity extends AppCompatActivity {
+    private static final String TAG = "HelloChartActivity";
     @Bind(R.id.btn_back)
     ClickImageView btnBack;
     @Bind(R.id.btn_above_disable)
@@ -97,9 +97,6 @@ public class BezierActivity extends AppCompatActivity {
     TextView singleUnit;
     @Bind(R.id.coupleUnit)
     TextView coupleUnit;
-
-    @Bind(R.id.myName)
-    TextView myName;
     //创建一个可重用固定线程数的线程池
     ExecutorService pool = Executors.newFixedThreadPool(4);
 
@@ -179,7 +176,7 @@ public class BezierActivity extends AppCompatActivity {
     int count = 0;
     private StringBuilder sb1 = new StringBuilder();
     int curveNum = 0;
-    private final BroadcastReceiver setBezierActivityReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver setHelloChartActivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -208,10 +205,10 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     break;
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
-                    startActivity(new Intent(BezierActivity.this, MainActivity.class));
+                    startActivity(new Intent(HelloChartActivity.this, MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                    startActivity(new Intent(BezierActivity.this, MainActivity.class));
+                    startActivity(new Intent(HelloChartActivity.this, MainActivity.class));
                     break;
             }
         }
@@ -227,12 +224,6 @@ public class BezierActivity extends AppCompatActivity {
     private ProgressDialog waitingDialog;
     private boolean saveCurve = false;
     private int temperatureUnit;
-    private int powerRange_max;
-    private int powerRange_min;
-    private int jouleRange_max;
-    private int jouleRange_min;
-    private int moveMax = 200;
-    private int moveMin = 5;
 
 
     private void handlerCurveData(byte[] data) {
@@ -241,16 +232,16 @@ public class BezierActivity extends AppCompatActivity {
             littleOrder++;
         }
 
-        if (TAG == "BezierActivity" && littleOrder == 1 && begin == true) {
+        if (TAG == "HelloChartActivity" && littleOrder == 1 && begin == true) {
             oneFirst = subBytes(data, 11, 9);
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
-        } else if (TAG == "BezierActivity" && littleOrder == 2 && begin == true) {
+        } else if (TAG == "HelloChartActivity" && littleOrder == 2 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
-        } else if (TAG == "BezierActivity" && littleOrder == 3 && begin == true) {
+        } else if (TAG == "HelloChartActivity" && littleOrder == 3 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
             //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
-        } else if (TAG == "BezierActivity" && littleOrder == 4 && begin == true) {
+        } else if (TAG == "HelloChartActivity" && littleOrder == 4 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
             Log.d(TAG, "byteMergerData: " + BinaryToHexString(oneFirst));
             //处理取到的50个数据
@@ -359,7 +350,7 @@ public class BezierActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bezier);
         ButterKnife.bind(this);
 
-        waitingDialog = new ProgressDialog(BezierActivity.this);
+        waitingDialog = new ProgressDialog(HelloChartActivity.this);
         waitingDialog.setTitle(R.string.point_out_title);
         waitingDialog.setIcon(R.mipmap.app_icon);
         waitingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -370,11 +361,6 @@ public class BezierActivity extends AppCompatActivity {
         Intent intent = getIntent();
         MyModel selectedModel = MyModel.getSelectedModel();
         settingPackage = selectedModel.model;
-        powerRange_max = selectedModel.powerRange_max / 10;
-        powerRange_min = selectedModel.powerRange_min / 10;
-        jouleRange_max = selectedModel.jouleRange_max / 10;
-        jouleRange_min = selectedModel.jouleRange_min / 10;
-
         switch (settingPackage) {
             case "C1":
                 settingPackageOrder = 0x00;
@@ -414,14 +400,13 @@ public class BezierActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:   获取连接的设备： " + connectedDevice);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        registerReceiver(setBezierActivityReceiver, makeBroadcastFilter());
+        registerReceiver(setHelloChartActivityReceiver, makeBroadcastFilter());
         chartComputator = myChart.getChartComputator();
         //初始化
         if (connectedDevice != null) {
-            initDialog = new ProgressDialog(BezierActivity.this);
+            initDialog = new ProgressDialog(HelloChartActivity.this);
             initDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             initDialog.setMessage(this.getString(R.string.reading));
-            myName.setText(connectedDevice.deviceName);
             initDialog.show();
         } else {
             init();
@@ -449,14 +434,12 @@ public class BezierActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
-            Log.d(TAG, "onServiceConnected: BezierActivity service connect");
+            Log.d(TAG, "onServiceConnected: HelloChartActivity service connect");
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {             //   功率曲线上的点的数据   序号00     第一组的25个点
                 startReadPowerCurveData = true;
                 Log.d(TAG, "onServiceConnected: " + "开始查询数据   " + settingPackageOrder + "   " + userOrder);
-                if (mBluetoothLeService.getTheConnectedState() == 2) {
-                    settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x00, (byte) 0x04, userOrder, 50);
-                }
+                settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x00, (byte) 0x04, userOrder, 50);
             }
         }
 
@@ -468,13 +451,13 @@ public class BezierActivity extends AppCompatActivity {
     };
 
     private void myListeners() {
-        btnBack.setOnClickListener(new myClickListener());
-        btnAbove.setOnClickListener(new myClickListener());
-        btnNext.setOnClickListener(new myClickListener());
-        btnSwitch.setOnClickListener(new myClickListener());
-        btnWave.setOnClickListener(new myClickListener());
-        btn_waveBehind.setOnClickListener(new myClickListener());
-        btnSave.setOnClickListener(new myClickListener());
+        btnBack.setOnClickListener(new HelloChartActivity.myClickListener());
+        btnAbove.setOnClickListener(new HelloChartActivity.myClickListener());
+        btnNext.setOnClickListener(new HelloChartActivity.myClickListener());
+        btnSwitch.setOnClickListener(new HelloChartActivity.myClickListener());
+        btnWave.setOnClickListener(new HelloChartActivity.myClickListener());
+        btn_waveBehind.setOnClickListener(new HelloChartActivity.myClickListener());
+        btnSave.setOnClickListener(new HelloChartActivity.myClickListener());
     }
 
     private void init() {
@@ -484,8 +467,9 @@ public class BezierActivity extends AppCompatActivity {
 
         Log.d(TAG, "init: " + texture.arr1 + "    " + texture.arr3 + "    " + texture.dash + "    " + dashListInTemper);
         //功率曲线的数据
-        powerData1 = getLineData(texture.arr1, powerRange_min);
-        powerMoveList.add(powerData1);
+        powerData1 = getLineData(texture.arr1, 5);
+        //        powerMoveList.add(powerData1);
+
         //虚线1的数据
         powerDashValue = texture.dash;
         if (powerDashValue > 200 || powerDashValue < 0) {
@@ -508,7 +492,7 @@ public class BezierActivity extends AppCompatActivity {
         //℃温度曲线的数据
         temperData1 = getLineData(texture.arr3, 5);
         // J  焦耳曲线的数据
-        initJouleData = getLineData(texture.arr4, jouleRange_min);
+        initJouleData = getLineData(texture.arr4, 5);
         //通过查询数据库判断是焦耳还是功率
         MyModel myMode = texture.myModel;
         //0代表功率曲线，1代表焦耳曲线
@@ -612,7 +596,7 @@ public class BezierActivity extends AppCompatActivity {
         vp.top = 210;
         myChart.setCurrentViewport(vp);
         myChart.setZoomEnabled(false);
-        myChart.setOnTouchListener(new myChartTouchListener());
+        myChart.setOnTouchListener(new HelloChartActivity.myChartTouchListener());
 
         setAboveAndNextButtonState(jouleDataList, jouleIndex);
         currentAxisY_Values = axisValuesY;
@@ -629,8 +613,6 @@ public class BezierActivity extends AppCompatActivity {
             btn_waveBehind.setVisibility(View.VISIBLE);
         }
 
-        moveMax = powerRange_max;
-        moveMin = powerRange_min;
     }
 
     //显示为功率Chart
@@ -639,9 +621,16 @@ public class BezierActivity extends AppCompatActivity {
         //功率曲线
         if (powerLine == null) {
             List<PointValue> powerValues = new ArrayList<PointValue>();
-            for (float i = 0; i < 11 - 0.5; i += 0.5) {
-                powerValues.add(new PointValue(i, powerData1[(int) (i * 2)]));
+            //            for (float i = 0; i < 11 - 0.5; i += 0.5) {
+            //                powerValues.add(new PointValue(i, powerData1[(int) (i * 2)]));
+            //            }
+
+            for (float i = 0; i <= 10; i += 0.2) {
+                int a = 22 + (int) (Math.random() * 80);
+                powerValues.add(new PointValue(i, a));
             }
+
+
             powerLine = new Line(powerValues);
             setLineStyle(powerLine, POWER_HIGHLIGHT_CURVE);
         }
@@ -657,9 +646,14 @@ public class BezierActivity extends AppCompatActivity {
         //初始化背后的温度曲线℃
         if (temperLine_back == null) {
             List<PointValue> temperValue_back = new ArrayList<>();
-            for (float i = 0; i < 11 - 0.5; i += 0.5) {
-                temperValue_back.add(new PointValue(i, temperData1[(int) (i * 2)]));
+            //            for (float i = 0; i < 11 - 0.5; i += 0.5) {
+            //                temperValue_back.add(new PointValue(i, temperData1[(int) (i * 2)]));
+            //            }
+            for (float i = 0; i <= 10; i += 0.2) {
+                int a = 10 + (int) (Math.random() * 175);
+                temperValue_back.add(new PointValue(i, a));
             }
+
             temperLine_back = new Line(temperValue_back);
             setLineStyle(temperLine_back, DARK_CURVE);
         } else if (tempToPower) {
@@ -669,23 +663,24 @@ public class BezierActivity extends AppCompatActivity {
         }
 
         //X轴
-        List<AxisValue> axisValues_x = new ArrayList<AxisValue>();
-        for (int i = 0; i < 11; i++) {
-            axisValues_x.add(new AxisValue(i).setLabel(axisData[i]));
-        }
-        Axis axisX = new Axis(axisValues_x);
+//        List<AxisValue> axisValues_x = new ArrayList<AxisValue>();
+//        for (int i = 0; i < 11; i++) {
+//            axisValues_x.add(new AxisValue(i).setLabel(axisData[i]));
+//        }
+//        Axis axisX = new Axis(axisValues_x);
+        Axis axisX = new Axis();
         axisX.setHasLines(true);
-        axisX.setValues(axisValues_x);
+//        axisX.setMaxLabelChars(5);
         //Y轴
         Axis axisY = new Axis();
         axisY.setHasLines(true);
-        axisY.setMaxLabelChars(3);
+//        axisY.setMaxLabelChars(3);
         List<AxisValue> axisValuesY = new ArrayList<>();
         for (int i = 0; i <= 200; i += 40) {
             axisValuesY.add(new AxisValue(i).setLabel(i + ""));
         }
         axisY.setValues(axisValuesY);
-        int maxLabelChars = axisY.getMaxLabelChars();
+
 
 
         //此刻所有的线的集合
@@ -710,15 +705,19 @@ public class BezierActivity extends AppCompatActivity {
         myChart.setMaximumViewport(v);
         myChart.setCurrentViewport(v);
         myChart.setZoomType(ZoomType.HORIZONTAL);
-        myChart.setMaxZoom((float) 10);
+        myChart.setMaxZoom((float) 6);
         Viewport vp = new Viewport(null);
         vp.left = 0;
-        vp.right = 4;//显示的点
+        vp.right = 3;//显示的点
         vp.bottom = 0;
         vp.top = 210;
+//        myChart.setMaximumViewport(vp);
+
+
         myChart.setCurrentViewport(vp);
-        myChart.setZoomEnabled(false);
-        myChart.setOnTouchListener(new myChartTouchListener());
+        myChart.setZoomEnabled(true);
+
+        myChart.setOnTouchListener(new HelloChartActivity.myChartTouchListener());
 
         setAboveAndNextButtonState(powerMoveList, powerIndex);
         currentAxisY_Values = axisValuesY;
@@ -735,9 +734,6 @@ public class BezierActivity extends AppCompatActivity {
             btnWave.setVisibility(View.GONE);
             btn_waveBehind.setVisibility(View.VISIBLE);
         }
-
-        moveMax = powerRange_max;
-        moveMin = powerRange_min;
 
     }
 
@@ -830,7 +826,7 @@ public class BezierActivity extends AppCompatActivity {
         vp.top = 310;
         myChart.setCurrentViewport(vp);
         myChart.setZoomEnabled(false);
-        myChart.setOnTouchListener(new myChartTouchListener());
+        myChart.setOnTouchListener(new HelloChartActivity.myChartTouchListener());
 
 
         //切换时控制above按钮和next按钮的显示
@@ -848,19 +844,16 @@ public class BezierActivity extends AppCompatActivity {
             btnWave.setVisibility(View.GONE);
             btn_waveBehind.setVisibility(View.VISIBLE);
         }
-
-        moveMax = 300;
-        moveMin = 100;
     }
 
-    private int[] getLineData(String string, int min) {
+    private int[] getLineData(String string, int limit) {
         String[] splited = string.split(",");
         int[] data = new int[splited.length];
         for (int i = 0; i < splited.length; i++) {
             data[i] = Integer.parseInt(splited[i]);
             if (data[i] > 200 || data[i] < 0) {
                 for (int j = 0; j < splited.length; j++) {
-                    data[j] = min;
+                    data[j] = limit;
                 }
                 return data;
             }
@@ -887,6 +880,7 @@ public class BezierActivity extends AppCompatActivity {
     private class myChartTouchListener implements View.OnTouchListener {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
+
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.d(TAG, "actionDown getRate: " + chartComputator.computeRawY((float) 100) + "  " + chartComputator.computeRawY((float) 140));
@@ -921,6 +915,7 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    Log.d(TAG, "getZoomLevel:   "+myChart.getZoomLevel());
                     int moveX = (int) motionEvent.getX();
                     int moveY = (int) motionEvent.getY();
                     int move = moveY - clickY;
@@ -964,8 +959,6 @@ public class BezierActivity extends AppCompatActivity {
                                 } else {
                                     result = translateY + "";
                                 }
-
-
                                 tvDashY.setText(result);
                                 break;
                         }
@@ -976,15 +969,16 @@ public class BezierActivity extends AppCompatActivity {
                         float currentY = selectedValue.getY() - move / rate;
                         Log.d(TAG, "onTouch: " + "找到点" + selectedValue.toString());
                         //控制范围
-                        if (currentY < moveMin) {
-                            currentY = moveMin;
-                        } else if (currentY > moveMax) {
-                            currentY = moveMax;
+                        if (currentY < currentAxisY_Values.get(0).getValue()) {
+                            currentY = currentAxisY_Values.get(0).getValue();
+                        } else if (currentY > currentAxisY_Values.get(5).getValue()) {
+                            currentY = currentAxisY_Values.get(5).getValue();
                         }
                         //        powerLine.getValues().get((int) (selectedValue.getX() * 2)).set(currentX, currentY);
                         selectedValue.set(currentX, currentY);
                         float translateY = (float) (Math.round(currentY * 10)) / 10;
-                        valueX.setText(currentX + "");
+                        String result_x = String.format("%.1f", currentX);
+                        valueX.setText(result_x);
                         switch (temperatureUnit) {
                             case 0:
                                 valueY.setText(translateY + "");
@@ -1007,6 +1001,7 @@ public class BezierActivity extends AppCompatActivity {
                 case MotionEvent.ACTION_UP:
                     showTemper.setVisibility(View.GONE);
                     dashLayout.setVisibility(View.GONE);
+                    //当前虚线的值
                     switch (touchInChart) {
                         case TOUCH_FOR_POWER_CHART:
                             powerDashValue = (int) currentDashLine.getValues().get(0).getY();
@@ -1022,6 +1017,7 @@ public class BezierActivity extends AppCompatActivity {
                     }
                     Log.d(TAG, "dashValues: powerDashValue: " + powerDashValue + "  jouleDashValue:  " + jouleDashValue + "  temperDashValue:  " + temperDashValue);
                     selectedDashLine = null;
+                    selectedValue = null;
                     if (selectedValue != null) {
                         //                        Log.d(TAG, "onTouch: 抬起的点" + (int) (selectedValue.getY()));
 
@@ -1038,7 +1034,7 @@ public class BezierActivity extends AppCompatActivity {
                         texture.arr1 = sb.toString();
                         texture.save();*/
                     }
-                    //如果曲线有变动,记录存储
+                    //如果曲线有变动,记录操作
                     if (dataChanged) {
                         for (int i = 0; i < currentMoveLineList.size(); i++) {
                             if (i > currentIndex) {
@@ -1048,7 +1044,7 @@ public class BezierActivity extends AppCompatActivity {
                         }
 
                         List<PointValue> values = currentMainLine.getValues();
-                        int[] arr = new int[21];
+                        int[] arr = new int[51];
                         for (int i = 0; i < values.size(); i++) {
                             arr[i] = (int) values.get(i).getY();
                         }
@@ -1075,7 +1071,7 @@ public class BezierActivity extends AppCompatActivity {
 
 
     private PointValue selectPoint(List<PointValue> pointValues) {
-        int backgroundGridWidth = MyUtils.dip2px(BezierActivity.this, 45);
+        int backgroundGridWidth = MyUtils.dip2px(HelloChartActivity.this, 45);
         int width = backgroundGridWidth / 2;
         Region r = new Region();
 
@@ -1092,7 +1088,7 @@ public class BezierActivity extends AppCompatActivity {
     }
 
     private Line selectedDashLine(MotionEvent motionEvent, Line dashLine) {
-        int backgroundGridWidth = MyUtils.dip2px(BezierActivity.this, 40);
+        int backgroundGridWidth = MyUtils.dip2px(HelloChartActivity.this, 40);
         int width = backgroundGridWidth / 2;
         float downY = motionEvent.getY();
         float y = dashLine.getValues().get(0).getY();
@@ -1516,7 +1512,7 @@ public class BezierActivity extends AppCompatActivity {
         myChart.startDataAnimation(300);
 
         List<PointValue> vs = Line.getValues();
-        int[] arr = new int[21];
+        int[] arr = new int[51];
         for (int i = 0; i < vs.size(); i++) {
             arr[i] = (int) vs.get(i).getY();
         }
@@ -1623,22 +1619,6 @@ public class BezierActivity extends AppCompatActivity {
         return new Line(valuesInPower);
     }
 
-    //变换的动画
-    //    private void startAnimation(int powerIndex) {
-    //        myChart.cancelDataAnimation();
-    //        int[] currentPower = powerMoveList.get(powerIndex);
-    //        int currentDash = dashListInPower.get(powerIndex);
-    //        List<PointValue> powerValues = powerLine.getValues();
-    //        List<PointValue> dashValues = powerDashLine.getValues();
-    //        Log.d(TAG, "OnClick: " + "size:  " + powerValues.size() + "dash  " + dashValues.size());
-    //        for (int i = 0; i < powerValues.size(); i++) {
-    //            powerValues.get(i).setTarget(powerValues.get(i).getX(), currentPower[i]);
-    //        }
-    //        for (int i = 0; i < dashValues.size(); i++) {
-    //            dashValues.get(i).setTarget(dashValues.get(i).getX(), currentDash);
-    //        }
-    //        myChart.startDataAnimation(300);
-    //    }
 
     private void startAnimation(List<int[]> dataList, int Index, List<Integer> dashList) {
         myChart.cancelDataAnimation();
@@ -1659,7 +1639,7 @@ public class BezierActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(setBezierActivityReceiver);
+        unregisterReceiver(setHelloChartActivityReceiver);
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }

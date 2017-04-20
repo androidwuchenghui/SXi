@@ -11,14 +11,20 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 import com.yihai.wu.util.MyUtils;
@@ -28,16 +34,16 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.yihai.wu.sxi.R.id.rg_joule;
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.byteMerger;
+import static com.yihai.wu.util.MyUtils.bytesToInt;
 
 
 /**
  * Created by ${Wu} on 2016/12/13.
  */
 
-public class SetDetailsActivity extends AppCompatActivity {
+public class SetDetailsActivity extends AppCompatActivity implements View.OnLayoutChangeListener {
     @Bind(R.id.selected_material)
     TextView selectedMaterial;
     @Bind(R.id.btn_back)
@@ -60,7 +66,7 @@ public class SetDetailsActivity extends AppCompatActivity {
     RadioGroup rgMemories;
     @Bind(R.id.rg_unit_temperature)
     RadioGroup rgUnitTemperature;
-    @Bind(rg_joule)
+    @Bind(R.id.rg_joule)
     RadioGroup rgJoule;
     @Bind(R.id.rg_operation)
     RadioGroup rgOperation;
@@ -132,6 +138,12 @@ public class SetDetailsActivity extends AppCompatActivity {
     SeekBar seekBarSetJoule;
     @Bind(R.id.line_show_joule)
     LinearLayout lineShowJoule;
+    @Bind(R.id.setName)
+    EditText etSetName;
+    @Bind(R.id.mainLayout)
+    LinearLayout maiLinearLayout;
+    @Bind(R.id.myName)
+    TextView myName;
     private static final String TAG = "SetDetailsActivity";
     private boolean isCentigrade = true;
     private String detail;
@@ -141,6 +153,30 @@ public class SetDetailsActivity extends AppCompatActivity {
     private boolean mergerData = false;
     private int jouleOrPower;
     private boolean mergerDataOver = false;
+    private boolean sendData = false;
+    //      seekbar的范围
+    private int tempMax_c = 300;
+    private int tempMin_c = 100;
+    private int tempValue = 186;
+    private int tempMax_f = 572;
+    private int tempMin_f = 212;
+    private int compensateTempMax_c = 50;
+    private int compensateTempMin_c = 0;
+    private int compensateTempValue = 39;
+    private int compensateTempMax_f = 122;
+    private int compensateTempMin_f = 32;
+    private int powerRange_max=2000;
+    private int powerRange_min=50;
+    private int jouleRange_max=1200;
+    private int jouleRange_min=100;
+    private int tcr_max=700;
+    private int tcr_min=50;
+    private int tcr_value=0;
+    private int powerValue;
+    private int jouleValue;
+    private int screenHeight;
+    private int keyHeight;
+    private String changeName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,18 +184,17 @@ public class SetDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setdetails);
         ButterKnife.bind(this);
         registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
-        initListener();
-        initUI();
 
+        initUI();
+        initListener();
         Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        maiLinearLayout.addOnLayoutChangeListener(this);
     }
 
     private String first = "";
@@ -175,40 +210,41 @@ public class SetDetailsActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "receiveInfo: " + s);
 
-                    if (mergerData) {
-                        if (receiveCount == 1) {
-                            mergerDataOver = true;
-                            byte[] mergerBytes = byteMerger(firstByteArray, data);
-                            String result = first + s;
-                            Log.d(TAG, "temperInfo: 合并：" + BinaryToHexString(mergerBytes));
-                            mergerData = false;
+                    if (TAG == "SetDetailsActivity" && sendData) {
+                        Log.d(TAG, "receiveInfo: " + s);
+                        if (mergerData) {
+                            if (receiveCount == 1) {
+                                mergerDataOver = true;
+                                byte[] mergerBytes = byteMerger(firstByteArray, data);
+                                String result = first + s;
+                                Log.d(TAG, "temperInfo: 第二节数据合并后：" + BinaryToHexString(mergerBytes));
+                                mergerData = false;
 
-                            receiveCount = 0;
-                            first = "";
-                            Sys_YiHi_Protocol_RX_Porc(mergerBytes);
+                                receiveCount = 0;
+                                first = "";
+                                Sys_YiHi_Protocol_RX_Porc(mergerBytes);
 
+                            } else {
+                                mergerDataOver = false;
+                                first += s;
+                                Log.d(TAG, "mergerBytes: 一段：" + first);
+                                firstByteArray = new byte[data.length];
+                                firstByteArray = data;
+                                receiveCount++;
+                            }
                         } else {
-                            mergerDataOver = false;
-                            first += s;
-                            Log.d(TAG, "mergerBytes: 一段：" + first);
-                            firstByteArray = new byte[data.length];
-                            firstByteArray = data;
-                            receiveCount++;
+                            Sys_YiHi_Protocol_RX_Porc(data);
                         }
-                    } else {
-                        Sys_YiHi_Protocol_RX_Porc(data);
                     }
-
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectState.setText(R.string.no_connect);
-                    startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
+                    startActivity(new Intent(SetDetailsActivity.this, MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
                     connectState.setText(R.string.connected);
-                    startActivity(new Intent(SetDetailsActivity.this,MainActivity.class));
+                    startActivity(new Intent(SetDetailsActivity.this, MainActivity.class));
                     break;
 
             }
@@ -223,6 +259,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         return intentFilter;
     }
 
+    private String deviceName;
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -237,12 +274,18 @@ public class SetDetailsActivity extends AppCompatActivity {
                 connectState.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectState.setText(R.string.connected);
+
+                ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+                if(connectedDevice!=null){
+                    deviceName = connectedDevice.deviceName;
+                    myName.setText(deviceName);
+                }
+
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {
                 //                getConnectedDevicePowerModel();
                 //                AckUserDeviceSetting();
-
                 switch (detail) {
                     case "C1":
                         pack = 0x00;
@@ -260,6 +303,7 @@ public class SetDetailsActivity extends AppCompatActivity {
                         pack = 0x04;
                         break;
                 }
+                Log.d(TAG, "onServiceConnected:    开始取数据   " + g_Character_TX);
                 getSettingPackage_ReadData_Exe(pack);
 
             }
@@ -281,9 +325,14 @@ public class SetDetailsActivity extends AppCompatActivity {
 
     private void initUI() {
 
+        sendData = false;
         Intent intent = getIntent();
         detail = intent.getStringExtra("detail");
-        modelName.setText(detail);
+        MyModel myModelForGivenName = MyModel.getMyModelForGivenName(detail);
+
+        modelName.setText(myModelForGivenName.showName);
+        etSetName.setText(myModelForGivenName.showName);
+        changeName = myModelForGivenName.showName;
         MyModel myModel = MyModel.getMyModelForGivenName(detail);
         int status = myModel.bypass;
         btSwitch.setOpened(status == 0 ? false : true);
@@ -316,6 +365,7 @@ public class SetDetailsActivity extends AppCompatActivity {
         //口感
         int textured = myModel.texture;
         setShowText(textured);
+
         //记忆模式选择
         int memory = myModel.memory;
         RadioButton rb_M = (RadioButton) rgMemories.getChildAt(memory);
@@ -328,23 +378,54 @@ public class SetDetailsActivity extends AppCompatActivity {
         jouleOrPower = myModel.JouleOrPower;
         RadioButton rb_jouleOrPower = (RadioButton) rgJoule.getChildAt(jouleOrPower);
         rb_jouleOrPower.setChecked(true);
+
+        Log.d(TAG, "initUIjouleOrPower: " + jouleOrPower);
         //操作模式
         int operation = myModel.operation;
         RadioButton rb_operation = (RadioButton) rgOperation.getChildAt(operation);
         rb_operation.setChecked(true);
 
         //seekBar温度调节
-        int temperature = myModel.temperature;
-        seekBarAdjustTemperature.setProgress(temperature - 100);
-
-
+        tempValue = myModel.temperature;
         //seekBar补偿温度
-        int temperature_c = myModel.temperature_c;
-        seekBarCompensationTemperature.setProgress(temperature_c);
+        compensateTempValue = myModel.temperature_c;
+        Log.d(TAG, "initUI: 温度单位 " + temperatureUnit);
+        switch (temperatureUnit) {
+            case 0:
+                miniSkAt.setText(tempMin_c + "");
+                maxSkAt.setText(tempMax_c + "");
+                miniSkCt.setText(compensateTempMin_c + "");
+                maxSkCt.setText(compensateTempMax_c + "");
+                isCentigrade = true;
+                showAdjustTemperature.setText(tempValue + "");
+                showCompensationTemperature.setText(compensateTempValue + "");
+                seekBarAdjustTemperature.setMax(tempMax_c - tempMin_c);
+                seekBarAdjustTemperature.setProgress(tempValue - tempMin_c);
+                seekBarCompensationTemperature.setMax(compensateTempMax_c - compensateTempMin_c);
+                seekBarCompensationTemperature.setProgress(compensateTempValue - compensateTempMin_c);
+                break;
+            case 1:
+                isCentigrade = false;
+                miniSkAt.setText(tempMin_f + "");
+                maxSkAt.setText(tempMax_f + "");
+                miniSkCt.setText(compensateTempMin_f + "");
+                maxSkCt.setText(compensateTempMax_f + "");
+
+                showAdjustTemperature.setText(tempValue * 9 / 5 + 32 + "");
+                showCompensationTemperature.setText(compensateTempValue * 9 / 5 + 32 + "");
+                seekBarAdjustTemperature.setMax(tempMax_c - tempMin_c);
+                seekBarAdjustTemperature.setProgress(tempValue - tempMin_c);
+                seekBarCompensationTemperature.setMax(compensateTempMax_c - compensateTempMin_c);
+                seekBarCompensationTemperature.setProgress(compensateTempValue - compensateTempMin_c);
+                break;
+
+        }
+
 
         //seekBar设置TCR
         int tcr = myModel.tcr;
-        seekBarSetTCR.setProgress(tcr - 50);
+        seekBarSetTCR.setMax(tcr_max-tcr_min);
+        seekBarSetTCR.setProgress(tcr - tcr_min);
         if (tcr < 100) {
             showTCR.setText("0.000" + tcr);
         } else {
@@ -352,12 +433,25 @@ public class SetDetailsActivity extends AppCompatActivity {
         }
         //seekBar功率调节
         int power = myModel.power;
-        seekBarSetPower.setProgress(power - 50);
+        seekBarSetPower.setMax(powerRange_max - powerRange_min);
+        seekBarSetPower.setProgress(power-powerRange_min);
         showPower.setText(power / 10 + "." + power % 10);
         //seekBar焦耳调节
         int joule = myModel.joule;
-        seekBarSetJoule.setProgress(joule - 100);
+        seekBarSetJoule.setMax(jouleRange_max - jouleRange_min);
+        seekBarSetJoule.setProgress(joule - jouleRange_min);
         showJoule.setText(joule / 10 + "." + joule % 10);
+
+        switch (jouleOrPower) {
+            case 0:
+                lineShowPower.setVisibility(View.VISIBLE);
+                break;
+            case 1:
+                lineShowJoule.setVisibility(View.VISIBLE);
+                break;
+
+        }
+        sendData = true;
     }
 
     //口感选择显示
@@ -398,8 +492,38 @@ public class SetDetailsActivity extends AppCompatActivity {
         seekBarSetTCR.setOnSeekBarChangeListener(new onSeekBarChangeListen());
         seekBarSetPower.setOnSeekBarChangeListener(new onSeekBarChangeListen());
         seekBarSetJoule.setOnSeekBarChangeListener(new onSeekBarChangeListen());
+        etSetName.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                if (MotionEvent.ACTION_DOWN == event.getAction()) {
+                    etSetName.setCursorVisible(true);// 再次点击显示光标
+                }
+                return false;
+            }
+        });
 
+        etSetName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                changeName = String.valueOf(editable);
+                Log.d(TAG, "onLayoutChange: "+etSetName.getText()+"    "+ changeName);
+            }
+        });
+        //获取屏幕高度
+        screenHeight = this.getWindowManager().getDefaultDisplay().getHeight();
+        //阀值设置为屏幕高度的1/3
+        keyHeight = android.R.attr.keyHeight;
+        keyHeight = screenHeight /3;
     }
 
     @OnClick({R.id.select_material, R.id.btn_back, R.id.select_texture, R.id.bt_switch})
@@ -451,6 +575,30 @@ public class SetDetailsActivity extends AppCompatActivity {
         }
 
     }
+    //    监听软键盘弹出与关闭
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right,
+                               int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        if(oldBottom != 0 && bottom != 0 &&(oldBottom - bottom > keyHeight)){
+            Log.d(TAG, "onLayoutChange: "+"监听到软键盘弹起...");
+
+        }else if(oldBottom != 0 && bottom != 0 &&(bottom - oldBottom > keyHeight)){
+
+            Log.d(TAG, "onLayoutChange: "+"监听到软键盘关闭...");
+            if(!TextUtils.isEmpty(etSetName.getText())){
+                MyModel myModelForGivenName = MyModel.getMyModelForGivenName(detail);
+
+                if(myModelForGivenName!=null){
+                    Log.d(TAG, "onLayoutChange: "+changeName+"    "+myModelForGivenName.showName);
+                    if(!changeName.equals(myModelForGivenName.showName )){
+                        myModelForGivenName.showName = changeName;
+                        myModelForGivenName.save();
+                    }
+                }
+
+            }
+        }
+    }
 
     //seekBar变化时
     private class onSeekBarChangeListen implements SeekBar.OnSeekBarChangeListener {
@@ -459,10 +607,10 @@ public class SetDetailsActivity extends AppCompatActivity {
             switch (seekBar.getId()) {
                 case R.id.seekBar_adjust_temperature:
                     if (isCentigrade) {
-                        showAdjustTemperature.setText(i + 100 + "");
+                        showAdjustTemperature.setText(i + tempMin_c + "");
 
                     } else {
-                        showAdjustTemperature.setText((i + 100) * 9 / 5 + 32 + "");
+                        showAdjustTemperature.setText((i + tempMin_c) * 9 / 5 + 32 + "");
                     }
                     break;
                 case R.id.seekBar_compensation_temperature:
@@ -481,18 +629,17 @@ public class SetDetailsActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.seekBar_set_power:
-                    showPower.setText((i + 50) / 10 + "." + (i + 50) % 10);
+                    showPower.setText((i + powerRange_min) / 10 + "." + ((i + powerRange_min) % 10));
 
                     break;
                 case R.id.seekBar_set_joule:
-                    showJoule.setText((i + 100) / 10 + "." + (i + 100) % 10);
+                    showJoule.setText((i + jouleRange_min) / 10 + "." + (i + jouleRange_min) % 10);
                     break;
             }
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
         }
 
         @Override
@@ -501,13 +648,18 @@ public class SetDetailsActivity extends AppCompatActivity {
                 case R.id.seekBar_adjust_temperature:
                     MyModel myModel = MyModel.getMyModelForGivenName(detail);
 
-                     String str = showAdjustTemperature.getText().toString();
+                    String str = showAdjustTemperature.getText().toString();
                     int num = Integer.parseInt(str);
-                    Log.d(TAG, "onStopTrackingTouch: "+str);
+                    Log.d(TAG, "onStopTrackingTouch: " + str);
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x06, num);
                     }
-                    myModel.temperature = num;
+                    if(isCentigrade){
+                        myModel.temperature = num;
+                    }else {
+                        myModel.temperature= (num-32)*5/9;
+                    }
+
                     myModel.save();
                     break;
                 case R.id.seekBar_compensation_temperature:
@@ -517,7 +669,12 @@ public class SetDetailsActivity extends AppCompatActivity {
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x07, compensation_temperature_num);
                     }
-                    myModel1.temperature_c = compensation_temperature_num;
+                    if(isCentigrade){
+                        myModel1.temperature_c = compensation_temperature_num;
+                    }else {
+                        myModel1.temperature_c = compensation_temperature_num;
+                    }
+                    myModel1.temperature_c = (compensation_temperature_num-32)*5/9;
                     myModel1.save();
                     break;
                 case R.id.seekBar_set_TCR:
@@ -531,24 +688,30 @@ public class SetDetailsActivity extends AppCompatActivity {
                     myModel2.save();
                     break;
                 case R.id.seekBar_set_power:
+
                     MyModel myModel3 = MyModel.getMyModelForGivenName(detail);
-                    int power_num = seekBar.getProgress() + 50;
+                    int power_num = seekBar.getProgress() + powerRange_min;
                     myModel3.power = power_num;//需要发送的数据
                     myModel3.save();
+
                     if (g_Character_TX != null) {
+
                         setPowerValueIn_Watts_Joule((byte) 0x0E, (byte) 0x01, power_num);
                     }
-                    //                    setPowerValue(power_num / 10, power_num % 10);
-
+                    //                   setPowerValue(power_num / 10, power_num % 10);
+                    break;
                 case R.id.seekBar_set_joule:
+
                     MyModel myModel4 = MyModel.getMyModelForGivenName(detail);
 
-                    int joule_num = seekBar.getProgress() + 100;
+                    int joule_num = seekBar.getProgress() + jouleRange_min;
                     if (g_Character_TX != null) {
+
                         setPowerValueIn_Watts_Joule((byte) 0x0E, (byte) 0x02, joule_num);
                     }
                     myModel4.joule = joule_num;
                     myModel4.save();
+                    break;
             }
 
         }
@@ -572,14 +735,14 @@ public class SetDetailsActivity extends AppCompatActivity {
                             }
                             //温度调节的seekBar
                             unitC.setText(getResources().getString(R.string.temperature_C));
-                            miniSkAt.setText("" + 100);
-                            maxSkAt.setText("" + 300);
+                            miniSkAt.setText("" + tempMin_c);
+                            maxSkAt.setText("" + tempMax_c);
                             showAdjustTemperature.setText(myModel_C.temperature + "");
 
                             //补偿温度的seekBar
                             unitF.setText(getResources().getString(R.string.temperature_C));
-                            miniSkCt.setText("" + 0);
-                            maxSkCt.setText("" + 50);
+                            miniSkCt.setText("" + compensateTempMin_c);
+                            maxSkCt.setText("" + compensateTempMax_c);
                             showCompensationTemperature.setText(myModel_C.temperature_c + "");
                             break;
                         case R.id.temp_unit_f:
@@ -590,14 +753,14 @@ public class SetDetailsActivity extends AppCompatActivity {
                             }
                             //温度调节的seekBar
                             unitC.setText(getResources().getString(R.string.temperature_F));
-                            miniSkAt.setText(100 * 9 / 5 + 32 + "");
-                            maxSkAt.setText(300 * 9 / 5 + 32 + "");
+                            miniSkAt.setText(tempMin_c * 9 / 5 + 32 + "");
+                            maxSkAt.setText(tempMax_c * 9 / 5 + 32 + "");
 
                             showAdjustTemperature.setText(myModel_C.temperature * 9 / 5 + 32 + "");
                             //补偿温度的seekBar
                             unitF.setText(getResources().getString(R.string.temperature_F));
-                            miniSkCt.setText(0 * 9 / 5 + 32 + "");
-                            maxSkCt.setText(50 * 9 / 5 + 32 + "");
+                            miniSkCt.setText(compensateTempMin_c * 9 / 5 + 32 + "");
+                            maxSkCt.setText(compensateTempMax_c * 9 / 5 + 32 + "");
                             showCompensationTemperature.setText(myModel_C.temperature_c * 9 / 5 + 32 + "");
 
                             break;
@@ -686,7 +849,10 @@ public class SetDetailsActivity extends AppCompatActivity {
     }
 
     private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
-
+        if (sendData == false) {
+            return;
+        }
+        Log.d(TAG, "Sys_Proc_Charactor_TX_Send:     " + BinaryToHexString(m_Data) + "    写TX特性");
         byte[] m_MyData = new byte[m_Length];
         for (int i = 0; i < m_Length; i++) {
             m_MyData[i] = m_Data[i];
@@ -818,71 +984,89 @@ public class SetDetailsActivity extends AppCompatActivity {
                     configPackage.display = (int) m_Data[12];
                     configPackage.coilSelect = (int) m_Data[13];
                     configPackage.temperatureUnit = (int) m_Data[14];
+
                     //   功率值
-                    int powerValue = (m_Data[15] & 0xff) << 24 | (m_Data[16] & 0xff) << 16 | (m_Data[17] & 0xff) << 8 | m_Data[18] & 0xff;
+                    powerValue = (m_Data[15] & 0xff) << 24 | (m_Data[16] & 0xff) << 16 | (m_Data[17] & 0xff) << 8 | m_Data[18] & 0xff;
                     configPackage.power = powerValue;
                     //   焦耳值
-                    int jouleValue = (m_Data[19] & 0xff) << 24 | (m_Data[20] & 0xff) << 16 | (m_Data[21] & 0xff) << 8 | m_Data[22] & 0xff;
+                    jouleValue = (m_Data[19] & 0xff) << 24 | (m_Data[20] & 0xff) << 16 | (m_Data[21] & 0xff) << 8 | m_Data[22] & 0xff;
                     configPackage.joule = jouleValue;
                     //   温度值
                     int tempValue = (m_Data[23] & 0xff) << 24 | (m_Data[24] & 0xff) << 16 | (m_Data[25] & 0xff) << 8 | m_Data[26] & 0xff;
                     configPackage.temperature = tempValue;
+                    this.tempValue = tempValue;
                     //   温度补偿值
                     int compensateTempValue = (m_Data[27] & 0xff) << 24 | (m_Data[28] & 0xff) << 16 | (m_Data[29] & 0xff) << 8 | m_Data[30] & 0xff;
                     configPackage.temperature_c = compensateTempValue;
+                    this.compensateTempValue = compensateTempValue;
                     //   TCR_Value值
-                    int TCR_Value = (m_Data[31] & 0xff) << 24 | (m_Data[32] & 0xff) << 16 | (m_Data[33] & 0xff) << 8 | m_Data[34] & 0xff;
-                    configPackage.tcr = TCR_Value;
+                    tcr_value = (m_Data[31] & 0xff) << 24 | (m_Data[32] & 0xff) << 16 | (m_Data[33] & 0xff) << 8 | m_Data[34] & 0xff;
+                    configPackage.tcr = tcr_value;
                     //口感
                     configPackage.texture = (int) m_Data[35];
                     //记忆模式
                     configPackage.memory = (int) m_Data[36];
                     configPackage.save();
-                    initUI();
-                    Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + TCR_Value);
+
+                    Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + tcr_value);
 
                     //获得温度调节范围
-//                    getUserDeviceSetting((byte) 0x09);
-//                    mergerData = true;
+                    mergerData = true;
+                    getUserDeviceSetting((byte) 0x09);
+
                 }
                 break;
             case 0x58:
+                if (m_Data[5] == 0x13 && jouleOrPower == 0) {
+                    int setPowerNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+                    seekBarSetPower.setProgress(setPowerNum - 50);
+                } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
+                    int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
+                    seekBarSetJoule.setProgress(setJouleNum - 100);
+                } else if (m_Data[5] == (byte) 0x09 && mergerDataOver) {
+                    mergerDataOver = false;
+                    Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
+                    tempMax_c = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    tempMin_c = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    tempMax_f = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    tempMin_f = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "获得温度调节范围： temperInfo   " + tempMax_c + "  " + tempMin_c + "  " + tempMax_f + "  " + tempMin_f);
 
+                    mergerData = true;
+                    getUserDeviceSetting((byte) 0x0A);
+                } else if (m_Data[5] == (byte) 0x0A && mergerDataOver) {
+                    Log.d(TAG, "temperInfo: 补偿温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
+                    compensateTempMax_c = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    compensateTempMin_c = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    compensateTempMax_f = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    compensateTempMin_f = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "获得补偿温度调节范围： temperInfo   " + compensateTempMax_c + "   " + compensateTempMin_c + "   " + compensateTempMax_f + "   " + compensateTempMin_f);
+                    mergerData = true;
+                    getUserDeviceSetting((byte) 0x0D);
+
+                } else if (m_Data[5] == (byte) 0x0D && mergerDataOver) {
+                    powerRange_max = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
+                    powerRange_min = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
+                    jouleRange_max = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
+                    jouleRange_min = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
+                    Log.d(TAG, "功率焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
+                    MyModel getModel = MyModel.getMyModelForGivenName(detail);
+                    getModel.powerRange_max =powerRange_max;
+                    getModel.powerRange_min = powerRange_min;
+                    getModel.jouleRange_max = jouleRange_max;
+                    getModel.jouleRange_min = jouleRange_min;
+                    getModel.save();
+                    getUserDeviceSetting((byte) 0x0B);
+                } else if (m_Data[5] == (byte) 0x0B) {
+                    Log.d(TAG, "temperInfo:     TCR   " + BinaryToHexString(m_Data));
+                    tcr_max = bytesToInt(m_Data, 6);
+                    tcr_min = bytesToInt(m_Data, 10);
+                    Log.d(TAG, "temperInfo:     TCR    " + tcr_max + "   " + tcr_min);
+                    initUI();
+                }
                 break;
         }
-        if (m_Data[5] == 0x13 && jouleOrPower == 0) {
-            int setPowerNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
-            seekBarSetPower.setProgress(setPowerNum - 50);
-        } else if (m_Data[5] == 0x13 && jouleOrPower == 1) {
-            int setJouleNum = (m_Data[7] & 0xff) << 24 | (m_Data[8] & 0xff) << 16 | (m_Data[9] & 0xff) << 8 | m_Data[10] & 0xff;
-            seekBarSetJoule.setProgress(setJouleNum - 100);
-        }
-        /*else if (m_Data[5] == 0x09 && mergerDataOver) {
-                    mergerDataOver = false;
-                    Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length);
-                    int tempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
-                    int tempMin_C = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
-                    int tempMax_F = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
-                    int tempMin_F = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "获得温度调节范围： temperInfo   "+tempMax_C+"  "+tempMin_C+"  "+tempMax_F+"  "+tempMin_F);
-                    getUserDeviceSetting((byte) 0x0A);
-                    mergerData = true;
-                }else if(m_Data[5]==0x0A&&mergerDataOver){
-                    int compensateTempMax_C = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
-                    int compensateTempMin_C = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
-                    int compensateTempMax_F = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
-                    int compensateTempMin_F = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "获得补偿温度调节范围： temperInfo   "+compensateTempMax_C+"   "+compensateTempMin_C+"   "+compensateTempMax_F+"   "+compensateTempMin_F);
-                    getUserDeviceSetting((byte) 0x0D);
-                    mergerData = true;
-                }else if(m_Data[5]==0x0D&&mergerDataOver){
-                    int a = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
-                    int b = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
-                    int c = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
-                    int d = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "功率焦耳切换时范围  temperInfo: "+ a+"   "+b+ "   "+"   "+c+"    "+d);
-                }
-*/
+
     }
 
     public void setUserDevicePowerOrJoule(byte b) {
@@ -990,7 +1174,8 @@ public class SetDetailsActivity extends AppCompatActivity {
     }
 
     //设置功率或者焦耳模式下的功率值
-    public void setPowerValueIn_Watts_Joule(byte nn, byte model, int num) {
+    public void
+    setPowerValueIn_Watts_Joule(byte nn, byte model, int num) {
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -1034,8 +1219,10 @@ public class SetDetailsActivity extends AppCompatActivity {
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             connectState.setText(R.string.connected);
+            Log.d(TAG, "onRestart: sendData   " + sendData);
         } else {
             connectState.setText(R.string.no_connect);
         }
     }
+
 }

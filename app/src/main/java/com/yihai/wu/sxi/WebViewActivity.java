@@ -70,7 +70,8 @@ public class WebViewActivity extends AppCompatActivity {
             }
             else
             {
-                System.exit(0);//退出程序
+//                System.exit(0);//退出程序
+                finish();
             }
         }
         return super.onKeyDown(keyCode, event);

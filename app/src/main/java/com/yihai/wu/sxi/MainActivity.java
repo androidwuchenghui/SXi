@@ -2,6 +2,7 @@ package com.yihai.wu.sxi;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
@@ -16,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.intToBytes;
 import static com.yihai.wu.util.MyUtils.isGpsEnable;
 
 
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DarkImageButton btn_reset;
     private DarkImageButton btn_upgrade;
     private TextView connectedState;
-
+    private TextView myName;
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -62,13 +65,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int REQUST_MODE = 0X222;             //546
     private static final int REQUEST_CODE_TO_MAIN = 0X002;    //2
     private static final int AckUserDeviceSetting = 0X58;    //2
-
+    private ProgressDialog submitDialog;
+    private Handler myHandler;
     //服务
     private BluetoothLeService mBluetoothLeService;
 
     //一些特征值
     private BluetoothGattCharacteristic g_Character_TX;
-
+    private BluetoothGattCharacteristic g_Character_Baud_Rate;
 
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -83,26 +87,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress );
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText(R.string.have_been_not_connected);
-                //   try to connect
+                //              try to connect
                 if (lastAddress != null ) {
                     Log.d(TAG, "doScan:  绑定成功后    叫后台去搜索   ");
                     mBluetoothLeService.serviceScan();
 
-                   /* new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                            Log.d(TAG, "ServiceOnConnectionStateChange:   执行持续搜索。。。 " + scaning + "   mBluetoothAdapter " + mBluetoothAdapter);
-                            mBluetoothAdapter.startLeScan(mLeScanCallback);
-                            scaning = true;
-                        }
-                    }.start();*/
-                    //                    mBluetoothLeService.connect(lastAddress);
                 }
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectedState.setText(R.string.have_been_connected);
             }
-
         }
 
         @Override
@@ -116,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String lastAddress;
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
+    private String deviceName;
 
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -152,10 +146,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // finish();
             return;
         }
-
-        if (!mBluetoothAdapter.isEnabled()) {
-            mBluetoothAdapter.enable();
-        }
+//            mBluetoothAdapter.enable();
+            if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+                mBluetoothAdapter.enable();
+//                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
 
         initBanner();
         initButton();
@@ -174,6 +170,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        submitDialog = new ProgressDialog(MainActivity.this);
+        submitDialog.setTitle(R.string.point_out_title);
+        submitDialog.setIcon(R.mipmap.app_icon);
+        submitDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        submitDialog.setCancelable(true);//设置进度条是否可以按退回键取消
+        submitDialog.setIndeterminate(true);
+        submitDialog.setCanceledOnTouchOutside(false);
+        myHandler = new Handler();
     }
 
     @Override
@@ -182,11 +186,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
         Log.d(TAG, "life:----onRestart---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
+            myName.setText(deviceName);
             connectedState.setText(R.string.have_been_connected);
             getUserDeviceSetting();
         } else {
+            myName.setText("");
             connectedState.setText(R.string.have_been_not_connected);
         }
+
     }
 
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
@@ -203,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    myName.setText("");
                     connectedState.setText(R.string.have_been_not_connected);
                     break;
                 case BluetoothLeService.ACTION_GATT_CONNECTED:
@@ -229,6 +237,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             .create();
                     remindDialog.show();
                     break;
+                case BluetoothLeService.ACTION_LANDING:
+                    submitDialog.setMessage(MainActivity.this.getString(R.string.connecting));
+                    submitDialog.show();
+                    break;
+                case BluetoothLeService.ACTION_LAND_SUCCESS:
+                    submitDialog.setMessage(MainActivity.this.getString(R.string.connect_successfully));
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            deviceName = ConnectedBleDevices.getConnectedDevice().deviceName;
+                            myName.setText(deviceName);
+                            submitDialog.dismiss();
+                            submitDialog.setMessage(MainActivity.this.getString(R.string.connecting));
+
+                        }
+                    },500);
+
+                    break;
             }
         }
     };
@@ -238,8 +264,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-
+        intentFilter.addAction(BluetoothLeService.ACTION_LANDING);
         intentFilter.addAction(BluetoothLeService.ACTION_LOGIN_FAILED);
+        intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
         return intentFilter;
     }
 
@@ -260,17 +287,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBluetoothAdapter.enable();
         }
 
-        Log.d(TAG, "life:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
-        while (!mBluetoothAdapter.isEnabled()){
-        }
+        Log.d(TAG, "handlePasswordCallbacks:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
+
         Log.d(TAG, "life: onStart: "+mBluetoothAdapter.isEnabled());
         if (mBluetoothLeService != null  && mBluetoothAdapter != null&& lastAddress != null&& mBluetoothAdapter.isEnabled()) {
             Log.d(TAG, "onResume:   state  "+mBluetoothLeService.getTheConnectedState());
             if (mBluetoothLeService.getTheConnectedState() == 0  ) {
                 Log.d(TAG, "doScan:  onStart  -->   让后台去连接 "+mBluetoothAdapter);
                 mBluetoothLeService.setDisConnectByMyself(false);
-                mBluetoothLeService.connect(lastAddress);
+                mBluetoothLeService.serviceScan();
             }
+        }
+
+        ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+        if(connectedDevice!=null){
+            String deviceName = connectedDevice.deviceName;
+            myName.setText(deviceName);
         }
     }
 
@@ -287,6 +319,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_reset.setOnClickListener(this);
         btn_upgrade = (DarkImageButton) findViewById(R.id.btn_upgrade);
         btn_upgrade.setOnClickListener(this);
+        myName = (TextView) findViewById(R.id.myName);
+
     }
 
     private void initBanner() {
@@ -328,21 +362,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(this, SetActivity.class));
                 break;
             case R.id.btn_reset:
-                //                Log.d(TAG, "onClick: "+g_Character_BaudRate+"---状态  "+mBluetoothLeService.getTheConnectedState());
-               /* MyModel model = MyModel.getMyModelForGivenName("C1");
-                List<Textures> curves = model.getCurves();
-                Log.d(TAG, "curve: "+curves);
-                for (Textures curve : curves) {
-                    Log.d(TAG, "curve: "+curve.name);
+                g_Character_Baud_Rate = mBluetoothLeService.getG_Character_Baud_Rate();
+                if(g_Character_Baud_Rate!=null){
+                    Log.d(TAG, "g_Character_Baud_Rate:  波特率重置");
+                    g_Character_Baud_Rate.setValue(intToBytes(5));
+                    mBluetoothLeService.writeCharacteristic(g_Character_Baud_Rate);
                 }
-                List<Textures> all = Textures.getAll();
-                for (Textures textures : all) {
-                    Log.d(TAG, " modelName :  "+textures.modelName+"  name : "+textures.name+"  data:  "+textures.arr1+"    "+all.size()+"selected   "+textures.selected);
-                }*/
-                Log.d(TAG, "onClick: " + mBluetoothLeService);
+
                 break;
             case R.id.btn_upgrade:
                 //                throw new RuntimeException("Check Crashlytics Unhandled exceptions are working");
+
                 break;
         }
 
@@ -514,6 +544,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
         }
+//        if (requestCode == REQUEST_ENABLE_BT
+//                && resultCode == Activity.RESULT_CANCELED) {
+//            finish();
+//            return;
+//        }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -521,7 +556,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "life:---- onResume");
+        Log.d(TAG, "handlePasswordCallbacks:---- onResume");
 
     }
 }

@@ -31,6 +31,10 @@
     <string name="point_out_information_1">Conexión fallida, quizás el cambio de contraseña ha fallado</string>
     <string name="point_out_information_2">Porfavor siga los siguientes pasos para resetear:\nA.Salir de SXi App\nB.Operacion del dispositivo Manual. Entrar en Conexión del dispositivo [interface].\nC.Presione 5 segundos  el botón de dispario y entre en el emparejado via bluetooth.\nD.Reinicie la Aplicación , conecte y busque de nuevo el dispositivo</string>
     <string name="close_the_tip">Hecho</string>
+    <string name="submit_password">Inserte contraseña</string>
+    <string name="submit_password_success"> Contraseña cambiada</string>
+    <string name="submit_password_failed"> Cambio de contraseña fallido</string>
+
 
     <string name="connect_fail">Cargado fallido</string>
     <string name="have_been_connected">Dispositivo conectado</string>

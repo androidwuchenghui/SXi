@@ -31,6 +31,10 @@
     <string name="point_out_information_1">연결실패 블루투스 모듈의 비밀번호 변경기능이 정상인지 확인해 보세요</string>
     <string name="point_out_information_2">초기화를 위해 다음과 같은 단계를 따라해 주세요\nA. Sxi 앱을 종료합니다.\nB. 기기를 수동으로 조작하여 기기 페어링 상태로 들어갑니다.\nC. 파이어버튼을 5초간 누르면 블르투스 페어링 상태로 들어갑니다.\nD. 앱을 재시작 하여 기기를 다시 찾고,  찾은 기기를 연결하고 페어링합니다.</string>
     <string name="close_the_tip">완료</string>
+    <string name="submit_password">비밀번호 입력</string>
+    <string name="submit_password_success"> 비밀번호 입력 성공</string>
+    <string name="submit_password_failed"> 비밀번호 입력 실패</string>
+
 
     <string name="connect_fail">로드 실패</string>
     <string name="have_been_connected">기기연결됨</string>

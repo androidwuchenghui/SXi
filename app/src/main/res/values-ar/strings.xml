@@ -20,6 +20,9 @@
     <string name="connecting">Connecting</string>
     <string name="Modifying">تعديل</string>
     <string name="connect_successfully">تم ا تصال</string>
+    <string name="submit_password">عرض كلمة المرور</string>
+    <string name="submit_password_success"> تم التأكد من كلمة المرور</string>
+    <string name="submit_password_failed">لم يتم التأكد من كلمة المرور</string>
 
     <string name="no_device_find">لم يتم التحقق</string>
     <string name="disconnected">تم الفصل</string>

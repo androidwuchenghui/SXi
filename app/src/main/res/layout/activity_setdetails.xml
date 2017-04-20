@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:id="@+id/mainLayout"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@color/colorGray"
@@ -59,17 +60,43 @@
             android:layout_height="match_parent"
             android:background="@color/colorWhite"
             android:orientation="vertical">
+            <TextView
+                android:id="@+id/myName"
+                android:text="@string/no_connect"
+                android:gravity="center_horizontal"
+                android:background="@color/colorGray"
+                android:padding="8dp"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <EditText
+                android:id="@+id/setName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/edittext_shape"
+                android:cursorVisible="false"
+                android:maxLength="16"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:textColor="@color/colorPrimaryDark"
+                android:textColorHint="@color/colorPrimary"
+                android:textSize="@dimen/activity_text_mid"/>
 
             <View
                 android:layout_width="match_parent"
 
-                android:layout_height="38dp"
+                android:layout_height="8dp"
                 android:background="@color/colorWhite"/>
+
             <View
-                android:layout_height="0.4dp"
                 android:layout_width="match_parent"
+                android:layout_height="0.4dp"
                 android:background="@color/colorGray"
                 />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -532,15 +559,15 @@
             </LinearLayout>
 
             <SeekBar
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
                 android:id="@+id/seekBar_adjust_temperature"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:max="200"
-                android:progressDrawable="@drawable/seekbar_color"
                 android:maxHeight="3dip"
+                android:progressDrawable="@drawable/seekbar_color"
                 android:thumb="@drawable/seekbar_thumb"
                 />
 
@@ -604,15 +631,15 @@
             </LinearLayout>
 
             <SeekBar
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
                 android:id="@+id/seekBar_compensation_temperature"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:max="50"
-                android:progressDrawable="@drawable/seekbar_color"
                 android:maxHeight="3dip"
+                android:progressDrawable="@drawable/seekbar_color"
                 android:thumb="@drawable/seekbar_thumb"
                 />
 
@@ -668,15 +695,15 @@
             </LinearLayout>
 
             <SeekBar
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
                 android:id="@+id/seekBar_set_TCR"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:max="650"
-                android:progressDrawable="@drawable/seekbar_color"
                 android:maxHeight="3dip"
+                android:progressDrawable="@drawable/seekbar_color"
                 android:thumb="@drawable/seekbar_thumb"
                 />
 
@@ -690,7 +717,8 @@
                 android:id="@+id/line_show_power"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <LinearLayout
 
@@ -740,15 +768,15 @@
                 </LinearLayout>
 
                 <SeekBar
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:id="@+id/seekBar_set_power"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:max="1950"
-                    android:progressDrawable="@drawable/seekbar_color"
                     android:maxHeight="3dip"
+                    android:progressDrawable="@drawable/seekbar_color"
                     android:thumb="@drawable/seekbar_thumb"
                     />
 
@@ -758,7 +786,8 @@
                 android:id="@+id/line_show_joule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <LinearLayout
 
@@ -810,13 +839,13 @@
                 <SeekBar
                     android:id="@+id/seekBar_set_joule"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:max="1100"
+                    android:maxHeight="3dip"
                     android:progressDrawable="@drawable/seekbar_color"
-                    android:maxHeight="2dip"
                     android:thumb="@drawable/seekbar_thumb"
                     />
 
@@ -826,7 +855,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="0.4dp"
                 android:background="@color/colorGray"/>
-
 
         </LinearLayout>
 

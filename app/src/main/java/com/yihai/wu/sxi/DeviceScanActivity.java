@@ -253,6 +253,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     editor.commit();
                     g_Character_TX = mBluetoothLeService.getG_Character_TX();
                     Log.d(TAG, "commitPassword Ok: 修改登录成功" + " charac  " + g_Character_TX);
+
+                    ConnectedBleDevices connectedBleDevice = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
+                    if(connectedBleDevice==null){
+                        connectedBleDevice = new ConnectedBleDevices();
+                        connectedBleDevice.deviceAddress = mDeviceAddress;
+                        connectedBleDevice.save();
+                    }
                     getConnectedDeviceRealName();
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
@@ -328,7 +335,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         @Override
                         public void run() {
 
-                            Log.d(TAG, "扫描结果  : " + device.getBondState() + "   getuuid： " + device.getUuids() + "   address： " + device.getAddress() + ">>>>>" + scanRecord.toString() + "name: " + device.getName());
+//                            Log.d(TAG, "扫描结果  : " + device.getBondState() + "   getuuid： " + device.getUuids() + "   address： " + device.getAddress() + ">>>>>" + scanRecord.toString() + "name: " + device.getName());
                             mLeDeviceListAdapter.addDevice(device);
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
@@ -813,8 +820,6 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         DeviceScanActivity.this.finish();
                     }
                 }, 800);
-
-
                 break;
 
         }
@@ -829,6 +834,5 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         m_Return += (byte) (m_Temp % 10);
         return m_Return;
     }
-
 
 }

@@ -31,6 +31,10 @@
     <string name="point_out_information_1">接続失敗、パスワード変更異常</string>
     <string name="point_out_information_2">Please follow the following steps to reset:\nA.Exit the Sxi App.\nB.Operate the device Manually,enter the 『Device Pairing』 interface.\nC.Press down the fire button and keep 5 seconds to enter the bluetooth pairing interface.\nD.Restart the App, search the device again,connect and pairing with the found device.</string>
     <string name="close_the_tip">完成</string>
+    <string name="submit_password">パスワード登録</string>
+    <string name="submit_password_success"> パスワード登録成功</string>
+    <string name="submit_password_failed"> パスワード登録失敗</string>
+
 
     <string name="connect_fail">接続失敗</string>
     <string name="have_been_connected">デバイス接続</string>

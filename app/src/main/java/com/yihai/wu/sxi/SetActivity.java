@@ -40,7 +40,7 @@ public class SetActivity extends AppCompatActivity {
     private ImageView select_c1, select_c2, select_c3, select_c4, select_c5;
     private ImageView detail_c1, detail_c2, detail_c3, detail_c4, detail_c5;
     private LinearLayout line_c1, line_c2, line_c3, line_c4, line_c5;
-    private TextView tv_c1, tv_c2, tv_c3, tv_c4, tv_c5, status;
+    private TextView tv_c1, tv_c2, tv_c3, tv_c4, tv_c5, status,myName;
     private final int REQUEST_CODE_1 = 0X001;
     private final int REQUEST_CODE_TO_MAIN = 0X002;
 
@@ -52,6 +52,12 @@ public class SetActivity extends AppCompatActivity {
     private BluetoothGattCharacteristic g_Character_DeviceName;
     private static final String TAG = "SetActivity";
     private String deviceName;
+    private String c1_show;
+    private String c2_show;
+    private String c3_show;
+    private String c4_show;
+    private String c5_show;
+    private String deviceName1="";
 
 
     @Override
@@ -72,6 +78,10 @@ public class SetActivity extends AppCompatActivity {
         } else {
             select_control("C1");
         }
+        ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
+        if(connectedDevice!=null){
+            deviceName1 = connectedDevice.deviceName;
+        }
     }
 
     private final BroadcastReceiver mainActivityReceiver = new BroadcastReceiver() {
@@ -86,6 +96,7 @@ public class SetActivity extends AppCompatActivity {
                     startActivity(new Intent(SetActivity.this,MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    deviceName1="";
                     status.setText(R.string.no_connect);
                     Log.e("log", "onReceive: " + "GATT未连接********");
                     startActivity(new Intent(SetActivity.this,MainActivity.class));
@@ -96,7 +107,6 @@ public class SetActivity extends AppCompatActivity {
                     String s = BinaryToHexString(data);
                     Log.d("set", "onReceive: 收到的数据为：  " + s);
                     //                    Sys_YiHi_Protocol_RX_Porc(data);
-
                     break;
             }
         }
@@ -114,6 +124,7 @@ public class SetActivity extends AppCompatActivity {
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 status.setText(R.string.no_connect);
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
+                myName.setText(deviceName1);
                 status.setText(R.string.connected);
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
@@ -271,6 +282,7 @@ public class SetActivity extends AppCompatActivity {
         tv_c4.setOnClickListener(new clickEvent());
         tv_c5 = (TextView) findViewById(R.id.tv_c5);
         tv_c5.setOnClickListener(new clickEvent());
+        myName = (TextView) findViewById(R.id.myName);
         btn_back = (DarkImageButton) findViewById(R.id.btn_back);
         btn_back.setOnClickListener(new clickEvent());
         et = (EditText) findViewById(R.id.et);
@@ -292,6 +304,16 @@ public class SetActivity extends AppCompatActivity {
         //跳转到设置详情页
 
         toMainIntent = new Intent();
+        c1_show = MyModel.getMyModelForGivenName("C1").showName;
+        c2_show = MyModel.getMyModelForGivenName("C2").showName;
+        c3_show = MyModel.getMyModelForGivenName("C3").showName;
+        c4_show = MyModel.getMyModelForGivenName("C4").showName;
+        c5_show = MyModel.getMyModelForGivenName("C5").showName;
+        tv_c1.setText(c1_show);
+        tv_c2.setText(c2_show);
+        tv_c3.setText(c3_show);
+        tv_c4.setText(c4_show);
+        tv_c5.setText(c5_show);
     }
 
     private class clickEvent implements View.OnClickListener {
@@ -473,17 +495,28 @@ public class SetActivity extends AppCompatActivity {
         Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             status.setText(R.string.connected);
-
         } else {
             status.setText(R.string.no_connect);
         }
+
+        c1_show = MyModel.getMyModelForGivenName("C1").showName;
+        c2_show = MyModel.getMyModelForGivenName("C2").showName;
+        c3_show = MyModel.getMyModelForGivenName("C3").showName;
+        c4_show = MyModel.getMyModelForGivenName("C4").showName;
+        c5_show = MyModel.getMyModelForGivenName("C5").showName;
+        tv_c1.setText(c1_show);
+        tv_c2.setText(c2_show);
+        tv_c3.setText(c3_show);
+        tv_c4.setText(c4_show);
+        tv_c5.setText(c5_show);
+
     }
 
     //修改设备可见名称
     private void Sys_SetMyDeviceName(String m_MyDeviceName) {
         // Send a message using content of the edit text widget
         int m_Length = 0;
-        if (m_MyDeviceName.equals(deviceName) == true) {
+        if (m_MyDeviceName.equals(deviceName)) {
             return;
         }
         m_Length = m_MyDeviceName.length();
@@ -496,4 +529,6 @@ public class SetActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }

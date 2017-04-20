@@ -31,6 +31,10 @@
     <string name="point_out_information_1">Соединение не удалось, возможно неверный пароль или проблемы с Bluetooth</string>
     <string name="point_out_information_2">Для сброса выполните: \n1) Выйдите из приложения\n2) На устройстве войдите в режим соединения\n3) Зажмите одновременно кнопки 『вниз』 и 『включения』 на 5 секунд для перехода в режим соединения\n4) Перезапустите приложение и установите соединение с найденным устройством</string>
     <string name="close_the_tip">Завершить</string>
+    <string name="submit_password">Сохранить пароль</string>
+    <string name="submit_password_success"> Пароль изменён</string>
+    <string name="submit_password_failed"> Password submit failed</string>
+
 
     <string name="connect_fail">Загрузка не удалась</string>
     <string name="have_been_connected">Устройство подключено</string>

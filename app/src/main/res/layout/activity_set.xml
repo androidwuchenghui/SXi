@@ -61,9 +61,20 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/myName"
+                android:text="@string/no_connect"
+                android:gravity="center_horizontal"
+                android:background="@color/colorGray"
+                android:padding="8dp"
+                android:textSize="18sp"
+                android:textColor="@color/colorWhite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
             <EditText
                 android:id="@+id/et"
-                android:layout_marginTop="38dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="28dp"
                 android:padding="10dp"
                 android:maxLength="16"
@@ -71,6 +82,7 @@
                 android:layout_height="wrap_content"
                 android:text="myDevice"
                 android:textSize="@dimen/activity_text_mid"
+                android:singleLine="true"
                 android:cursorVisible="false"
                 android:background="@drawable/edittext_shape"
                 android:textColor="@color/colorPrimaryDark"/>
@@ -101,7 +113,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:background="@color/colorWhite"
-                    android:text="C1"
+
                     android:textSize="@dimen/activity_text_mid"
                     android:textColor="@color/colorPrimaryDark"/>
                 <ImageView
@@ -141,7 +153,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:background="@color/colorWhite"
-                    android:text="C2"
+
                     android:textSize="@dimen/activity_text_mid"
                     android:textColor="@color/colorPrimaryDark"/>
                 <ImageView
@@ -180,7 +192,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:background="@color/colorWhite"
-                    android:text="C3"
+
                     android:textSize="@dimen/activity_text_mid"
                     android:textColor="@color/colorPrimaryDark"/>
                 <ImageView
@@ -218,7 +230,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:background="@color/colorWhite"
-                    android:text="C4"
+
                     android:textSize="@dimen/activity_text_mid"
                     android:textColor="@color/colorPrimaryDark"/>
                 <ImageView
@@ -257,7 +269,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:background="@color/colorWhite"
-                    android:text="C5"
+
                     android:textSize="@dimen/activity_text_mid"
                     android:textColor="@color/colorPrimaryDark"/>
                 <ImageView

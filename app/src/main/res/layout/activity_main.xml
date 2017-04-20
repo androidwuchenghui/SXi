@@ -39,7 +39,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <com.youth.banner.Banner
             android:id="@+id/head_banner"
             android:layout_width="0dp"
@@ -62,15 +61,31 @@
             app:layout_heightPercent="64%"
             app:layout_widthPercent="100%">
 
-            <TextView
-                android:id="@+id/device_name"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
-                android:gravity="center"
-                android:text="@string/have_been_not_connected"
-                android:textSize="20sp"
-                />
+              android:gravity="center"
+                >
+
+                <TextView
+                    android:id="@+id/myName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:paddingRight="6dp"
+                    android:textSize="20sp"/>
+
+                <TextView
+
+                    android:id="@+id/device_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/myName"
+                    android:text="@string/have_been_not_connected"
+                    android:textSize="20sp"
+                    />
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -250,10 +265,10 @@
                     </LinearLayout>
 
                     <TextView
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:gravity="center"
                         android:text="@string/text_reset"
                         android:textSize="14sp"/>
 
