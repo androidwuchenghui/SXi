@@ -51,7 +51,7 @@ public class DeviceInformationActivity extends BaseActivity {
         visionName.setText(versionName);
         if (state == 2) {
             connectState.setText(R.string.connected);
-            ConnectedBleDevices connectedDevice = ConnectedBleDevices.getLastConnectedDevice();
+            ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
             if(connectedDevice!=null) {
                 nameAfter.setText(connectedDevice.realName);
                 softAfter.setText(connectedDevice.softVision);

@@ -162,4 +162,8 @@ public class MyUtils {
                 |(src[offset+3] & 0xFF));
         return value;
     }
+
+    public static int bytes2Int(byte a,byte b){
+        return  ((a & 0xff) << 8) | (b & 0xff);
+    }
 }

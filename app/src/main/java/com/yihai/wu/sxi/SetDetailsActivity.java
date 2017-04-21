@@ -36,6 +36,7 @@ import butterknife.OnClick;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.byteMerger;
+import static com.yihai.wu.util.MyUtils.bytes2Int;
 import static com.yihai.wu.util.MyUtils.bytesToInt;
 
 
@@ -165,18 +166,24 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     private int compensateTempValue = 39;
     private int compensateTempMax_f = 122;
     private int compensateTempMin_f = 32;
-    private int powerRange_max=2000;
-    private int powerRange_min=50;
-    private int jouleRange_max=1200;
-    private int jouleRange_min=100;
-    private int tcr_max=700;
-    private int tcr_min=50;
-    private int tcr_value=0;
+    private int powerRange_max = 2000;
+    private int powerRange_min = 50;
+    private int jouleRange_max = 1200;
+    private int jouleRange_min = 100;
+    private int tcr_max = 700;
+    private int tcr_min = 50;
+    private int tcr_value = 0;
     private int powerValue;
     private int jouleValue;
     private int screenHeight;
     private int keyHeight;
     private String changeName;
+
+    private int eco_range_power_max = 400;
+    private int eco_range_power_min = 100;
+    private int eco_range_joule_max = 400;
+    private int eco_range_joule_min = 100;
+    private int textured;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -185,7 +192,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         ButterKnife.bind(this);
         registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
 
-        initUI();
+        //        initUI();
         initListener();
         Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -276,7 +283,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                 connectState.setText(R.string.connected);
 
                 ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-                if(connectedDevice!=null){
+                if (connectedDevice != null) {
                     deviceName = connectedDevice.deviceName;
                     myName.setText(deviceName);
                 }
@@ -321,6 +328,8 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: rrrrrrrrrrr");
+        initUI();
     }
 
     private void initUI() {
@@ -363,9 +372,9 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         }
 
         //口感
-        int textured = myModel.texture;
+        textured = myModel.texture;
+        Log.d(TAG, "onStart: " + textured);
         setShowText(textured);
-
         //记忆模式选择
         int memory = myModel.memory;
         RadioButton rb_M = (RadioButton) rgMemories.getChildAt(memory);
@@ -424,7 +433,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
         //seekBar设置TCR
         int tcr = myModel.tcr;
-        seekBarSetTCR.setMax(tcr_max-tcr_min);
+        seekBarSetTCR.setMax(tcr_max - tcr_min);
         seekBarSetTCR.setProgress(tcr - tcr_min);
         if (tcr < 100) {
             showTCR.setText("0.000" + tcr);
@@ -433,14 +442,55 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         }
         //seekBar功率调节
         int power = myModel.power;
-        seekBarSetPower.setMax(powerRange_max - powerRange_min);
-        seekBarSetPower.setProgress(power-powerRange_min);
-        showPower.setText(power / 10 + "." + power % 10);
+
+        int progress;
+        if (textured == 0) {
+            progress=power-eco_range_power_min;
+            seekBarSetPower.setMax(eco_range_power_max - eco_range_power_min);
+            if (power < eco_range_power_min) {
+                progress = eco_range_power_min-eco_range_power_min;
+            } else if (power > eco_range_power_max) {
+                progress = eco_range_power_max-eco_range_power_min;
+            }
+            miniSkPj.setText(eco_range_power_min / 10 + ".0");
+            maxSkPj.setText(eco_range_power_max / 10 + ".0");
+            showPower.setText((progress + eco_range_power_min) / 10 + "." + (progress + eco_range_power_min) % 10);
+
+        } else {
+            progress = power - powerRange_min;
+            seekBarSetPower.setMax(powerRange_max - powerRange_min);
+            miniSkPj.setText(powerRange_min / 10 + ".0");
+            maxSkPj.setText(powerRange_max / 10 + ".0");
+            showPower.setText((progress + powerRange_min) / 10 + "." + (progress + powerRange_min) % 10);
+
+        }
+        seekBarSetPower.setProgress(progress);
+
+
         //seekBar焦耳调节
         int joule = myModel.joule;
-        seekBarSetJoule.setMax(jouleRange_max - jouleRange_min);
-        seekBarSetJoule.setProgress(joule - jouleRange_min);
-        showJoule.setText(joule / 10 + "." + joule % 10);
+
+        int joule_progress;
+        if (textured == 0) {
+            joule_progress= joule - eco_range_joule_min;
+            seekBarSetJoule.setMax(eco_range_joule_max - eco_range_joule_min);
+            if (joule < eco_range_joule_min) {
+                joule_progress = eco_range_joule_min-eco_range_joule_min;
+            } else if (joule > eco_range_joule_max) {
+                joule_progress = eco_range_joule_max-eco_range_joule_min;
+            }
+            miniSkJ.setText(eco_range_joule_min / 10 + ".0");
+            maxSkJ.setText(eco_range_joule_max / 10 + ".0");
+            showJoule.setText((joule_progress + eco_range_joule_min) / 10 + "." + (joule_progress + eco_range_joule_min) % 10);
+
+        } else {
+            joule_progress= joule - jouleRange_min;
+            seekBarSetJoule.setMax(jouleRange_max - jouleRange_min);
+            miniSkJ.setText(jouleRange_min / 10 + ".0");
+            maxSkJ.setText(jouleRange_max / 10 + ".0");
+            showJoule.setText((joule_progress + jouleRange_min) / 10 + "." + (joule_progress + jouleRange_min) % 10);
+        }
+        seekBarSetJoule.setProgress(joule_progress);
 
         switch (jouleOrPower) {
             case 0:
@@ -449,7 +499,6 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
             case 1:
                 lineShowJoule.setVisibility(View.VISIBLE);
                 break;
-
         }
         sendData = true;
     }
@@ -516,14 +565,14 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
             public void afterTextChanged(Editable editable) {
 
                 changeName = String.valueOf(editable);
-                Log.d(TAG, "onLayoutChange: "+etSetName.getText()+"    "+ changeName);
+                Log.d(TAG, "onLayoutChange: " + etSetName.getText() + "    " + changeName);
             }
         });
         //获取屏幕高度
         screenHeight = this.getWindowManager().getDefaultDisplay().getHeight();
         //阀值设置为屏幕高度的1/3
         keyHeight = android.R.attr.keyHeight;
-        keyHeight = screenHeight /3;
+        keyHeight = screenHeight / 3;
     }
 
     @OnClick({R.id.select_material, R.id.btn_back, R.id.select_texture, R.id.bt_switch})
@@ -575,22 +624,23 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         }
 
     }
+
     //    监听软键盘弹出与关闭
     @Override
     public void onLayoutChange(View v, int left, int top, int right,
                                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        if(oldBottom != 0 && bottom != 0 &&(oldBottom - bottom > keyHeight)){
-            Log.d(TAG, "onLayoutChange: "+"监听到软键盘弹起...");
+        if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
+            Log.d(TAG, "onLayoutChange: " + "监听到软键盘弹起...");
 
-        }else if(oldBottom != 0 && bottom != 0 &&(bottom - oldBottom > keyHeight)){
+        } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
 
-            Log.d(TAG, "onLayoutChange: "+"监听到软键盘关闭...");
-            if(!TextUtils.isEmpty(etSetName.getText())){
+            Log.d(TAG, "onLayoutChange: " + "监听到软键盘关闭...");
+            if (!TextUtils.isEmpty(etSetName.getText())) {
                 MyModel myModelForGivenName = MyModel.getMyModelForGivenName(detail);
 
-                if(myModelForGivenName!=null){
-                    Log.d(TAG, "onLayoutChange: "+changeName+"    "+myModelForGivenName.showName);
-                    if(!changeName.equals(myModelForGivenName.showName )){
+                if (myModelForGivenName != null) {
+                    Log.d(TAG, "onLayoutChange: " + changeName + "    " + myModelForGivenName.showName);
+                    if (!changeName.equals(myModelForGivenName.showName)) {
                         myModelForGivenName.showName = changeName;
                         myModelForGivenName.save();
                     }
@@ -629,11 +679,18 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     }
                     break;
                 case R.id.seekBar_set_power:
-                    showPower.setText((i + powerRange_min) / 10 + "." + ((i + powerRange_min) % 10));
-
+                    if (textured == 0) {
+                        showPower.setText((i + eco_range_power_min) / 10 + "." + ((i + eco_range_power_min) % 10));
+                    } else {
+                        showPower.setText((i + powerRange_min) / 10 + "." + ((i + powerRange_min) % 10));
+                    }
                     break;
                 case R.id.seekBar_set_joule:
-                    showJoule.setText((i + jouleRange_min) / 10 + "." + (i + jouleRange_min) % 10);
+                    if (textured == 0) {
+                        showJoule.setText((i + eco_range_joule_min) / 10 + "." + (i + eco_range_joule_min) % 10);
+                    } else {
+                        showJoule.setText((i + jouleRange_min) / 10 + "." + (i + jouleRange_min) % 10);
+                    }
                     break;
             }
         }
@@ -654,10 +711,10 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x06, num);
                     }
-                    if(isCentigrade){
+                    if (isCentigrade) {
                         myModel.temperature = num;
-                    }else {
-                        myModel.temperature= (num-32)*5/9;
+                    } else {
+                        myModel.temperature = (num - 32) * 5 / 9;
                     }
 
                     myModel.save();
@@ -669,12 +726,12 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x07, compensation_temperature_num);
                     }
-                    if(isCentigrade){
+                    if (isCentigrade) {
                         myModel1.temperature_c = compensation_temperature_num;
-                    }else {
+                    } else {
                         myModel1.temperature_c = compensation_temperature_num;
                     }
-                    myModel1.temperature_c = (compensation_temperature_num-32)*5/9;
+                    myModel1.temperature_c = (compensation_temperature_num - 32) * 5 / 9;
                     myModel1.save();
                     break;
                 case R.id.seekBar_set_TCR:
@@ -690,7 +747,12 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                 case R.id.seekBar_set_power:
 
                     MyModel myModel3 = MyModel.getMyModelForGivenName(detail);
-                    int power_num = seekBar.getProgress() + powerRange_min;
+                    int power_num;
+                    if(textured==0){
+                         power_num = seekBar.getProgress() + eco_range_power_min;
+                    }else {
+                         power_num = seekBar.getProgress() + powerRange_min;
+                    }
                     myModel3.power = power_num;//需要发送的数据
                     myModel3.save();
 
@@ -703,10 +765,14 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                 case R.id.seekBar_set_joule:
 
                     MyModel myModel4 = MyModel.getMyModelForGivenName(detail);
+                    int joule_num;
+                    if(textured==0){
+                        joule_num = seekBar.getProgress() + eco_range_joule_min;
+                    }else {
+                        joule_num = seekBar.getProgress() + jouleRange_min;
+                    }
 
-                    int joule_num = seekBar.getProgress() + jouleRange_min;
                     if (g_Character_TX != null) {
-
                         setPowerValueIn_Watts_Joule((byte) 0x0E, (byte) 0x02, joule_num);
                     }
                     myModel4.joule = joule_num;
@@ -936,13 +1002,13 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         //Get command code.
         m_Command = m_Data[(m_Index + 4)];
         m_SecondCommand = m_Data[(m_Index + 5)];
-        Log.d(TAG, "onReceiveMainActivity: " + m_Command);
+        //        Log.d(TAG, "onReceiveMainActivity: " + m_Command);
         if (m_Command == 0x58 && m_SecondCommand == 0x0F && m_Data.length == 7)
         //获得功率焦耳切换
         {
             s = BinaryToHexString(m_Data);
             String substring = s.substring(12);
-            Log.d(TAG, "处理    : power&Joule--   " + s + "  -:   " + substring);
+            //            Log.d(TAG, "处理    : power&Joule--   " + s + "  -:   " + substring);
             int model = Integer.parseInt(substring);
             //1
             MyModel myModel = MyModel.getMyModelForGivenName(detail);
@@ -1051,18 +1117,29 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     jouleRange_min = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
                     Log.d(TAG, "功率焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
                     MyModel getModel = MyModel.getMyModelForGivenName(detail);
-                    getModel.powerRange_max =powerRange_max;
+                    getModel.powerRange_max = powerRange_max;
                     getModel.powerRange_min = powerRange_min;
                     getModel.jouleRange_max = jouleRange_max;
                     getModel.jouleRange_min = jouleRange_min;
                     getModel.save();
                     getUserDeviceSetting((byte) 0x0B);
                 } else if (m_Data[5] == (byte) 0x0B) {
-                    Log.d(TAG, "temperInfo:     TCR   " + BinaryToHexString(m_Data));
+                    //                    Log.d(TAG, "temperInfo:     TCR   " + BinaryToHexString(m_Data));
                     tcr_max = bytesToInt(m_Data, 6);
                     tcr_min = bytesToInt(m_Data, 10);
-                    Log.d(TAG, "temperInfo:     TCR    " + tcr_max + "   " + tcr_min);
+                    //                    Log.d(TAG, "temperInfo:     TCR    " + tcr_max + "   " + tcr_min);
+                    getUserDeviceSetting((byte) 0x15);
+
+                } else if (m_Data[5] == (byte) 0x15) {
+                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+BinaryToHexString(m_Data));
+                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[6],m_Data[7])+"   "+bytes2Int(m_Data[8],m_Data[9]));
+                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[10],m_Data[11])+"   "+bytes2Int(m_Data[12],m_Data[13]));
+                    eco_range_power_max = bytes2Int(m_Data[6], m_Data[7]);
+                    eco_range_power_min = bytes2Int(m_Data[8], m_Data[9]);
+                    eco_range_joule_max = bytes2Int(m_Data[10], m_Data[11]);
+                    eco_range_joule_max = bytes2Int(m_Data[12], m_Data[13]);
                     initUI();
+
                 }
                 break;
         }
