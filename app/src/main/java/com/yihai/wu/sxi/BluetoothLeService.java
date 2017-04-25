@@ -227,6 +227,11 @@ public class BluetoothLeService extends Service {
                 }
 
             }
+            if(status==133){
+                close();
+                Log.d(TAG, "onConnectionStateChange: 133333");
+                connect(connectedAddress);
+            }
 
         }
 
@@ -975,7 +980,7 @@ public class BluetoothLeService extends Service {
 
     private boolean step3 = false;
     private boolean step5 = false;
-
+    //      ----首次连接提交第一次密码
     private void handlePasswordCallbacks(String reply) {
         ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
         Log.d(TAG, "handlePasswordCallbacks: " + "处理返回的密码状态:" + reply);

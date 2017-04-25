@@ -254,6 +254,10 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     g_Character_TX = mBluetoothLeService.getG_Character_TX();
                     Log.d(TAG, "commitPassword Ok: 修改登录成功" + " charac  " + g_Character_TX);
 
+                    if(mDeviceAddress==null){
+                       mDeviceAddress= ConnectedBleDevices.getConnectedDevice().deviceAddress;
+                    }
+
                     ConnectedBleDevices connectedBleDevice = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
                     if(connectedBleDevice==null){
                         connectedBleDevice = new ConnectedBleDevices();
@@ -749,6 +753,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 //                    @Override
                 //                    public void run() {
                 getConnectedDeviceID();
+
                 //                    }
                 //                }, 50);
                 break;
@@ -782,7 +787,13 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 //                mHandler.postDelayed(new Runnable() {
                 //                    @Override
                 //                    public void run() {
+
+//                ConnectedBleDevices connectedDevice_sv = ConnectedBleDevices.getConnectedDevice();
+//                connectedDevice_sv.softVision = realVsion;
+//                connectedDevice_sv.save();
+                //    ---询问主机支持哪些功能
                 getConnectedDeviceCapability();
+
                 //                    }
                 //                }, 50);
                 break;
@@ -793,10 +804,11 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 String tString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
                 char c = tString.charAt(1);
                 Log.d(TAG, ": cap :   " + tString + "    " + Protocol_Capability + "   ");
-                if (tString.substring(1, 2).equals(1 + "")) {
+//                if (tString.substring(1, 2).equals(1 + "")) {
+                //  获得芯片版本
                     getConnectedDeviceSoftVision();
                     get_software_version = true;
-                }
+//                }
                 break;
             case C_SXi_CR_AckUserSoftware_Version:
 
@@ -809,14 +821,14 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 deviceSoftVision.isConnected = true;
                 deviceSoftVision.lastConnect = true;
                 deviceSoftVision.save();
-//                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
+                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if(LandDialog.isShowing()) {
                             LandDialog.dismiss();
                         }
-//                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
+                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
                         DeviceScanActivity.this.finish();
                     }
                 }, 800);

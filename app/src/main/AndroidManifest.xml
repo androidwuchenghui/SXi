@@ -2,21 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.yihai.wu.sxi">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:required="false"/>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" android:required="false"/>
 
     <!--蓝牙权限-->
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:required="false"/>
 
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:required="false"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:required="false" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:required="false" />
 
     <!--只为BLE提供服务-->
-    <!--<uses-feature
-       android:name="android.hardware.bluetooth_le" android:required="true"/>-->
-    <uses-feature android:name="android.bluetooth.le" android:required="true"/>
+    <uses-feature
+       android:name="android.hardware.bluetooth_le" android:required="false"/>
+
     <application
         android:name="com.yihai.wu.appcontext.MyApplication"
         android:allowBackup="true"
