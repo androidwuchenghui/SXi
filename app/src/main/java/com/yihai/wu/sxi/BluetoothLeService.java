@@ -212,8 +212,10 @@ public class BluetoothLeService extends Service {
                     broadcastUpdate(ACTION_LOGIN_FAILED);
                     return;
                 }
+                //出现133 错误
                 if (status == 133) {
-                    connect(lastAddress);
+                    Log.d(TAG, "onConnectionStateChange: 133 出现了    "+connectedAddress);
+                    connect(connectedAddress);
                     return;
                 }
                 broadcastUpdate(intentAction);
@@ -226,11 +228,6 @@ public class BluetoothLeService extends Service {
                     broadcastUpdate(ACTION_LOGIN_FAILED);
                 }
 
-            }
-            if(status==133){
-                close();
-                Log.d(TAG, "onConnectionStateChange: 133333");
-                connect(connectedAddress);
             }
 
         }
