@@ -15,6 +15,7 @@ import android.graphics.PathEffect;
 import android.graphics.PointF;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -235,6 +236,7 @@ public class BezierActivity extends AppCompatActivity {
     private int moveMin = 5;
 
 
+
     private void handlerCurveData(byte[] data) {
         Sys_YiHi_Protocol_RX_Porc(data);
         if (begin) {
@@ -352,13 +354,33 @@ public class BezierActivity extends AppCompatActivity {
     private byte settingPackageOrder;
     private byte userOrder;
 
+    private Handler handler=new Handler();
+    int i =0;
+    Runnable runnable=new Runnable() {
+        @Override
+        public void run() {
+
+            //要做的事情
+            getConnectedDeviceRealName();
+            handler.postDelayed(this, 100000);
+        }
+    };
+
+    Runnable endRunnable = new Runnable() {
+        @Override
+        public void run() {
+            handler.removeCallbacks(runnable);
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_bezier);
         ButterKnife.bind(this);
-
+        handler.postDelayed(runnable,100000);
+        handler.postDelayed(endRunnable,600000);
         waitingDialog = new ProgressDialog(BezierActivity.this);
         waitingDialog.setTitle(R.string.point_out_title);
         waitingDialog.setIcon(R.mipmap.app_icon);
@@ -1223,6 +1245,7 @@ public class BezierActivity extends AppCompatActivity {
                     Log.d(TAG, "OnClick: powerMoveList: " + powerMoveList.size() + " index " + powerIndex);
                     break;
                 case R.id.btn_save:
+                    handler.removeCallbacks(runnable);
                     if (!MyUtils.NoDoubleClickUtils.isDoubleClick()) {
                         saveCurve = true;
                         waitingDialog.show();
@@ -1659,8 +1682,11 @@ public class BezierActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         unregisterReceiver(setBezierActivityReceiver);
         unbindService(mServiceConnection);
+        handler.removeCallbacks(runnable);
+        handler.removeCallbacks(endRunnable);
         mBluetoothLeService = null;
     }
 
@@ -1928,4 +1954,20 @@ public class BezierActivity extends AppCompatActivity {
             settingPackage_sendMidlleLineData(userOrder, (byte) 0x04, (byte) 0x01, temperDashValue);
         }
     }
+
+    //获得产品名称
+    private void getConnectedDeviceRealName() {
+        Log.d(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
+        byte[] m_Data_GetDeviceName = new byte[32];
+        //GetDeviceName
+        int m_NameLength = 0;
+        m_Data_GetDeviceName[0] = 0x55;
+        m_Data_GetDeviceName[1] = (byte) 0xFF;
+        m_Data_GetDeviceName[3] = 0x01; //Device ID
+        m_Data_GetDeviceName[2] = 0x02;
+        m_Data_GetDeviceName[4] = 0x01;
+        m_NameLength = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_GetDeviceName, m_NameLength);
+    }
+
 }
