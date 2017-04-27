@@ -191,7 +191,6 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         setContentView(R.layout.activity_setdetails);
         ButterKnife.bind(this);
         registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
-
         //        initUI();
         initListener();
         Intent gattServiceIntent = new Intent(SetDetailsActivity.this, BluetoothLeService.class);
@@ -217,7 +216,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-
+                    Log.d(TAG, "onReceive:ssss "+s);
                     if (TAG == "SetDetailsActivity" && sendData) {
                         Log.d(TAG, "receiveInfo: " + s);
                         if (mergerData) {
@@ -227,7 +226,6 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                                 String result = first + s;
                                 Log.d(TAG, "temperInfo: 第二节数据合并后：" + BinaryToHexString(mergerBytes));
                                 mergerData = false;
-
                                 receiveCount = 0;
                                 first = "";
                                 Sys_YiHi_Protocol_RX_Porc(mergerBytes);
@@ -290,6 +288,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
+
             if (g_Character_TX != null) {
                 //                getConnectedDevicePowerModel();
                 //                AckUserDeviceSetting();
@@ -1115,7 +1114,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     powerRange_min = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
                     jouleRange_max = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
                     jouleRange_min = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "功率焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
+                    Log.d(TAG, "功率和焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
                     MyModel getModel = MyModel.getMyModelForGivenName(detail);
                     getModel.powerRange_max = powerRange_max;
                     getModel.powerRange_min = powerRange_min;

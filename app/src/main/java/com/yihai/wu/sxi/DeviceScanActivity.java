@@ -72,7 +72,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private static final long SCAN_PERIOD = 6000;
     private final static String TAG = "DeviceScanActivity";
     private boolean mConnected = false;
-
+    private byte[] merger_bytes;
     //    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
     //            new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private final String LIST_NAME = "NAME";
@@ -104,6 +104,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
     private String changeTo;
     private BluetoothDevice device;
     private boolean get_software_version = false;
+    private boolean wait = false;
     //    private ScanCallback mScanCallback;
 
     //    private static final int REQUEST_FINE_LOCATION = 0;
@@ -227,22 +228,40 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 case BluetoothLeService.ACTION_DATA_RX:
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
-
-                    String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceiveRX: " + s);
-                    if(get_software_version){
-                        if(software_Version==null) {
-                            software_Version = data;
-                        }else {
-                            software_Version = byteMerger(software_Version,data);
-                            get_software_version =false;
-                            Log.d(TAG, "onReceiveRX: "+BinaryToHexString(software_Version));
-                            Sys_YiHi_Protocol_RX_Porc(software_Version);
-                        }
-
-                    }else {
-                        Sys_YiHi_Protocol_RX_Porc(data);
+                    int counts=0;
+                    if(data.length>3){
+                         counts = (data[2] & 0xff) + 3;
                     }
+
+                    if (wait) {
+                        merger_bytes = byteMerger(merger_bytes, data);
+                        Sys_YiHi_Protocol_RX_Porc(merger_bytes);
+                        merger_bytes = null;
+                        wait = false;
+                    }
+
+                    if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts <= 20) {
+
+                        Sys_YiHi_Protocol_RX_Porc(data);
+
+                    } else if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts > 20) {
+                        merger_bytes = data;
+                        wait = true;
+                    }
+
+//                    if(get_software_version){
+//                        if(software_Version==null) {
+//                            software_Version = data;
+//                        }else {
+//                            software_Version = byteMerger(software_Version,data);
+//                            get_software_version =false;
+//                            Log.d(TAG, "onReceiveRX: "+BinaryToHexString(software_Version));
+//                            Sys_YiHi_Protocol_RX_Porc(software_Version);
+//                        }
+//
+//                    }else {
+//                        Sys_YiHi_Protocol_RX_Porc(data);
+//                    }
                     break;
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
@@ -743,6 +762,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         switch (m_Command) {
             case C_SXi_CR_AskDeviceName:
                 String s = BinaryToHexString(m_Data);
+                 Log.d(TAG, "scanReceive: "+s+"   data_length "+m_Data.length);
                 String usefulData = s.substring(10, m_Data.length * 2);
                 String realName = hexStringToString(usefulData);
                 ConnectedBleDevices connectedBleDevice = ConnectedBleDevices.getConnectInfoByAddress(mDeviceAddress);
@@ -821,14 +841,14 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 deviceSoftVision.isConnected = true;
                 deviceSoftVision.lastConnect = true;
                 deviceSoftVision.save();
-                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
+//                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " + mBluetoothLeService.getTheConnectedState());
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if(LandDialog.isShowing()) {
                             LandDialog.dismiss();
                         }
-                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
+//                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
                         DeviceScanActivity.this.finish();
                     }
                 }, 800);

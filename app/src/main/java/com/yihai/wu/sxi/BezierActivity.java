@@ -651,8 +651,8 @@ public class BezierActivity extends AppCompatActivity {
             btn_waveBehind.setVisibility(View.VISIBLE);
         }
 
-        moveMax = powerRange_max;
-        moveMin = powerRange_min;
+        moveMax = jouleRange_max;
+        moveMin = jouleRange_min;
     }
 
     //显示为功率Chart
@@ -955,20 +955,31 @@ public class BezierActivity extends AppCompatActivity {
                         for (PointValue value : dashLineValues) {
                             float currentY = value.getY() - move / rate;
 
-                            if (currentY < currentAxisY_Values.get(0).getValue() + 5) {
-                                currentY = currentAxisY_Values.get(0).getValue() + 5;
-                            } else if (currentY > currentAxisY_Values.get(5).getValue()) {
-                                currentY = currentAxisY_Values.get(5).getValue();
+//                            if (currentY < currentAxisY_Values.get(0).getValue() + 5) {
+//                                currentY = currentAxisY_Values.get(0).getValue() + 5;
+//                            } else if (currentY > currentAxisY_Values.get(5).getValue()) {
+//                                currentY = currentAxisY_Values.get(5).getValue();
+//                            }
+                            if (currentY < moveMin) {
+                                currentY = moveMin;
+                            } else if (currentY > moveMax) {
+                                currentY = moveMax;
                             }
+
                             value.set(value.getX(), currentY);
                         }
                         //移动功率线所有的点
                         for (PointValue value : currentMainLine.getValues()) {
                             float currentY = value.getY() - move / rate;
-                            if (currentY < currentAxisY_Values.get(0).getValue()) {
-                                currentY = currentAxisY_Values.get(0).getValue();
-                            } else if (currentY > currentAxisY_Values.get(5).getValue()) {
-                                currentY = currentAxisY_Values.get(5).getValue();
+//                            if (currentY < currentAxisY_Values.get(0).getValue()) {
+//                                currentY = currentAxisY_Values.get(0).getValue();
+//                            } else if (currentY > currentAxisY_Values.get(5).getValue()) {
+//                                currentY = currentAxisY_Values.get(5).getValue();
+//                            }
+                            if (currentY < moveMin) {
+                                currentY = moveMin;
+                            } else if (currentY > moveMax) {
+                                currentY = moveMax;
                             }
                             value.set(value.getX(), currentY);
                         }
@@ -986,7 +997,6 @@ public class BezierActivity extends AppCompatActivity {
                                 } else {
                                     result = translateY + "";
                                 }
-
 
                                 tvDashY.setText(result);
                                 break;

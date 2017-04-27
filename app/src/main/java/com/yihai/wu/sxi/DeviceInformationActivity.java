@@ -189,7 +189,11 @@ public class DeviceInformationActivity extends BaseActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
 //                    String s = BinaryToHexString(data);
-                    int counts = (data[2] & 0xff) + 3;
+                    int counts = 0;
+                    if(data.length>3){
+                        counts = (data[2] & 0xff) + 3;
+                    }
+
 //                    Log.d(TAG, "receive_bytes: " + s + "    ---  " + counts);
                     if (wait) {
                         merger_bytes = byteMerger(merger_bytes, data);
