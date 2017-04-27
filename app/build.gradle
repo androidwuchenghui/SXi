@@ -9,8 +9,8 @@ android {
         applicationId "com.yihai.wu.sxi"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 9
-        versionName "1.1.03"
+        versionCode 10
+        versionName "1.1.04"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

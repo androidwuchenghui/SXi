@@ -48,14 +48,14 @@ public class DeviceInformationActivity extends BaseActivity {
     TextView visionName;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic g_Character_TX;
-    private boolean get_software_version = false;
-    private byte[] software_Version;
+//    private boolean get_software_version = false;
+//    private byte[] software_Version;
+    private byte[] merger_bytes;
     public static final int C_SXi_CR_AskDeviceName = 0x02;
     public static final int C_SXi_CR_AckDevice_ID = 0x04;
-    public static final int C_SXi_CR_AckProtocolVersion = 0x13;
-    public static final int C_SXi_CR_AckDevCapability = 0x19;
     public static final int C_SXi_CR_AckUserSoftware_Version = 0x42;
-    private boolean getId = false;
+//    private boolean getId = false;
+    private boolean wait = false;
 
     @Override
     protected int getContentId() {
@@ -177,43 +177,62 @@ public class DeviceInformationActivity extends BaseActivity {
 
                 case BluetoothLeService.ACTION_LAND_SUCCESS:
                     connectState.setText(R.string.connected);
-                    Log.e("log", "onReceive: " + "GATT连接成功*************");
+//                    Log.e("log", "onReceive: " + "GATT连接成功*************");
                     startActivity(new Intent(DeviceInformationActivity.this, MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_GATT_DISCONNECTED:
                     connectState.setText(R.string.no_connect);
-                    Log.e("log", "onReceive: " + "GATT未连接********");
+//                    Log.e("log", "onReceive: " + "GATT未连接********");
                     startActivity(new Intent(DeviceInformationActivity.this, MainActivity.class));
                     break;
                 case BluetoothLeService.ACTION_DATA_RX:
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
-                    String s = BinaryToHexString(data);
-                    Log.d("DeviceInformation", "onReceive: 收到的数据为：  " + s+"    "+get_software_version);
-
-                    if (get_software_version) {
-                        if (software_Version == null) {
-                            software_Version = data;
-                        } else {
-                            software_Version = byteMerger(software_Version, data);
-                            get_software_version = false;
-                            Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
-                            Sys_YiHi_Protocol_RX_Porc(software_Version);
-                            software_Version=null;
-                        }
-                    } else if(getId){
-                        if (software_Version == null) {
-                            software_Version = data;
-                        } else {
-                            software_Version = byteMerger(software_Version, data);
-                            getId = false;
-                            Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
-                            Sys_YiHi_Protocol_RX_Porc(software_Version);
-                            software_Version=null;
-                        }
-                    }else {
-                        Sys_YiHi_Protocol_RX_Porc(data);
+//                    String s = BinaryToHexString(data);
+                    int counts = (data[2] & 0xff) + 3;
+//                    Log.d(TAG, "receive_bytes: " + s + "    ---  " + counts);
+                    if (wait) {
+                        merger_bytes = byteMerger(merger_bytes, data);
+                        Sys_YiHi_Protocol_RX_Porc(merger_bytes);
+                        merger_bytes = null;
+                        wait = false;
                     }
+
+                    if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts <= 20) {
+
+                        Sys_YiHi_Protocol_RX_Porc(data);
+
+                    } else if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts > 20) {
+                        merger_bytes = data;
+                        wait = true;
+                    }
+
+                    /*
+                                        if (get_software_version) {
+                                            Log.d("DeviceInformation", "onReceive: 收到的数据为：  " + s + "    " + get_software_version);
+
+                                            if (software_Version == null) {
+                                                software_Version = data;
+                                            } else {
+                                                software_Version = byteMerger(software_Version, data);
+                                                get_software_version = false;
+                                                Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
+                                                Sys_YiHi_Protocol_RX_Porc(software_Version);
+                                                software_Version = null;
+                                            }
+                                        } else if (getId) {
+                                            if (software_Version == null) {
+                                                software_Version = data;
+                                            } else {
+                                                software_Version = byteMerger(software_Version, data);
+                                                getId = false;
+                                                Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
+                                                Sys_YiHi_Protocol_RX_Porc(software_Version);
+                                                software_Version = null;
+                                            }
+                                        } else {
+                                            Sys_YiHi_Protocol_RX_Porc(data);
+                                        }*/
                     break;
             }
         }
@@ -322,43 +341,39 @@ public class DeviceInformationActivity extends BaseActivity {
 
         switch (m_Command) {
             case C_SXi_CR_AskDeviceName:
+
                 String s = BinaryToHexString(m_Data);
                 String usefulData = s.substring(10, m_Data.length * 2);
                 String realName = hexStringToString(usefulData);
                 ConnectedBleDevices deviceName = ConnectedBleDevices.getConnectedDevice();
                 deviceName.realName = realName;
                 deviceName.save();
-                Log.d(TAG, "DeviceInformation: name:  " + s + "  r: " + realName);
-                //                mHandler.postDelayed(new Runnable() {
-                //                    @Override
-                //                    public void run() {
+
                 nameAfter.setText(realName);
 
                 getConnectedDeviceID();
-                getId = true;
-                //                    }
-                //                }, 50);
                 break;
             case C_SXi_CR_AckDevice_ID:
 
                 String AckDevice_ID = BinaryToHexString(m_Data);
+
                 String AckDevice_ID_Behind = AckDevice_ID.substring(10, m_Data.length * 2);
                 String realID = hexStringToString(AckDevice_ID_Behind);
-                Log.d(TAG, "handleInfo: "+realID);
+
                 idAfter.setText(realID);
                 ConnectedBleDevices deviceId = ConnectedBleDevices.getConnectedDevice();
                 deviceId.deviceID = realID;
                 deviceId.save();
 
-                get_software_version = true;
                 getConnectedDeviceSoftVision();
 
                 break;
             case C_SXi_CR_AckUserSoftware_Version:
-                String back_Software = BinaryToHexString(m_Data).toString();
+                String back_Software = BinaryToHexString(m_Data);
+
                 String SoftwareData = back_Software.substring(10);
                 String Software_Version = hexStringToString(SoftwareData);
-                Log.d(TAG, "handleInfo: "+Software_Version);
+
                 softAfter.setText(Software_Version);
                 ConnectedBleDevices deviceSoftV = ConnectedBleDevices.getConnectedDevice();
                 deviceSoftV.deviceID = Software_Version;
