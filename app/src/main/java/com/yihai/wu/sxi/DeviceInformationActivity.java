@@ -376,7 +376,7 @@ public class DeviceInformationActivity extends BaseActivity {
 
                 softAfter.setText(Software_Version);
                 ConnectedBleDevices deviceSoftV = ConnectedBleDevices.getConnectedDevice();
-                deviceSoftV.deviceID = Software_Version;
+                deviceSoftV.softVision = Software_Version;
                 deviceSoftV.save();
                 break;
         }
