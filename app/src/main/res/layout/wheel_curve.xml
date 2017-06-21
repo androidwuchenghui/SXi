@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:aigestudio="http://schemas.android.com/apk/res-auto"
+              android:id="@+id/ll_wheel_curved"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        >
+
+        <TextView
+            android:id="@+id/cancle_wheel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="取消"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ok_wheel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:text="确定"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp" />
+    </RelativeLayout>
+
+
+        <com.aigestudio.wheelpicker.WheelPicker
+            android:id="@+id/wheel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@color/colorAccent"
+            aigestudio:wheel_selected_item_text_color="@color/blueSky"
+            aigestudio:wheel_curved="true"
+            aigestudio:wheel_visible_item_count="3"
+            aigestudio:wheel_item_space="2dp"
+            />
+    <NumberPicker
+        android:id="@+id/np"
+        android:background="@color/colorGray"
+        android:layout_width="match_parent"
+        android:solidColor="@color/bezierBack"
+
+        android:layout_height="80dp"/>
+
+
+</LinearLayout>

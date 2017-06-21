@@ -9,8 +9,8 @@ android {
         applicationId "com.yihai.wu.sxi"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 10
-        versionName "1.1.04"
+        versionCode 15
+        versionName "1.56.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -48,8 +48,12 @@ dependencies {
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.github.lecho:hellocharts-android:v1.5.8'
     compile 'com.android.support:support-annotations:20.0.0'
+    compile 'cn.aigestudio.wheelpicker:WheelPicker:1.1.2'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.7@aar') {
         transitive = true
     }
+    compile project(':takephoto_library')
+    //    compile 'ch.halcyon:squareprogressbar:1.6.1'
+    compile 'com.dinuscxj:circleprogressbar:1.1.1'
 
 }

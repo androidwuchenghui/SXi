@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">sxi_library</string>
+    <string name="app_name">SXi</string>
     <string name="footer_hint_load_normal">加载更多</string>
     <string name="footer_hint_load_ready">放开以加载更多</string>
     <string name="header_hint_refresh_normal">下拉刷新...</string>

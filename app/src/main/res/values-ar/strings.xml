@@ -46,7 +46,7 @@
     <string name="double_kill">再按一次退出应用</string>
 
 
-    <string name="SXi_Q">SXi-Q</string>
+    <string name="SXi_Q">SXi</string>
     <string name="ID">ID</string>
 
     <string name="ble_not_supported">BLE is not supported</string>
@@ -107,4 +107,6 @@
     <string name="power_regulation">قدرة</string>
     <string name="joule_regulation">جول</string>
 
+    <string name="set_wallpaper">wallpaper change</string>
+    <string name="choose_picture">Choose to switch wallpaper</string>
 </resources>

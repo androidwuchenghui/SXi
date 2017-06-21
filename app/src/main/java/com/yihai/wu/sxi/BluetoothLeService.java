@@ -47,6 +47,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.intToBytes;
+import static com.yihai.wu.util.MyUtils.intToBytes2;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -72,7 +74,25 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    private int count = 0;
+
+    // -----
+
+    public void setCanSendPicture(boolean canSendPicture) {
+        this.canSendPicture = canSendPicture;
+    }
+
+    private boolean canSendPicture = false;
+
     /*用于广播的消息.*/
+
+    public final static String ACTION_SEND_PROGRESS =
+            "com.example.bluetooth.le.PICTURE_PROGRESS";
+
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
@@ -171,6 +191,14 @@ public class BluetoothLeService extends Service {
         }
     };
 
+    private Thread sendPixelThread = new Thread(){
+        @Override
+        public void run() {
+            super.run();
+            sendData(count);
+        }
+    };
+
     private boolean keepSearch = true;
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -214,7 +242,7 @@ public class BluetoothLeService extends Service {
                 }
                 //出现133 错误
                 if (status == 133) {
-                    Log.d(TAG, "onConnectionStateChange: 133 出现了    "+connectedAddress);
+                    Log.d(TAG, "onConnectionStateChange: 133 出现了    " + connectedAddress);
                     connect(connectedAddress);
                     return;
                 }
@@ -254,7 +282,7 @@ public class BluetoothLeService extends Service {
                 //                }, 2500);
                 //            }
                 //            if (status == 129) {
-//                                broadcastUpdate(ACTION_LOGIN_FAILED);
+                //                                broadcastUpdate(ACTION_LOGIN_FAILED);
             }
         }
 
@@ -343,19 +371,19 @@ public class BluetoothLeService extends Service {
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
-            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
+            //            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
             if (characteristic.getUuid().equals(g_UUID_Charater_Password_C2)) {
                 //                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
 
                 byte[] data = characteristic.getValue();
                 final String reply = BinaryToHexString(data);
-                Log.d(TAG, "onCharacteristicChanged:  reply : " + reply);
+                //                Log.d(TAG, "onCharacteristicChanged:  reply : " + reply);
                 pool.execute(new Thread() {
                     @Override
                     public void run() {
                         super.run();
                         try {
-                            sleep(0);
+                            sleep(10);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -376,8 +404,14 @@ public class BluetoothLeService extends Service {
                 });
 
             } else if (characteristic.getUuid().equals(g_UUID_Charater_ReadData)) {
+
                 Log.d(TAG, "onCharacteristicChanged:  RX" + BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
+//                if (canSendPicture) {
+//                    byte[] value = characteristic.getValue();
+//                    Log.d(TAG, "sendPicture: "+BinaryToHexString(value));
+//                    Sys_YiHi_Protocol_RX_Porc(value);
+//                }
             }
 
         }
@@ -425,6 +459,11 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
+    private void broadcastUpdateProgress( String action) {
+        final Intent intent = new Intent(action);
+        intent.putExtra("sendProgress",count);
+        sendBroadcast(intent);
+    }
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -484,8 +523,33 @@ public class BluetoothLeService extends Service {
         editor = sharedPreferences.edit();
         lastAddress = sharedPreferences.getString("address", null);
         initialize();
+        registerReceiver(serviceReceiver, makeBroadcastFilter());
         Log.d(TAG, "serviceOnCreate:     lastAddress  " + lastAddress);
     }
+
+    private IntentFilter makeBroadcastFilter() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
+        return intentFilter;
+    }
+
+    private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action){
+                case ACTION_DATA_RX:
+                    Bundle bundle = intent.getBundleExtra(EXTRA_DATA);
+                    byte[] data = bundle.getByteArray("byteValues");
+                    String s = BinaryToHexString(data);
+                    Log.d(TAG, "sendPicture: "+s);
+                    if(canSendPicture) {
+                        Sys_YiHi_Protocol_RX_Porc(data);
+                    }
+                    break;
+            }
+        }
+    };
 
     /*======================================================================
          *Purpose:与这个类进行绑定的窗口调用了bindService()时,就会触发这个函数.
@@ -516,6 +580,7 @@ public class BluetoothLeService extends Service {
         super.onDestroy();
         keepSearch = false;
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        unregisterReceiver(serviceReceiver);
         Log.d(TAG, "onServiceDestroy: 后台服务关闭 ");
     }
 
@@ -730,6 +795,7 @@ public class BluetoothLeService extends Service {
                     Log.d(TAG, "screenLock:    屏幕亮起  ");
                     //                    mBluetoothAdapter.enable();
                     break;
+
 
             }
         }
@@ -977,6 +1043,7 @@ public class BluetoothLeService extends Service {
 
     private boolean step3 = false;
     private boolean step5 = false;
+
     //      ----首次连接提交第一次密码
     private void handlePasswordCallbacks(String reply) {
         ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
@@ -1076,7 +1143,6 @@ public class BluetoothLeService extends Service {
 
                 commitPassword(lastPassword + lastPassword);
 
-
                 break;
         }
 
@@ -1094,8 +1160,221 @@ public class BluetoothLeService extends Service {
         }
     }
 
+
     public void serviceScan() {
         pool.execute(scanThread);
     }
 
+    //设置图片数据
+    private byte[] pixel_data;
+
+    public void setPixel_data(byte[] pixel_data) {
+        this.pixel_data = pixel_data;
+    }
+
+    public void sendData(int num) {
+//        Log.d(TAG, "sendData: begin~~~~~  ");
+        sendData1(num);
+        sendData2(num);
+        sendData3(num);
+        sendData4(num);
+    }
+
+
+    //发送壁纸的动作
+    private void sendData1(int num) {
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[21];
+        int m_Length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[2] = 0x3B;
+        m_Data[3] = 0x01;
+        m_Data[4] = 0x6C;
+        m_Data[5] = 0x0F;
+
+        //    序号   M M
+        byte[] bytes1 = intToBytes2(num);
+        m_Data[6] = bytes1[1];
+        m_Data[7] = bytes1[2];
+        m_Data[8] = bytes1[3];
+
+        //    本次发送数据包的长度   P P
+        byte[] bytes = intToBytes(50);
+        m_Data[9] = bytes[0];
+        m_Data[10] = bytes[1];
+
+        //有效数据  V V
+        for (int i = 0; i < 9; i++) {
+            m_Data[11 + i] = pixel_data[i + num * 50];
+        }
+
+//                Log.d(TAG, "sendData1:  "+BinaryToHexString(m_Data));
+        m_Length = 20;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+
+    }
+
+    private void Sys_Proc_Charactor_TX_Send(byte[] m_Data, int m_Length) {
+
+        byte[] m_MyData = new byte[m_Length];
+        for (int i = 0; i < m_Length; i++) {
+            m_MyData[i] = m_Data[i];
+        }
+
+        if (g_Character_TX == null) {
+            Log.e("set", "character TX is null");
+            return;
+        }
+
+        if (m_Length <= 0) {
+            return;
+        }
+//        Log.d(TAG, "sendData:  "+BinaryToHexString(m_MyData));
+        g_Character_TX.setValue(m_MyData);
+        writeCharacteristic(g_Character_TX);
+    }
+
+
+    private void sendData2(int num) {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        for (int i = 0; i < 20; i++) {
+            m_Data[i] = pixel_data[i + 9 + num * 50];
+        }
+        m_Length = 20;
+//        Log.d(TAG, "sendData2:  "+BinaryToHexString(m_Data));
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void sendData3(int num) {
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        for (int i = 0; i < 20; i++) {
+            m_Data[i] = pixel_data[i + 29 + num * 50];
+        }
+        m_Length = 20;
+//        Log.d(TAG, "sendData3:  "+BinaryToHexString(m_Data));
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void sendData4(int num) {
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        count++;
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        m_Data[0] = pixel_data[num * 50 + 49];
+        int sum = 0;
+        for (int i = 0; i < 50; i++) {
+            int onByte = pixel_data[i + num * 50] & 0xFF;
+            sum += onByte;
+        }
+        //       校验数据---
+//        Log.d(TAG, "sendData   out:  " + "   校验： " + sum);
+        byte yy = (byte) (sum & 0xFF);
+        m_Data[1] = yy;
+        m_Length = 2;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void Sys_YiHi_Protocol_RX_Porc(byte[] m_Data) {
+        int m_Length = 0;
+        int i;
+        int m_Index = 0xfe;
+        byte m_ValidData_Length = 0;
+        byte m_Command = 0;
+        byte m_SecondCommand = 0;
+        String s = null;
+        int m_iTemp_x10, m_iTemp_x1;
+        m_Length = m_Data.length;
+        if (m_Length < 5) {
+            return;
+        }
+        //Get sync code.
+        for (i = 0; i < m_Length; i++) {
+            //if (i<16)
+            //{
+            //	if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---Data["+i+"]="+m_Data[i]);
+            //}
+            //if ((m_Data[i]==0x55)&&(m_Data[(i+1)]==0xFF))
+            if (((m_Data[i] == 85) || (m_Data[i] == 0x55))
+                    && ((m_Data[(i + 1)] == -1) || (m_Data[(i + 1)] == 0xFF)
+                    || (m_Data[(i + 1)] == -3) || (m_Data[i + 1] == 0xFD))) {
+                //if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---i="+i);
+                m_Index = i;
+                //i=m_Length;
+                break;
+            }
+
+        }
+        if (m_Index == 0xfe) {
+            return;
+        }
+        if (m_Index > (m_Length - 2)) {
+            return;
+        }
+        //Get valid data length.
+        m_ValidData_Length = m_Data[(m_Index + 2)];
+        if ((m_Index + m_ValidData_Length) > m_Length) {
+            return;
+        }
+        //Get command code.
+        m_Command = m_Data[(m_Index + 5)];
+        switch (m_Command) {
+            case 0x0E:
+                Log.d(TAG, "sendPicture: "+BinaryToHexString(m_Data)  +"    "+g_Character_TX+"  count: "+count+"  piex: "+pixel_data.length);
+                pool.execute(sendPixelThread);
+                break;
+            case 0x10:
+                Log.d(TAG, "sendData:   back " + BinaryToHexString(m_Data) + "     count :  " + count);
+                int num = count-1;
+                editor.putInt("count",num);
+                editor.commit();
+               /* dialogView.setProgress((double) count * 100 / 2304);
+
+                if (count >= 2304) {
+                    Log.d(TAG, "sendData: " + "   over     over   over   over   over   over   over   over   over");
+                    dialogView.dismiss();
+                    count = 0;
+                    sendPicture = false;
+                    return;
+                }*/
+
+                broadcastUpdateProgress(ACTION_SEND_PROGRESS);
+
+                if(count>=2304){
+                    count =0;
+                    canSendPicture = false;
+                    return;
+                }
+//                sendData(count);
+                pool.execute(sendPixelThread);
+                break;
+        }
+    }
 }

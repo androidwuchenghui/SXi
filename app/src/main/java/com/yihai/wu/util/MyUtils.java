@@ -2,6 +2,8 @@ package com.yihai.wu.util;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.location.LocationManager;
 
 /**
@@ -95,6 +97,7 @@ public class MyUtils {
         }
         return result;
     }
+
     public static class NoDoubleClickUtils {
         private static long lastClickTime;
         private final static int SPACE_TIME = 800;
@@ -115,14 +118,18 @@ public class MyUtils {
             return isClick2;
         }
     }
+
+    //把一个int转成一个byte［2］
     public static byte[] intToBytes(int num) {
         byte[] b = new byte[2];
+
         for (int i = 0; i < 2; i++) {
             b[i] = (byte) (num >>> (8 - i * 8));
         }
 
         return b;
     }
+
     public static final boolean isGpsEnable(final Context context) {
         LocationManager locationManager
                 = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -134,7 +141,7 @@ public class MyUtils {
         return false;
     }
 
-    public  static String getRandomSix(){
+    public static String getRandomSix() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 6; i++) {
             int random = (int) (Math.random() * 100);
@@ -154,16 +161,62 @@ public class MyUtils {
         }
         return sb.toString();
     }
+
     public static int bytesToInt(byte[] src, int offset) {
         int value;
-        value = (int) ( ((src[offset] & 0xFF)<<24)
-                |((src[offset+1] & 0xFF)<<16)
-                |((src[offset+2] & 0xFF)<<8)
-                |(src[offset+3] & 0xFF));
+        value = (int) (((src[offset] & 0xFF) << 24)
+                | ((src[offset + 1] & 0xFF) << 16)
+                | ((src[offset + 2] & 0xFF) << 8)
+                | (src[offset + 3] & 0xFF));
         return value;
     }
 
-    public static int bytes2Int(byte a,byte b){
-        return  ((a & 0xff) << 8) | (b & 0xff);
+    public static int byte_3_ToInt(byte a, byte b,byte c) {
+        int value = ((a & 0xFF) << 16) | ((b & 0xFF) << 8) | (c & 0xFF);
+        return value;
     }
+
+    public static int bytes2Int(byte a, byte b) {
+        return ((a & 0xff) << 8) | (b & 0xff);
+    }
+
+    public static byte[] intToBytes2(int value) {
+        byte[] src = new byte[4];
+        src[0] = (byte) ((value >> 24) & 0xFF);
+        src[1] = (byte) ((value >> 16) & 0xFF);
+        src[2] = (byte) ((value >> 8) & 0xFF);
+        src[3] = (byte) (value & 0xFF);
+        return src;
+    }
+
+    //把图片缩放到指定大小
+    public static Bitmap zoomImg(Bitmap bm, int newWidth, int newHeight) {
+        // 获得图片的宽高
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        // 计算缩放比例
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // 取得想要缩放的matrix参数
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        // 得到新的图片   www.2cto.com
+        Bitmap newbm = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+        return newbm;
+    }
+
+    public static String toFullBinaryString(int x) {
+        int[] buffer = new int[Integer.SIZE];
+        for (int i = (Integer.SIZE - 1); i >= 0; i--) {
+            buffer[i] = x >> i & 1;
+        }
+        String s = "";
+        for (int j = (Integer.SIZE - 1); j >= 0; j--) {
+            s = s + buffer[j];
+        }
+        return s;
+    }
+
 }
+
+

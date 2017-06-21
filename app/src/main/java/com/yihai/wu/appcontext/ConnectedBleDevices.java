@@ -45,7 +45,6 @@ public class ConnectedBleDevices extends Model{
     public boolean lastConnect = false;
 
 
-
     public static ConnectedBleDevices getConnectInfoByName(String name) {
         return new Select().from(ConnectedBleDevices.class).where("deviceName = ?", name).executeSingle();
     }

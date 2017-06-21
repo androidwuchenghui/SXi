@@ -1,1 +1,1 @@
-include ':app', ':sxi_library'
+include ':app', ':sxi_library','takephoto_library'

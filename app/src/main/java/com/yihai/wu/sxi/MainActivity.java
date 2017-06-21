@@ -35,6 +35,7 @@ import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
 import com.yihai.wu.util.DarkImageButton;
 import com.yihai.wu.util.GlideImageLoader;
+import com.yihai.wu.util.WallpaperDialogView;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.listener.OnBannerClickListener;
@@ -44,10 +45,13 @@ import java.util.List;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.intToBytes;
+import static com.yihai.wu.util.MyUtils.intToBytes2;
 import static com.yihai.wu.util.MyUtils.isGpsEnable;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private byte[] pixel_data = new byte[115200];
     Integer[] images = {R.mipmap.a, R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
     String TAG = "printInMainActivity";
     private DarkImageButton btn_connect;
@@ -60,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_CONNECTED = 0X013;  //19
+    private static final int REQUEST_CONNECTED = 0X013;     //19
     private static final int REQUST_RESULT = 0X111;        //273
     private static final int REQUST_MODE = 0X222;             //546
     private static final int REQUEST_CODE_TO_MAIN = 0X002;    //2
@@ -84,11 +88,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress );
+            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText(R.string.have_been_not_connected);
                 //              try to connect
-                if (lastAddress != null ) {
+                if (lastAddress != null) {
                     Log.d(TAG, "doScan:  绑定成功后    叫后台去搜索   ");
                     mBluetoothLeService.serviceScan();
 
@@ -107,9 +111,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 0x09;
     private String lastAddress;
-    private SharedPreferences sp;
-    private SharedPreferences.Editor edit;
+    private SharedPreferences sp, pixelSp;
+    private SharedPreferences.Editor edit, pixelEditor;
     private String deviceName;
+    private WallpaperDialogView wallpaperDialogView;
 
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -146,12 +151,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // finish();
             return;
         }
-//            mBluetoothAdapter.enable();
-            if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-                mBluetoothAdapter.enable();
-//                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
+        //            mBluetoothAdapter.enable();
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+            //                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            //                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
 
         initBanner();
         initButton();
@@ -178,6 +183,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         submitDialog.setIndeterminate(true);
         submitDialog.setCanceledOnTouchOutside(false);
         myHandler = new Handler();
+
+        wallpaperDialogView = new WallpaperDialogView(this);
+        wallpaperDialogView.setCanceledOnTouchOutside(false);
+        wallpaperDialogView.setCancelable(false);
+
+
     }
 
     @Override
@@ -250,11 +261,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             myName.setText(deviceName);
                             submitDialog.dismiss();
                             submitDialog.setMessage(MainActivity.this.getString(R.string.connecting));
-
+                            Log.d(TAG, "run: mainTest   // 开始询问设备是否处于更换壁纸模式（也就是蓝屏状态）");
+                            if (g_Character_TX == null) {
+                                g_Character_TX = mBluetoothLeService.getG_Character_TX();
+                            }
+                            isInWallPaperRequest();
                         }
-                    },500);
+                    }, 500);
 
                     break;
+                case BluetoothLeService.ACTION_SEND_PROGRESS:
+
+                    if(wallpaperDialogView.isShowing()){
+                        int sendProgress = intent.getIntExtra("sendProgress", 0);
+                        wallpaperDialogView.setProgress( sendProgress * 100 / 2304);
+                        if(sendProgress==2304){
+                            wallpaperDialogView.dismiss();
+                            mBluetoothLeService.setCanSendPicture(false);
+                        }
+                    }
+
+                break;
             }
         }
     };
@@ -267,6 +294,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(BluetoothLeService.ACTION_LANDING);
         intentFilter.addAction(BluetoothLeService.ACTION_LOGIN_FAILED);
         intentFilter.addAction(BluetoothLeService.ACTION_LAND_SUCCESS);
+        intentFilter.addAction(BluetoothLeService.ACTION_SEND_PROGRESS);
+
         return intentFilter;
     }
 
@@ -289,21 +318,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.d(TAG, "handlePasswordCallbacks:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
 
-        Log.d(TAG, "life: onStart: "+mBluetoothAdapter.isEnabled());
-        if (mBluetoothLeService != null  && mBluetoothAdapter != null&& lastAddress != null&& mBluetoothAdapter.isEnabled()) {
-            Log.d(TAG, "onResume:   state  "+mBluetoothLeService.getTheConnectedState());
-            if (mBluetoothLeService.getTheConnectedState() == 0  ) {
-                Log.d(TAG, "doScan:  onStart  -->   让后台去连接 "+mBluetoothAdapter);
+        Log.d(TAG, "life: onStart: " + mBluetoothAdapter.isEnabled());
+        if (mBluetoothLeService != null && mBluetoothAdapter != null && lastAddress != null && mBluetoothAdapter.isEnabled()) {
+            Log.d(TAG, "onResume:   state  " + mBluetoothLeService.getTheConnectedState());
+            if (mBluetoothLeService.getTheConnectedState() == 0) {
+                Log.d(TAG, "doScan:  onStart  -->   让后台去连接 " + mBluetoothAdapter);
                 mBluetoothLeService.setDisConnectByMyself(false);
                 mBluetoothLeService.serviceScan();
             }
         }
 
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        if(connectedDevice!=null){
+        if (connectedDevice != null) {
             String deviceName = connectedDevice.deviceName;
             myName.setText(deviceName);
         }
+
+
     }
 
 
@@ -363,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_reset:
                 g_Character_Baud_Rate = mBluetoothLeService.getG_Character_Baud_Rate();
-                if(g_Character_Baud_Rate!=null){
+                if (g_Character_Baud_Rate != null) {
                     Log.d(TAG, "g_Character_Baud_Rate:  波特率重置");
                     g_Character_Baud_Rate.setValue(intToBytes(5));
                     mBluetoothLeService.writeCharacteristic(g_Character_Baud_Rate);
@@ -514,6 +545,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     myModel.save();
                 }
                 break;
+            //询问是否蓝屏换壁纸模式
+            case 0x6C:
+                if (m_Data[5] == 0x16) {
+//                    Log.d(TAG, " wallpaper: " + BinaryToHexString(m_Data));
+                    if (m_Data[6] == 0x01) {
+                        //已经处于蓝屏换壁纸模式
+                        Log.d(TAG, "sendData: "+"    已经蓝屏  ");
+
+                        wallpaperDialogView.show();
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                super.run();
+
+                                pixelSp = getSharedPreferences("pixelData", Context.MODE_PRIVATE);
+                                String pixels = pixelSp.getString("pixels", null);
+
+                                 String[] split = pixels.split(",");
+
+                                 int count = sp.getInt("count", 0);
+                               /* for (int j = 0; j < 57600; j++) {
+
+//                                    Log.d(TAG, "pixelData:    " + String.valueOf(pixels) + "   length: " + split.length + "  count: " + count);
+                                    Log.d(TAG, "sendData: " + split.length + "  count: " + count+"    j:  "+j);
+                                    int getPixel = Integer.parseInt(split[j]);
+                                    int r1 = (getPixel & 0x00F80000) >> 8;
+                                    int g1 = (getPixel & 0x0000FC00) >> 5;
+                                    int b1 = (getPixel & 0x000000F8) >> 3;
+                                    int all = r1 | g1 | b1;
+                                    byte one = (byte) (all >> 8);
+                                    byte two = (byte) all;
+
+                                    int m_dataIndex = j * 2;
+
+                                    pixel_data[m_dataIndex + 1] = one;
+                                    pixel_data[m_dataIndex] = two;
+                                    if(j==57599){
+                                        Log.d(TAG, "sendData: "+"     "+mBluetoothLeService+"   count: "+count);
+                                        mBluetoothLeService.setPixel_data(pixel_data);
+                                        mBluetoothLeService.setCount(count);
+                                        mBluetoothLeService.sendData(count);
+                                    }
+                                }*/
+                                int myIndex = 0;
+                                for (int j = 0; j < 240; j++) {
+                                    for (int k = 0; k < 240; k++) {
+
+                                        int getPixel = Integer.parseInt(split[myIndex++]);
+                                        int r1 = (getPixel & 0x00F80000) >> 8;
+                                        int g1 = (getPixel & 0x0000FC00) >> 5;
+                                        int b1 = (getPixel & 0x000000F8) >> 3;
+                                        int all = r1 | g1 | b1;
+                                        byte one = (byte) (all >> 8);
+                                        byte two = (byte) all;
+
+                                        int index = j * 240 * 2 + k * 2;
+                                        pixel_data[index + 1] = one;
+                                        pixel_data[index] = two;
+
+                                        if(j==239&&k==239){
+                                            Log.d(TAG, "sendData: >>>>>>  "+myIndex+"  count: "+count+"  service: "+mBluetoothLeService+"    tx: "+mBluetoothLeService.getG_Character_TX());
+                                            myIndex=0;
+                                            mBluetoothLeService.setPixel_data(pixel_data);
+                                            mBluetoothLeService.setCount(count);
+                                            mBluetoothLeService.setCanSendPicture(true);
+                                            mBluetoothLeService.sendData(count);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }.start();
+
+                        //                        mBluetoothLeService.setCount(count);
+                        //                        mBluetoothLeService.sendData(count);
+                    }
+                }
+                break;
         }
     }
 
@@ -544,11 +653,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
         }
-//        if (requestCode == REQUEST_ENABLE_BT
-//                && resultCode == Activity.RESULT_CANCELED) {
-//            finish();
-//            return;
-//        }
+        //        if (requestCode == REQUEST_ENABLE_BT
+        //                && resultCode == Activity.RESULT_CANCELED) {
+        //            finish();
+        //            return;
+        //        }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -556,7 +665,128 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "handlePasswordCallbacks:---- onResume");
+        Log.d(TAG, "mainTest:---- onResume: " + mBluetoothLeService);
 
+    }
+
+    //询问设备是否处于更换壁纸模式
+    private void isInWallPaperRequest() {
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[2] = 0x04;
+        m_Data[3] = 0x01;
+        m_Data[4] = 0x6C;
+        m_Data[5] = 0x15;
+        m_Data[6] = 0x03;
+
+        m_Length = 7;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+
+    private void sendData(int num) {
+        sendData1(num);
+        sendData2(num);
+        sendData3(num);
+        sendData4(num);
+    }
+
+    private void sendData1(int num) {
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[21];
+        int m_Length = 0;
+        m_Data[0] = 0x55;
+        m_Data[1] = (byte) 0xFF;
+        m_Data[2] = 0x3B;
+        m_Data[3] = 0x01;
+        m_Data[4] = 0x6C;
+        m_Data[5] = 0x0F;
+
+        //    序号   M M
+        byte[] bytes1 = intToBytes2(num);
+        m_Data[6] = bytes1[1];
+        m_Data[7] = bytes1[2];
+        m_Data[8] = bytes1[3];
+
+        //    本次发送数据包的长度   P P
+        byte[] bytes = intToBytes(50);
+        m_Data[9] = bytes[0];
+        m_Data[10] = bytes[1];
+
+        //有效数据  V V
+        for (int i = 0; i < 9; i++) {
+            m_Data[11 + i] = pixel_data[i + num * 50];
+        }
+
+        //        Log.d(TAG, "sendData1:  "+BinaryToHexString(m_Data));
+        m_Length = 20;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+
+    }
+
+    private void sendData2(int num) {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        for (int i = 0; i < 20; i++) {
+            m_Data[i] = pixel_data[i + 9 + num * 50];
+        }
+        m_Length = 20;
+
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void sendData3(int num) {
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+        for (int i = 0; i < 20; i++) {
+            m_Data[i] = pixel_data[i + 29 + num * 50];
+        }
+        m_Length = 20;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void sendData4(int num) {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        byte[] m_Data = new byte[32];
+        int m_Length = 0;
+
+        m_Data[0] = pixel_data[num * 50 + 49];
+        int sum = 0;
+        for (int i = 0; i < 50; i++) {
+            int onByte = pixel_data[i + num * 50] & 0xFF;
+            sum += onByte;
+        }
+        //       校验数据---
+        Log.d(TAG, "sendData   out:  " + "   校验： " + sum);
+        byte yy = (byte) (sum & 0xFF);
+        m_Data[1] = yy;
+        m_Length = 2;
+        Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
     }
 }

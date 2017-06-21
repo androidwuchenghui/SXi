@@ -286,7 +286,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="0.2dp"/>
 
+            <LinearLayout
+                android:layout_marginTop="18dp"
+                android:id="@+id/line_set_wallpaper"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_marginLeft="12dp"
+                    android:layout_weight="1"
+                    android:id="@+id/set_wallpaper"
+                    android:text="@string/set_wallpaper"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:id="@+id/detail_c6"
+                    android:layout_marginRight="10dp"
+                    android:src="@mipmap/detail"
+                    android:padding="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
+            </LinearLayout>
+            <View
+                android:background="@color/colorGray"
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"/>
         </LinearLayout>
 
     </com.yihai.wu.widget.stretchscrollview.MyScrollView>

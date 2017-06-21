@@ -1897,7 +1897,7 @@ public class BezierActivity extends AppCompatActivity {
         }
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
     }
-
+//发送曲线数据
     private void sendCurveDataToDevice(byte function, byte[] data) {
         for (int i = 0; i < 4; i++) {
             byte[] bt = subBytes(data, i * 50, 50);

@@ -45,7 +45,7 @@
     <string name="double_kill">再按一次退出应用</string>
     <string name="Modifying">수정</string>
 
-    <string name="SXi_Q">SXi-Q</string>
+    <string name="SXi_Q">SXi</string>
     <string name="ID">ID</string>
 
     <string name="ble_not_supported">이버전을 지원하지 않습니다</string>
@@ -105,5 +105,6 @@
     <string name="set_TCR">사용자 온도설정</string>
     <string name="power_regulation">파워 모드</string>
     <string name="joule_regulation">쥴 모드</string>
-
+    <string name="set_wallpaper">wallpaper change</string>
+    <string name="choose_picture">Choose to switch wallpaper</string>
 </resources>

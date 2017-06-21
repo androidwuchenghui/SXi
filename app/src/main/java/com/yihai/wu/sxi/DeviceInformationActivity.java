@@ -244,7 +244,7 @@ public class DeviceInformationActivity extends BaseActivity {
 
     //获得产品名称
     private void getConnectedDeviceRealName() {
-        Log.d(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
+//        Log.d(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
         byte[] m_Data_GetDeviceName = new byte[32];
         //GetDeviceName
         int m_NameLength = 0;

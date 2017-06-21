@@ -45,7 +45,7 @@
     <string name="double_kill">再按一次退出应用</string>
     <string name="Modifying">更新中</string>
 
-    <string name="SXi_Q">SXi-Q</string>
+    <string name="SXi_Q">SXi</string>
     <string name="ID">ID</string>
 
     <string name="ble_not_supported">サポート対象外</string>
@@ -105,5 +105,6 @@
     <string name="set_TCR">TCR設定</string>
     <string name="power_regulation">パワー調節</string>
     <string name="joule_regulation">ジュール調節</string>
-
+    <string name="set_wallpaper">wallpaper change</string>
+    <string name="choose_picture">Choose to switch wallpaper</string>
 </resources>
