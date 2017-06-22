@@ -47,6 +47,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.Sys_BCD_To_HEX;
+import static com.yihai.wu.util.MyUtils.byteMerger;
+import static com.yihai.wu.util.MyUtils.hexStringToString;
 import static com.yihai.wu.util.MyUtils.intToBytes;
 import static com.yihai.wu.util.MyUtils.intToBytes2;
 
@@ -532,7 +535,10 @@ public class BluetoothLeService extends Service {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         return intentFilter;
     }
-
+    /****************************************接受广播***********************************************************/
+    private boolean wait = false;
+    private byte[] merger_bytes;
+    private boolean get_software_version = false;
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -546,6 +552,28 @@ public class BluetoothLeService extends Service {
                     if(canSendPicture) {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
+
+                    int counts = 0;
+                    if (data.length > 3) {
+                        counts = (data[2] & 0xff) + 3;
+                    }
+
+                    if (wait) {
+                        merger_bytes = byteMerger(merger_bytes, data);
+                        Sys_YiHi_Protocol_RX_Porc_Do(merger_bytes);
+                        merger_bytes = null;
+                        wait = false;
+                    }
+
+                    if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts <= 20) {
+
+                        Sys_YiHi_Protocol_RX_Porc_Do(data);
+
+                    } else if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts > 20) {
+                        merger_bytes = data;
+                        wait = true;
+                    }
+
                     break;
             }
         }
@@ -1037,6 +1065,8 @@ public class BluetoothLeService extends Service {
             theDevice.save();
             //发出登陆成功的广播
             broadcastUpdate(ACTION_LAND_SUCCESS);
+
+            getConnectedDeviceRealName();
         }
 
     }
@@ -1058,6 +1088,8 @@ public class BluetoothLeService extends Service {
                         broadcastUpdate(ACTION_LAND_SUCCESS);
                         devices.isConnected = true;
                         devices.save();
+
+                        getConnectedDeviceRealName();
                         break;
                     }
 
@@ -1376,5 +1408,195 @@ public class BluetoothLeService extends Service {
                 pool.execute(sendPixelThread);
                 break;
         }
+    }
+
+
+    //TX传值
+    //获得产品名称
+    private void getConnectedDeviceRealName() {
+        Log.d(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
+        byte[] m_Data_GetDeviceName = new byte[32];
+        //GetDeviceName
+        int m_NameLength = 0;
+        m_Data_GetDeviceName[0] = 0x55;
+        m_Data_GetDeviceName[1] = (byte) 0xFF;
+        m_Data_GetDeviceName[3] = 0x01; //Device ID
+        m_Data_GetDeviceName[2] = 0x02;
+        m_Data_GetDeviceName[4] = 0x01;
+        m_NameLength = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_GetDeviceName, m_NameLength);
+
+    }
+
+    //对返回的byte[]进行处理
+    private void
+    Sys_YiHi_Protocol_RX_Porc_Do(byte[] m_Data) {
+        int m_Length = 0;
+        int i;
+        int m_Index = 0xfe;
+        byte m_ValidData_Length = 0;
+        byte m_Command;
+        int m_iTemp_x10, m_iTemp_x1;
+        m_Length = m_Data.length;
+        if (m_Length < 5) {
+            return;
+        }
+        //Get sync code.
+        for (i = 0; i < m_Length; i++) {
+            //if (i<16)
+            //{
+            //	if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---Data["+i+"]="+m_Data[i]);
+            //}
+            //if ((m_Data[i]==0x55)&&(m_Data[(i+1)]==0xFF))
+            if (((m_Data[i] == 85) || (m_Data[i] == 0x55))
+                    && ((m_Data[(i + 1)] == -1) || (m_Data[(i + 1)] == 0xFF)
+                    || (m_Data[(i + 1)] == -3) || (m_Data[i + 1] == 0xFD))) {
+                //if (g_b_Use_DEBUG) Log.i(LJB_TAG,"RX proc---i="+i);
+                m_Index = i;
+                //i=m_Length;
+                break;
+            }
+
+        }
+        if (m_Index == 0xfe) {
+            return;
+        }
+        if (m_Index > (m_Length - 2)) {
+            return;
+        }
+        //Get valid data length.
+        m_ValidData_Length = m_Data[(m_Index + 2)];
+        if ((m_Index + m_ValidData_Length) > m_Length) {
+            return;
+        }
+        //Get command code.
+        m_Command = m_Data[(m_Index + 4)];
+
+        switch (m_Command) {
+            case 0x02:
+                String s = BinaryToHexString(m_Data);
+                //                Log.d(TAG, "scanReceive: " + s + "   data_length " + m_Data.length);
+                String usefulData = s.substring(10, m_Data.length * 2);
+                String realName = hexStringToString(usefulData);
+                ConnectedBleDevices connectedBleDevice = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+                connectedBleDevice.realName = realName;
+                connectedBleDevice.save();
+                //                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: name:  " + s + "  r: " + realName);
+                //                mHandler.postDelayed(new Runnable() {
+                //                    @Override
+                //                    public void run() {
+                getConnectedDeviceID();
+
+                //                    }
+                //                }, 50);
+                break;
+            case 0x04:
+
+                String AckDevice_ID = BinaryToHexString(m_Data);
+                String AckDevice_ID_Behind = AckDevice_ID.substring(10, m_Data.length * 2);
+                String realID = hexStringToString(AckDevice_ID_Behind);
+                //                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: id:   " + AckDevice_ID + "  r: " + realID);
+                ConnectedBleDevices deviceID = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+                deviceID.deviceID = realID;
+                deviceID.save();
+
+                //                mHandler.postDelayed(new Runnable() {
+                //                    @Override
+                //                    public void run() {
+                getConnectedDeviceProtocol_Version();
+                //                    }
+                //                }, 50);
+                break;
+
+            case 0x13:
+
+                int g_PowerValue_x10 = Sys_BCD_To_HEX(m_Data[(m_Index + 5)]);
+                int g_PowerValue_x1 = Sys_BCD_To_HEX(m_Data[(m_Index + 6)]);
+                String Protocol_Vision = BinaryToHexString(m_Data);
+                String Protocol_Vision_Behind = Protocol_Vision.substring(10, m_Data.length * 2);
+                String realVsion = hexStringToString(Protocol_Vision_Behind);
+                //                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: x10: "+g_PowerValue_x10+"  x1:  "+g_PowerValue_x1);
+                //                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc:   Protocol:  " + Protocol_Vision + "  b: " + Protocol_Vision_Behind + "   r:  " + realVsion);
+                //                mHandler.postDelayed(new Runnable() {
+                //                    @Override
+                //                    public void run() {
+
+                //                ConnectedBleDevices connectedDevice_sv = ConnectedBleDevices.getConnectedDevice();
+                //                connectedDevice_sv.softVision = realVsion;
+                //                connectedDevice_sv.save();
+                //    ---询问主机支持哪些功能
+                //                getConnectedDeviceCapability();
+                get_software_version = true;
+                getConnectedDeviceSoftVision();
+
+                //                    }
+                //                }, 50);
+                break;
+          /*  case C_SXi_CR_AckDevCapability:
+                String Protocol_Capability = BinaryToHexString(m_Data);
+                byte b = m_Data[m_Index + 6];
+                //转成2进制
+                String tString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
+                char c = tString.charAt(1);
+                Log.d(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "   ");
+//                if (tString.substring(1, 2).equals(1 + "")) {
+
+                //  获得芯片版本
+                    getConnectedDeviceSoftVision();
+                    get_software_version = true;
+//                }
+                break;*/
+            case 0x42:
+
+                String back_Software = BinaryToHexString(m_Data).toString();
+                String SoftwareData = back_Software.substring(10);
+                String Software_Version = hexStringToString(SoftwareData);
+
+                ConnectedBleDevices deviceSoftVision = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
+                deviceSoftVision.softVision = Software_Version;
+                deviceSoftVision.isConnected = true;
+                deviceSoftVision.lastConnect = true;
+                deviceSoftVision.save();
+                get_software_version = false;
+                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " );
+                break;
+        }
+    }
+    //获得id
+    private void getConnectedDeviceID() {
+        byte[] m_Data_GetDeviceID = new byte[32];
+        int m_IDLength = 0;
+        m_Data_GetDeviceID[0] = 0x55;
+        m_Data_GetDeviceID[1] = (byte) 0xFF;
+        m_Data_GetDeviceID[3] = 0x01; //Device ID
+        m_Data_GetDeviceID[2] = 0x02;
+        m_Data_GetDeviceID[4] = 0x03;
+        m_IDLength = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_GetDeviceID, m_IDLength);
+    }
+
+    //获得SXi版本
+    private void getConnectedDeviceProtocol_Version() {
+        byte[] m_Data_GetProtocol_Version = new byte[32];
+        int m_VersionLength = 0;
+        m_Data_GetProtocol_Version[0] = 0x55;
+        m_Data_GetProtocol_Version[1] = (byte) 0xFF;
+        m_Data_GetProtocol_Version[3] = 0x01; //Device ID
+        m_Data_GetProtocol_Version[2] = 0x02;
+        m_Data_GetProtocol_Version[4] = 0x12;
+        m_VersionLength = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_GetProtocol_Version, m_VersionLength);
+    }
+
+    private void getConnectedDeviceSoftVision() {
+        byte[] m_Data_GetDevSoftVision = new byte[32];
+        int m_SoftVision = 0;
+        m_Data_GetDevSoftVision[0] = 0x55;
+        m_Data_GetDevSoftVision[1] = (byte) 0xFF;
+        m_Data_GetDevSoftVision[3] = 0x01; //Device ID
+        m_Data_GetDevSoftVision[2] = 0x02;
+        m_Data_GetDevSoftVision[4] = 0x41;
+        m_SoftVision = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_GetDevSoftVision, m_SoftVision);
     }
 }

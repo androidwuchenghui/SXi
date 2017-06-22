@@ -1,6 +1,5 @@
 package com.yihai.wu.sxi;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,11 +27,6 @@ public class CropActivity extends AppCompatActivity implements View.OnClickListe
     private static final String KEY = "path";
     private ClipImageLayout mClipImageLayout = null;
 
-    public static void startActivity(Activity activity, String path, int code) {
-        Intent intent = new Intent(activity, CropActivity.class);
-        intent.putExtra(KEY, path);
-        activity.startActivityForResult(intent, code);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

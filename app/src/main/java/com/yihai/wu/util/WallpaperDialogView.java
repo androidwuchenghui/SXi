@@ -20,7 +20,7 @@ public class WallpaperDialogView extends Dialog {
 //    private static SquareProgressBar spBar;
 private CircleProgressBar mCircleProgressBar;
     public WallpaperDialogView(Context context) {
-        super(context);
+        super(context,R.style.CustomDialogStyle);
         this.context = context;
     }
 
@@ -32,6 +32,7 @@ private CircleProgressBar mCircleProgressBar;
     protected WallpaperDialogView(Context context, boolean cancelable, OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
         this.context = context;
+
     }
 
     @Override

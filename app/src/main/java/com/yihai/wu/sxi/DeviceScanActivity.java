@@ -41,9 +41,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.yihai.wu.util.MyUtils.BinaryToHexString;
-import static com.yihai.wu.util.MyUtils.byteMerger;
-import static com.yihai.wu.util.MyUtils.hexStringToString;
 import static com.yihai.wu.util.MyUtils.isGpsEnable;
 
 /**
@@ -232,7 +229,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     if (data.length > 3) {
                         counts = (data[2] & 0xff) + 3;
                     }
-
+/*
                     if (wait) {
                         merger_bytes = byteMerger(merger_bytes, data);
                         Sys_YiHi_Protocol_RX_Porc(merger_bytes);
@@ -247,7 +244,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     } else if (data[0] == (byte) 0x55 && data[1] == (byte) 0xFF && counts > 20) {
                         merger_bytes = data;
                         wait = true;
-                    }
+                    }*/
 
                     //                    if(get_software_version){
                     //                        if(software_Version==null) {
@@ -283,7 +280,21 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                         connectedBleDevice.deviceAddress = mDeviceAddress;
                         connectedBleDevice.save();
                     }
-                    getConnectedDeviceRealName();
+
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (LandDialog.isShowing()) {
+                                LandDialog.dismiss();
+                            }
+                            //                        Log.d(TAG, "connectedState :" + mBluetoothLeService.getTheConnectedState());
+                            DeviceScanActivity.this.finish();
+                            overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+                        }
+                    }, 800);
+
+//                    getConnectedDeviceRealName();
                     break;
                 case BluetoothLeService.ACTION_LOGIN_FAILED:
 
@@ -759,7 +770,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         //Get command code.
         m_Command = m_Data[(m_Index + 4)];
 
-        switch (m_Command) {
+       /* switch (m_Command) {
             case C_SXi_CR_AskDeviceName:
                 String s = BinaryToHexString(m_Data);
 //                Log.d(TAG, "scanReceive: " + s + "   data_length " + m_Data.length);
@@ -819,7 +830,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                 //                    }
                 //                }, 50);
                 break;
-          /*  case C_SXi_CR_AckDevCapability:
+          *//*  case C_SXi_CR_AckDevCapability:
                 String Protocol_Capability = BinaryToHexString(m_Data);
                 byte b = m_Data[m_Index + 6];
                 //转成2进制
@@ -832,7 +843,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     getConnectedDeviceSoftVision();
                     get_software_version = true;
 //                }
-                break;*/
+                break;*//*
             case C_SXi_CR_AckUserSoftware_Version:
 
                 String back_Software = BinaryToHexString(m_Data).toString();
@@ -856,17 +867,9 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
                     }
                 }, 600);
                 break;
-        }
+        }*/
     }
 
-    private byte Sys_BCD_To_HEX(byte m_BCD) {
-        byte m_Return;
-        byte m_Temp;
-        m_Return = (byte) ((m_BCD / 16) * 10);
-        m_Temp = (byte) (m_BCD & 0x0F);
-        //m_Return+=(byte)(m_BCD%10);
-        m_Return += (byte) (m_Temp % 10);
-        return m_Return;
-    }
+
 
 }

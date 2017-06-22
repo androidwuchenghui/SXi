@@ -18,7 +18,7 @@
     <string name="reset_success">重置成功</string>
     <string name="searching">搜索中...</string>
     <string name="connecting">连接中...</string>
-    <string name="Modifying">修改中</string>
+    <string name="Modifying">修改中...</string>
     <string name="connect_successfully">连接成功</string>
     <string name="submit_password">提交密码</string>
     <string name="submit_password_success"> 密码提交成功</string>

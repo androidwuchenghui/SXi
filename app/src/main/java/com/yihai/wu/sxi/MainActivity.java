@@ -160,10 +160,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initBanner();
         initButton();
-
+        //android 6.0 权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //            Log.d(TAG, "permission6.0:   " + this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) + " -  " + PackageManager.PERMISSION_GRANTED);
-            //            Log.d(TAG, "permission6.0: FINE_LOCATION : " + this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) + "    -   " + PackageManager.PERMISSION_GRANTED);
 
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
@@ -173,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }
+        //绑定服务
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         submitDialog = new ProgressDialog(MainActivity.this);
@@ -188,7 +187,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         wallpaperDialogView.setCanceledOnTouchOutside(false);
         wallpaperDialogView.setCancelable(false);
 
-
+//        wallpaperDialogView.show();
+//        wallpaperDialogView.setProgress(80);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.yihai.wu.sxi;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.BroadcastReceiver;
@@ -9,10 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -70,6 +73,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
     private static final int IMAGE = 1;
     private static final int CROP_IMAGE = 2;
     public static final String TMP_PATH = "clip_temp.jpg";
+    private static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 0x05;
 
     PowerManager powerManager = null;
     PowerManager.WakeLock wakeLock = null;
@@ -117,6 +121,25 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
 
         powerManager = (PowerManager)this.getSystemService(this.POWER_SERVICE);
         wakeLock = this.powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Lock");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        Log.d(TAG, "onRequestPermissionsResult: "+requestCode+"   grantResults: "+grantResults);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+        }else {
+            finish();
+        }
+        return;
     }
 
     private IntentFilter makeBroadcastFilter() {
@@ -875,18 +898,12 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             c.moveToFirst();
             int columnIndex = c.getColumnIndex(filePathColumns[0]);
             String imagePath = c.getString(columnIndex);
-
+            c.close();
             Log.d(TAG, "onActivityResult: "+imagePath);
             Intent myCropIntent = new Intent(SetWallpaperActivity.this,CropActivity.class);
             myCropIntent.putExtra("path",imagePath);
             startActivityForResult(myCropIntent, CROP_IMAGE);
 
-//            Intent pickIntent = new Intent(Intent.ACTION_PICK, null);
-//            // 如果限制上传到服务器的图片类型时可以直接写如："image/jpeg 、 image/png等的类型"
-//            pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-//            startActivityForResult(pickIntent, CROP_IMAGE);
-//            showImage(imagePath);
-            c.close();
         }else if(requestCode == CROP_IMAGE && resultCode == Activity.RESULT_OK && data != null){
             String path = data.getStringExtra(CropActivity.RESULT_PATH);
             Bitmap photo = BitmapFactory.decodeFile(path);

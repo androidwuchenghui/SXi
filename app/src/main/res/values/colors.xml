@@ -13,5 +13,6 @@
     <color name="gray">#82947243</color>
     <color name="temperOrange">#f27d50</color>
     <color name="jouleGreen">#48f487</color>
+    <color name="red">#ff0000</color>
 
 </resources>

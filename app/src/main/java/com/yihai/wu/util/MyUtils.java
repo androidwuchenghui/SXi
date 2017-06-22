@@ -217,6 +217,15 @@ public class MyUtils {
         return s;
     }
 
+    public static byte Sys_BCD_To_HEX(byte m_BCD) {
+        byte m_Return;
+        byte m_Temp;
+        m_Return = (byte) ((m_BCD / 16) * 10);
+        m_Temp = (byte) (m_BCD & 0x0F);
+        //m_Return+=(byte)(m_BCD%10);
+        m_Return += (byte) (m_Temp % 10);
+        return m_Return;
+    }
 }
 
 

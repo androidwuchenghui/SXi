@@ -55,5 +55,6 @@ dependencies {
     compile project(':takephoto_library')
     //    compile 'ch.halcyon:squareprogressbar:1.6.1'
     compile 'com.dinuscxj:circleprogressbar:1.1.1'
-
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 }
