@@ -43,7 +43,7 @@
             android:layout_weight="1"
             android:padding="6dp"
             android:textColor="@color/colorPrimaryDark"
-            android:text="选择壁纸序号:"
+            android:text="@string/Index_of_Wallpaper"
             android:textSize="16sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

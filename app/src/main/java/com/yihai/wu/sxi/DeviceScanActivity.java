@@ -476,7 +476,7 @@ public class DeviceScanActivity extends BaseActivity implements View.OnClickList
         mDeviceAddress = device.getAddress();
         mDeviceName = device.getName();
         mBluetoothLeService.setmDeviceName(mDeviceName);
-        Log.d(TAG, "onItemClick: " + "address: " + mDeviceAddress + "  service：  " + mBluetoothLeService);
+//        Log.d(TAG, "onItemClick: " + "address: " + mDeviceAddress + "  service：  " + mBluetoothLeService);
         //点击了一个想要连接的设备
 
         mBluetoothLeService.connect(mDeviceAddress);

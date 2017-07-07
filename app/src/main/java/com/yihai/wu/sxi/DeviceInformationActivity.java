@@ -69,7 +69,9 @@ public class DeviceInformationActivity extends BaseActivity {
         String versionName = getVersionName(this);
         Intent getIntent = getIntent();
         int state = getIntent.getIntExtra("connectState", 0);
-        visionName.setText(versionName);
+//        visionName.setText(versionName);
+        visionName.setText("1.56.9");
+
         if (state == 2) {
             connectState.setText(R.string.connected);
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
@@ -155,7 +157,7 @@ public class DeviceInformationActivity extends BaseActivity {
 
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 connectState.setText(R.string.connected);
-                getConnectedDeviceRealName();
+//                getConnectedDeviceRealName();
             }
             //            g_Character_TX = mBluetoothLeService.getG_Character_TX();
             //            g_Character_DeviceName = mBluetoothLeService.getG_Character_DeviceName();

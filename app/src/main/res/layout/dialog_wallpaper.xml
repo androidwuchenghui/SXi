@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/blueSky"
 
-        android:text="@string/Modifying"/>
+        android:text="@string/downloading"/>
     <!--<LinearLayout
         android:id="@+id/percent_line"
         android:orientation="horizontal"

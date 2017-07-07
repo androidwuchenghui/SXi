@@ -105,7 +105,10 @@
     <string name="power_regulation">POWER</string>
     <string name="joule_regulation">JOULE</string>
     <string name="close_the_tip">close</string>
-    <string name="set_wallpaper">wallpaper change</string>
 
-    <string name="choose_picture">Choose to switch wallpaper</string>
+
+    <string name="set_wallpaper">Wallpaper</string>
+    <string name="choose_picture">choose a new wallpaper</string>
+    <string name="Index_of_Wallpaper">Index of Wallpaper</string>
+    <string name="downloading">Downloading</string>
 </resources>

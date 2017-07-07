@@ -105,6 +105,8 @@
     <string name="set_TCR">사용자 온도설정</string>
     <string name="power_regulation">파워 모드</string>
     <string name="joule_regulation">쥴 모드</string>
-    <string name="set_wallpaper">wallpaper change</string>
-    <string name="choose_picture">Choose to switch wallpaper</string>
+    <string name="set_wallpaper">Wallpaper</string>
+    <string name="choose_picture">choose a new wallpaper</string>
+    <string name="Index_of_Wallpaper">Index of Wallpaper</string>
+    <string name="downloading">Downloading</string>
 </resources>

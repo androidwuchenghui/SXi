@@ -108,6 +108,8 @@
     <string name="power_regulation">功率调节</string>
     <string name="joule_regulation">焦耳调节</string>
 
-    <string name="set_wallpaper">设置壁纸</string>
-    <string name="choose_picture">选择图片切换壁纸</string>
+    <string name="set_wallpaper">壁纸</string>
+    <string name="choose_picture">选取新的墙纸</string>
+    <string name="Index_of_Wallpaper">墙纸序号</string>
+    <string name="downloading">下载中</string>
 </resources>

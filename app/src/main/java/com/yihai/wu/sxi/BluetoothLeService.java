@@ -47,6 +47,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
+import static com.yihai.wu.util.MyUtils.HexToInt;
 import static com.yihai.wu.util.MyUtils.Sys_BCD_To_HEX;
 import static com.yihai.wu.util.MyUtils.byteMerger;
 import static com.yihai.wu.util.MyUtils.hexStringToString;
@@ -1493,9 +1494,11 @@ public class BluetoothLeService extends Service {
             case 0x04:
 
                 String AckDevice_ID = BinaryToHexString(m_Data);
-                String AckDevice_ID_Behind = AckDevice_ID.substring(10, m_Data.length * 2);
+                String count = AckDevice_ID.substring(4, 6);
+                int i1 = HexToInt(count);
+                String AckDevice_ID_Behind = AckDevice_ID.substring(10);
                 String realID = hexStringToString(AckDevice_ID_Behind);
-                //                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: id:   " + AckDevice_ID + "  r: " + realID);
+                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: id:    "+count+" int:   "+i1 +"  behind: "+AckDevice_ID_Behind+"   "+ AckDevice_ID + "  r: " + realID+"   length: "+m_Data.length);
                 ConnectedBleDevices deviceID = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
                 deviceID.deviceID = realID;
                 deviceID.save();
@@ -1559,6 +1562,7 @@ public class BluetoothLeService extends Service {
                 deviceSoftVision.save();
                 get_software_version = false;
                 Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " );
+
                 break;
         }
     }

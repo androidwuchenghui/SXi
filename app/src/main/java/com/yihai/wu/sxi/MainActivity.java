@@ -530,10 +530,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 String s = BinaryToHexString(m_Data);
                 String substring = s.substring(12);
+//                Log.d(TAG, "receiveSetting:    s: "+s+"   sub :  "+substring);
+//                int model = Integer.parseInt(substring);
+                String selectedModel = null;
+                switch (substring){
+                    case "00":
+                        selectedModel = "C1";
+                        break;
+                    case "01":
+                         selectedModel = "C2";
+                        break;
+                    case "02":
+                         selectedModel = "C3";
+                        break;
+                    case "03":
+                         selectedModel = "C4";
+                        break;
+                    case "04":
+                         selectedModel = "C5";
+                        break;
+                }
 
-                int model = Integer.parseInt(substring);
-                String selectedModel = "C" + (model + 1);
-                Log.d(TAG, "receiveSetting:     " + s + "    " + substring + "   m:  " + model + "   " + selectedModel);
+//                Log.d(TAG, "receiveSetting:     " + s + "    " + substring + "   m:  "  + "   " + selectedModel);
 
                 List<MyModel> allMyModel = MyModel.getAllMyModel();
                 for (MyModel myModel : allMyModel) {
