@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.activeandroid.query.Delete;
 import com.yihai.wu.appcontext.ConnectedBleDevices;
 import com.yihai.wu.appcontext.MyModel;
+import com.yihai.wu.entity.BannerEntity;
 import com.yihai.wu.util.DarkImageButton;
 import com.yihai.wu.util.GlideImageLoader;
 import com.yihai.wu.util.WallpaperDialogView;
@@ -43,6 +44,11 @@ import com.youth.banner.listener.OnBannerClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.yihai.wu.appcontext.MyApplication.mRetrofitService;
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.intToBytes;
 import static com.yihai.wu.util.MyUtils.intToBytes2;
@@ -117,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private WallpaperDialogView wallpaperDialogView;
 
 
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        initBanner();
+
         initButton();
         //android 6.0 权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -188,7 +195,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         wallpaperDialogView.setCancelable(false);
 
 //        wallpaperDialogView.show();
-//        wallpaperDialogView.setProgress(80);
+//        walpaperDialogView.setProgress(80);
+
+        Call<BannerEntity> bannerImages = mRetrofitService.getBannerImages();
+        bannerImages.enqueue(new Callback<BannerEntity>() {
+            @Override
+            public void onResponse(Call<BannerEntity> call, Response<BannerEntity> response) {
+                List<BannerEntity.ImagesUrlBean> images_url = response.body().getImages_url();
+                Log.d(TAG, "onResponse:   下载成功  "+images_url.size());
+                List<String> banner_images = new ArrayList<String>();
+                for (BannerEntity.ImagesUrlBean imagesUrlBean : images_url) {
+//                    Log.d(TAG, "onResponse: "+imagesUrlBean.getLink());
+                    banner_images.add(imagesUrlBean.getLink());
+                }
+                initBanner(banner_images);
+
+            }
+
+            @Override
+            public void onFailure(Call<BannerEntity> call, Throwable t) {
+                Log.d(TAG, "onFailure: "+"  下载失败  ");
+                List images_list = new ArrayList();
+                for (Integer image : images) {
+                    images_list.add(image);
+                }
+                initBanner(images_list);
+            }
+        });
+
     }
 
     @Override
@@ -216,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s + "  byte: " + data);
+                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s + "   ");
                     Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
@@ -354,20 +388,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void initBanner() {
+    private void initBanner(List<String> images_list) {
         Banner banner = (Banner) findViewById(R.id.head_banner);
         banner.setImageLoader(new GlideImageLoader());
-        List images_list = new ArrayList();
-        for (Integer image : images) {
-            images_list.add(image);
-        }
+
         banner.setImages(images_list);
         banner.setIndicatorGravity(BannerConfig.CENTER);
         banner.start();
         banner.setOnBannerClickListener(new OnBannerClickListener() {
             @Override
             public void OnBannerClick(int position) {
-                Log.d(TAG, "OnBannerClick: " + position); //position 从1开始
+//                Log.d(TAG, "OnBannerClick: " + position); //position 从1开始
                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                 startActivity(intent);
             }
@@ -402,7 +433,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.btn_upgrade:
-                //                throw new RuntimeException("Check Crashlytics Unhandled exceptions are working");
+                goToUpgradeMode();
+
+//                getAddrRange();
 
                 break;
         }
@@ -806,5 +839,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_Data[1] = yy;
         m_Length = 2;
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
+    }
+
+    private void getAddrRange(){
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[2] = 0x02;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[4] = 0x39;
+
+        m_Length = 5;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
+    }
+
+    private void goToUpgradeMode(){
+        byte[] m_Data_DeviceSetting = new byte[32];
+        int m_Length = 0;
+        m_Data_DeviceSetting[0] = 0x55;
+        m_Data_DeviceSetting[1] = (byte) 0xFF;
+        m_Data_DeviceSetting[2] = 0x06;
+        m_Data_DeviceSetting[3] = 0x01; //Device ID
+        m_Data_DeviceSetting[4] = 0x14;
+        m_Data_DeviceSetting[5] = 0x01;
+        m_Data_DeviceSetting[6] = 0x00;
+        m_Data_DeviceSetting[7] = 0x00;
+        m_Data_DeviceSetting[8] = 0x00;
+
+        m_Length = 9;
+        Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
     }
 }

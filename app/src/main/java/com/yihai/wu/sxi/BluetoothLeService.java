@@ -375,7 +375,7 @@ public class BluetoothLeService extends Service {
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
-            //            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
+                        Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
             if (characteristic.getUuid().equals(g_UUID_Charater_Password_C2)) {
                 //                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
 
@@ -409,7 +409,7 @@ public class BluetoothLeService extends Service {
 
             } else if (characteristic.getUuid().equals(g_UUID_Charater_ReadData)) {
 
-                Log.d(TAG, "onCharacteristicChanged:  RX" + BinaryToHexString(characteristic.getValue()));
+                Log.d(TAG, "onCharacteristicChanged:  RX    " + BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
 //                if (canSendPicture) {
 //                    byte[] value = characteristic.getValue();
