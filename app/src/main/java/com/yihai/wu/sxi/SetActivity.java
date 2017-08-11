@@ -31,8 +31,6 @@ import java.util.List;
 import static android.view.View.VISIBLE;
 import static com.yihai.wu.util.MyUtils.BinaryToHexString;
 import static com.yihai.wu.util.MyUtils.byteMerger;
-import static com.yihai.wu.util.MyUtils.bytes2Int;
-import static com.yihai.wu.util.MyUtils.bytesToInt;
 import static com.yihai.wu.util.MyUtils.intToBytes;
 import static java.lang.Character.getNumericValue;
 
@@ -82,6 +80,7 @@ public class SetActivity extends AppCompatActivity {
     private boolean getInit = false;
     private Handler handler;
     private boolean supportPreview = false;
+    private int mb4;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -439,7 +438,7 @@ public class SetActivity extends AppCompatActivity {
                     }
                     select_control("C1");
                     toDetail.putExtra("detail", "C1");
-
+                    toDetail.putExtra("mb4",mb4);
                     startActivity(toDetail);
                     break;
                 case R.id.detail_c2:
@@ -701,6 +700,7 @@ public class SetActivity extends AppCompatActivity {
         m_Command = m_Data[(m_Index + 4)];
 
         switch (m_Command) {
+            //   处理 AckDevCapability 返回的信息
             case 0x19:
                 String Protocol_Capability = BinaryToHexString(m_Data);
                 byte b = m_Data[m_Index + 6];
@@ -708,23 +708,36 @@ public class SetActivity extends AppCompatActivity {
                 String tString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
 
                 int num = getNumericValue(tString.charAt(5));
+                mb4 = getNumericValue(tString.charAt(4));
                 Log.d(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num);
+
                 if (num != 1) {
                     line_set_wallpaper.setVisibility(View.GONE);
-
                 } else {
                     line_set_wallpaper.setVisibility(VISIBLE);
                     getWallpaperInfo();
                     needMerge = true;
                 }
+                if(mb4 ==1){
+                    select_control("C1");
+//                    setEnable(tv_c2,detail_c2);
+//                    setEnable(tv_c3,detail_c3);
+//                    setEnable(tv_c4,detail_c4);
+//                    setEnable(tv_c5,detail_c5);
+                    line_c2.setVisibility(View.GONE);
+                    line_c3.setVisibility(View.GONE);
+                    line_c4.setVisibility(View.GONE);
+                    line_c5.setVisibility(View.GONE);
+                }
+
                 break;
 
             case (byte) 0x6C:
                 if (m_Data[5] == 0x02) {
-                    Log.d(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
-                    Log.d(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
-                    Log.d(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
-                    Log.d(TAG, "wallpaper:   最小地址 KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
+//                    Log.d(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
+//                    Log.d(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
+//                    Log.d(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
+//                    Log.d(TAG, "wallpaper:   最小地址    KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
                     byte b1 = m_Data[12];
                     String substring = Integer.toBinaryString((b1 & 0xFF) + 0x100).substring(1);
 
@@ -734,9 +747,9 @@ public class SetActivity extends AppCompatActivity {
                     char c3 = substring.charAt(3);
                     char c4 = substring.charAt(4);
                     char c5 = substring.charAt(5);
-                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
+//                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
                     int numericValue = getNumericValue((int) c5);
-                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
+//                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
                     if(numericValue==1){
                         supportPreview = true;
                     }else {
@@ -760,6 +773,13 @@ public class SetActivity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    private void setEnable(TextView tv,ImageView iv) {
+
+        tv.setTextColor(getResources().getColor(R.color.colorGray));
+        tv.setClickable(false);
+        iv.setClickable(false);
     }
 
     private void toshowWheel() {

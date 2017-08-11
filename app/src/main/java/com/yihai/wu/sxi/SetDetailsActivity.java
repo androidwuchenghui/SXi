@@ -145,6 +145,9 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     LinearLayout maiLinearLayout;
     @Bind(R.id.myName)
     TextView myName;
+    @Bind(R.id.display_mode)
+    TextView displayMode;
+
     private static final String TAG = "SetDetailsActivity";
     private boolean isCentigrade = true;
     private String detail;
@@ -216,7 +219,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive:ssss "+s);
+                    Log.d(TAG, "onReceive:ssss " + s);
                     if (TAG == "SetDetailsActivity" && sendData) {
                         Log.d(TAG, "receiveInfo: " + s);
                         if (mergerData) {
@@ -336,6 +339,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         sendData = false;
         Intent intent = getIntent();
         detail = intent.getStringExtra("detail");
+        int mb4 = intent.getIntExtra("mb4", 0);
         MyModel myModelForGivenName = MyModel.getMyModelForGivenName(detail);
 
         modelName.setText(myModelForGivenName.showName);
@@ -348,7 +352,15 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         int display = myModel.display;
         Log.d("log", "initUI:取得数据 " + display);
         RadioButton display_rbt = (RadioButton) rgDisplayStatus.getChildAt(display);
-        display_rbt.setChecked(true);
+        if (mb4 == 1) {
+            displayMode.setTextColor(getResources().getColor(R.color.colorGray));
+            disableRadioGroup(rgDisplayStatus);
+            rgDisplayStatus.setVisibility(View.GONE);
+            displayMode.setVisibility(View.GONE);
+        } else {
+            display_rbt.setChecked(true);
+        }
+
         //材料
         int material = myModel.coilSelect;
 
@@ -444,12 +456,12 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
         int progress;
         if (textured == 0) {
-            progress=power-eco_range_power_min;
+            progress = power - eco_range_power_min;
             seekBarSetPower.setMax(eco_range_power_max - eco_range_power_min);
             if (power < eco_range_power_min) {
-                progress = eco_range_power_min-eco_range_power_min;
+                progress = eco_range_power_min - eco_range_power_min;
             } else if (power > eco_range_power_max) {
-                progress = eco_range_power_max-eco_range_power_min;
+                progress = eco_range_power_max - eco_range_power_min;
             }
             miniSkPj.setText(eco_range_power_min / 10 + ".0");
             maxSkPj.setText(eco_range_power_max / 10 + ".0");
@@ -471,19 +483,19 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
         int joule_progress;
         if (textured == 0) {
-            joule_progress= joule - eco_range_joule_min;
+            joule_progress = joule - eco_range_joule_min;
             seekBarSetJoule.setMax(eco_range_joule_max - eco_range_joule_min);
             if (joule < eco_range_joule_min) {
-                joule_progress = eco_range_joule_min-eco_range_joule_min;
+                joule_progress = eco_range_joule_min - eco_range_joule_min;
             } else if (joule > eco_range_joule_max) {
-                joule_progress = eco_range_joule_max-eco_range_joule_min;
+                joule_progress = eco_range_joule_max - eco_range_joule_min;
             }
             miniSkJ.setText(eco_range_joule_min / 10 + ".0");
             maxSkJ.setText(eco_range_joule_max / 10 + ".0");
             showJoule.setText((joule_progress + eco_range_joule_min) / 10 + "." + (joule_progress + eco_range_joule_min) % 10);
 
         } else {
-            joule_progress= joule - jouleRange_min;
+            joule_progress = joule - jouleRange_min;
             seekBarSetJoule.setMax(jouleRange_max - jouleRange_min);
             miniSkJ.setText(jouleRange_min / 10 + ".0");
             maxSkJ.setText(jouleRange_max / 10 + ".0");
@@ -747,10 +759,10 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
                     MyModel myModel3 = MyModel.getMyModelForGivenName(detail);
                     int power_num;
-                    if(textured==0){
-                         power_num = seekBar.getProgress() + eco_range_power_min;
-                    }else {
-                         power_num = seekBar.getProgress() + powerRange_min;
+                    if (textured == 0) {
+                        power_num = seekBar.getProgress() + eco_range_power_min;
+                    } else {
+                        power_num = seekBar.getProgress() + powerRange_min;
                     }
                     myModel3.power = power_num;//需要发送的数据
                     myModel3.save();
@@ -765,9 +777,9 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
                     MyModel myModel4 = MyModel.getMyModelForGivenName(detail);
                     int joule_num;
-                    if(textured==0){
+                    if (textured == 0) {
                         joule_num = seekBar.getProgress() + eco_range_joule_min;
-                    }else {
+                    } else {
                         joule_num = seekBar.getProgress() + jouleRange_min;
                     }
 
@@ -1301,4 +1313,15 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         }
     }
 
+    public void disableRadioGroup(RadioGroup testRadioGroup) {
+        for (int i = 0; i < testRadioGroup.getChildCount(); i++) {
+            testRadioGroup.getChildAt(i).setEnabled(false);
+        }
+    }
+
+    public void enableRadioGroup(RadioGroup testRadioGroup) {
+        for (int i = 0; i < testRadioGroup.getChildCount(); i++) {
+            testRadioGroup.getChildAt(i).setEnabled(true);
+        }
+    }
 }

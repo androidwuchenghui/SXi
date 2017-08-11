@@ -1499,6 +1499,7 @@ public class BluetoothLeService extends Service {
                 String AckDevice_ID_Behind = AckDevice_ID.substring(10);
                 String realID = hexStringToString(AckDevice_ID_Behind);
                 Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: id:    "+count+" int:   "+i1 +"  behind: "+AckDevice_ID_Behind+"   "+ AckDevice_ID + "  r: " + realID+"   length: "+m_Data.length);
+
                 ConnectedBleDevices deviceID = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
                 deviceID.deviceID = realID;
                 deviceID.save();

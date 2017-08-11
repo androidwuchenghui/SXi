@@ -97,7 +97,6 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         myDialog.setCanceledOnTouchOutside(false);
         myDialog.setCancelable(false);
 
-
         //NumberPicker
         numberPicker = (NumberPicker) findViewById(R.id.numpicker);
 
