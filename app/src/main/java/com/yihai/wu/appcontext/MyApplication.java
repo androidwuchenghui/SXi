@@ -2,9 +2,11 @@ package com.yihai.wu.appcontext;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.app.Application;
+import com.crashlytics.android.Crashlytics;
 import com.yihai.wu.util.Constant;
 import com.yihai.wu.util.RetrofitService;
 
+import io.fabric.sdk.android.Fabric;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -19,7 +21,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ActiveAndroid.initialize(this);
-//        Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics());
         mRetrofitService = initRetrofit();
     }
 

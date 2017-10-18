@@ -94,7 +94,7 @@ public class SetActivity extends AppCompatActivity {
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
 
         MyModel selectedModel = MyModel.getSelectedModel();
-        Log.d(TAG, "onCreate: init" + selectedModel);
+
         if (selectedModel != null) {
             select_control(selectedModel.model);
         } else {
@@ -655,7 +655,11 @@ public class SetActivity extends AppCompatActivity {
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
     }
 
-    // 对返回的byte[]进行处理
+    /**
+     *  对返回的數據byte[]进行处理
+     * @param m_Data
+     */
+
     private void
     Sys_YiHi_Protocol_RX_Porc(byte[] m_Data) {
         int m_Length = 0;
@@ -700,16 +704,30 @@ public class SetActivity extends AppCompatActivity {
         m_Command = m_Data[(m_Index + 4)];
 
         switch (m_Command) {
-            //   处理 AckDevCapability 返回的信息
+            //   处理 AckDevCapability 返回的信息              getConnectedDeviceCapability方法
+
             case 0x19:
                 String Protocol_Capability = BinaryToHexString(m_Data);
-                byte b = m_Data[m_Index + 6];
+//                byte b = m_Data[m_Index + 6];
+                byte b = m_Data[m_Index + 7];
                 //转成2进制
                 String tString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
+                String mString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
 
-                int num = getNumericValue(tString.charAt(5));
-                mb4 = getNumericValue(tString.charAt(4));
-                Log.d(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num);
+                int i1 = b & 0x0f;
+                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: "+b+"  ****  "+tString+"  bbbb:  "+ i1);
+
+                if(i1==1){
+                    select_control("C1");
+                    line_c2.setVisibility(View.GONE);
+                    line_c3.setVisibility(View.GONE);
+                    line_c4.setVisibility(View.GONE);
+                    line_c5.setVisibility(View.GONE);
+                }
+
+                int num = getNumericValue(mString.charAt(5));
+//                mb4 = getNumericValue(tString.charAt(4));
+                Log.d(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num+"  ---->: "+mb4);
 
                 if (num != 1) {
                     line_set_wallpaper.setVisibility(View.GONE);
@@ -718,7 +736,7 @@ public class SetActivity extends AppCompatActivity {
                     getWallpaperInfo();
                     needMerge = true;
                 }
-                if(mb4 ==1){
+          /*      if(mb4 ==1){
                     select_control("C1");
 //                    setEnable(tv_c2,detail_c2);
 //                    setEnable(tv_c3,detail_c3);
@@ -729,7 +747,7 @@ public class SetActivity extends AppCompatActivity {
                     line_c4.setVisibility(View.GONE);
                     line_c5.setVisibility(View.GONE);
                 }
-
+*/
                 break;
 
             case (byte) 0x6C:

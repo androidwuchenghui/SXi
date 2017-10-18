@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private byte[] pixel_data = new byte[115200];
     Integer[] images = {R.mipmap.a, R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
-    String TAG = "printInMainActivity";
+    private static final String TAG = "printInMainActivity";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //        Log.d(TAG, "onCreate: 0x013:" + a + "  0x111:" + b + "   0x222:" + c + "    0x002:" + d);
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
+
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sp = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
         edit = sp.edit();
         lastAddress = sp.getString("address", null);
-        Log.d(TAG, "life :-----onCreate-----     lastAddress " + lastAddress);
+        Log.d(TAG, "life :-----onCreate-----     lastAddress： " + lastAddress);
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -281,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             })
                             .create();
                     remindDialog.show();
+
                     break;
                 case BluetoothLeService.ACTION_LANDING:
                     submitDialog.setMessage(MainActivity.this.getString(R.string.connecting));
@@ -433,9 +435,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.btn_upgrade:
-                goToUpgradeMode();
-
+//                goToUpgradeMode();
 //                getAddrRange();
+
 
                 break;
         }
