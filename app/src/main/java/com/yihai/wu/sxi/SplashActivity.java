@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.yihai.wu.appcontext.MyModel;
+import com.yihai.wu.util.LogService;
 
 /**
  * Created by ${Wu} on 2016/12/1.
@@ -22,6 +23,8 @@ public class SplashActivity extends AppCompatActivity {
 
         initdb();
         init();
+        Intent stateService =  new Intent (this, LogService.class);
+        startService( stateService );
     }
 
 

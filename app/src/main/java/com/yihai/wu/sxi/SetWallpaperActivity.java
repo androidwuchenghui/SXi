@@ -132,7 +132,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        Log.d(TAG, "onRequestPermissionsResult: "+requestCode+"   grantResults: "+grantResults);
+//        Log.e(TAG, "onRequestPermissionsResult: "+requestCode+"   grantResults: "+grantResults);
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
         }else {
@@ -205,7 +205,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
 
 //        final Bitmap bm = BitmapFactory.decodeFile(images.get(images.size() - 1).getOriginalPath());
 
-//        Log.d(TAG, "bmSize: bm  width：" + bm.getWidth() + "   " + bm.getHeight());
+//        Log.e(TAG, "bmSize: bm  width：" + bm.getWidth() + "   " + bm.getHeight());
         Bitmap bitmap = zoomImg(bm, 240, 240);
 
         show_img.setImageBitmap(bitmap);
@@ -215,7 +215,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
 
 
 
-      /*  Log.d(TAG, "bmSize: width:  " + width + " height: " + height);
+      /*  Log.e(TAG, "bmSize: width:  " + width + " height: " + height);
         //单色验证
         int point_pixel = bitmap.getPixel(100, 100);
         int alpha = Color.alpha(point_pixel);
@@ -228,8 +228,8 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         //        point_blue = 255;
         //        short all = RGB8_to_RGB565(pixel);
 
-        Log.d(TAG, "one_point_showImg: " + " alpha  " + alpha + "  red:  " + point_red + "  green:  " + point_green + "  blue:  " + point_blue + "     " + "  " + "  pixel:  " + point_pixel + "  ");
-        Log.d(TAG, "one_point_showImg: " + toFullBinaryString(point_red) + "   " + toFullBinaryString(point_green) + "   " + toFullBinaryString(point_blue));
+        Log.e(TAG, "one_point_showImg: " + " alpha  " + alpha + "  red:  " + point_red + "  green:  " + point_green + "  blue:  " + point_blue + "     " + "  " + "  pixel:  " + point_pixel + "  ");
+        Log.e(TAG, "one_point_showImg: " + toFullBinaryString(point_red) + "   " + toFullBinaryString(point_green) + "   " + toFullBinaryString(point_blue));
 
         byte[] bytes = intToBytes2(point_red);
 
@@ -240,7 +240,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         short test1 = (short) (point_r1 | point_g1 | point_b1);
         int all_int = point_r1 | point_g1 | point_b1;
         int qz = test1;
-        Log.d(TAG, "one_point_showImg: short " + test1 + "   int: " + all_int + "   test1:  " + qz);
+        Log.e(TAG, "one_point_showImg: short " + test1 + "   int: " + all_int + "   test1:  " + qz);
         byte[] bytes1 = intToBytes2(all_int);
         //        byte b2 = bytes1[2];
         //        byte b3 = bytes1[3];
@@ -249,7 +249,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         byte b_low = (byte) all_int;
         int merge = bytes2Int(b_high, b_low);
 
-        Log.d(TAG, "one_point_showImg: 两个byte合并:" + merge + "    " + toFullBinaryString(all_int) + "    short:  " + test1 + "     " + "   " + toFullBinaryString(test1));
+        Log.e(TAG, "one_point_showImg: 两个byte合并:" + merge + "    " + toFullBinaryString(all_int) + "    short:  " + test1 + "     " + "   " + toFullBinaryString(test1));
 
         //  rgb565转回rgb888
         byte[] rgb24 = new byte[3];
@@ -269,9 +269,9 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         int bbb = rgb24[0] & 0xff;
         int back_RGB24 = byte_3_ToInt(rgb24[2], rgb24[1], rgb24[0]);
 
-        Log.d(TAG, "one_point_showImg:  r:" + rrr + " g: " + ggg + " b: " + bbb + "  " + back_RGB24);
-        Log.d(TAG, "one_point_showImg: " + "    " + toFullBinaryString(rrr) + "    ggg:  " + toFullBinaryString(ggg) + "     " + " bbb  " + toFullBinaryString(bbb));
-        Log.d(TAG, "one_point_showImg: " + " RGB888:  " + toFullBinaryString(back_RGB24));
+        Log.e(TAG, "one_point_showImg:  r:" + rrr + " g: " + ggg + " b: " + bbb + "  " + back_RGB24);
+        Log.e(TAG, "one_point_showImg: " + "    " + toFullBinaryString(rrr) + "    ggg:  " + toFullBinaryString(ggg) + "     " + " bbb  " + toFullBinaryString(bbb));
+        Log.e(TAG, "one_point_showImg: " + " RGB888:  " + toFullBinaryString(back_RGB24));
         //单色验证完成
         */
         //        BitmapFactory.Options options =new BitmapFactory.Options();
@@ -297,8 +297,8 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         //        rgb[1] = (pixel & 0xff00) >> 8;
         //        rgb[2] = (pixel & 0xff);
         //
-        //        Log.d("showImg", "ARGB:    a:"  + "  r: " + red + " g: " + green + " b: " + blue + "   pixel: " + pixel+" rgb:  "+rgb[0]+" , "+ rgb[1]+" , "+rgb[2]);
-        //        Log.d("showImg", "showImg: "+r+"   "+g+"   "+b+"   all: "+all);
+        //        Log.e("showImg", "ARGB:    a:"  + "  r: " + red + " g: " + green + " b: " + blue + "   pixel: " + pixel+" rgb:  "+rgb[0]+" , "+ rgb[1]+" , "+rgb[2]);
+        //        Log.e("showImg", "showImg: "+r+"   "+g+"   "+b+"   all: "+all);
 
         //        int count =0;
         //循环取色
@@ -322,7 +322,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 //                short red = (short) Color.red(pixel);
                 //                short green = (short) Color.green(pixel);
                 //                short blue = (short) Color.blue(pixel);
-                //                Log.d("showImg", "ARGB:    a:"  + "  r: " + red + " g: " + green + " b: " + blue + "   pixel: " + pixel+" rgb:  ");
+                //                Log.e("showImg", "ARGB:    a:"  + "  r: " + red + " g: " + green + " b: " + blue + "   pixel: " + pixel+" rgb:  ");
                 //      方案一：
                 //                int r1 = (red << 8) & 0xF800;
                 //                int g1 = (green << 3) & 0x7E0;
@@ -335,7 +335,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 //
                 //                short all = RGB8_to_RGB565(pixel);
                 //                int p2 = RGB565_to_RGB888(all);
-                //                Log.d(TAG, "showImg: p1:  " + pixel + "     " + p2);
+                //                Log.e(TAG, "showImg: p1:  " + pixel + "     " + p2);
                 //--------------------
                 //      方案二：
                 int r1 = (pixel & 0x00F80000) >> 8;
@@ -373,7 +373,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 byte m8_low = (byte) all2;
 */
 
-                //                Log.d(TAG, "showImg: " + "   --------------------  " + all2);
+                //                Log.e(TAG, "showImg: " + "   --------------------  " + all2);
                 //                int all = RGB888toRGB565(red, green, blue);
                 //                int all = colorValue_RGB888_To_RGB565(red, green, blue);
 
@@ -388,15 +388,15 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 //                                byte two3 = (byte) (all & 0x00FF);
                 //                boolean bool_one = one==one3;
                 //                boolean bool_two =  two==two3;
-                //                Log.d(TAG, "showImg: "+bool_one+"   "+bool_two);
+                //                Log.e(TAG, "showImg: "+bool_one+"   "+bool_two);
                 //
                 //                int it = bytes2Int(one, two);
-                //                Log.d("showImg", "showImg:     "  +it);
+                //                Log.e("showImg", "showImg:     "  +it);
                 //                char c_height = (char) ((all & 0xFF00) >> 8);
                 //                char c_low = (char) (all & 0x00FF);
                 //                int hi = (all & 0xFF00) >> 8;
                 //                int lo = all & 0x00FF;
-                //                Log.d("showImg", "  "+c_height+"  ***  "+c_low+"   ----  "+hi+" -- "+lo);
+                //                Log.e("showImg", "  "+c_height+"  ***  "+c_low+"   ----  "+hi+" -- "+lo);
                 //-----------------------------
 
 
@@ -449,13 +449,13 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                     //
                     //                    color_2.setImageBitmap(result);
                     pixelData.append(pixel);
-                    Log.d("showImg", "showImg: over  over  over  over  over over   "+pixelData);
+                    Log.e("showImg", "showImg: over  over  over  over  over over   "+pixelData);
                     if (mBluetoothLeService.getTheConnectedState() == 2) {
                         sendPicture = true;
                         mBluetoothLeService.setPixel_data(pixel_data);
 
                         spEditor.putString("pixels", String.valueOf(pixelData));
-                        Log.d("showImg", "showImg:    "+String.valueOf(pixelData));
+                        Log.e("showImg", "showImg:    "+String.valueOf(pixelData));
                         spEditor.commit();
 
                         //进入蓝屏模式
@@ -503,12 +503,12 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             } else if (mBluetoothLeService.getTheConnectedState() == 2) {
                 g_Character_TX = mBluetoothLeService.getG_Character_TX();
             }
-            Log.d("setActivityInService", "onServiceConnected: " + mBluetoothLeService + "  character_TX:  " + g_Character_TX + "    ");
+            Log.e("setActivityInService", "onServiceConnected: " + mBluetoothLeService + "  character_TX:  " + g_Character_TX + "    ");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务断开-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务断开-------------");
             mBluetoothLeService = null;
         }
     };
@@ -541,7 +541,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "myReceive: >>>>>>  " + s);
+                    Log.e(TAG, "myReceive: >>>>>>  " + s);
                     if (needMerge) {
                         needMerge = false;
                         merger_datas = data;
@@ -640,7 +640,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             //     getOneWallpaper返回的信息：
             case 0x04:
 
-                Log.d(TAG, "getOneWallpaper:  " + BinaryToHexString(m_Data) + "   地址： " + bytesToInt(m_Data, 12));
+                Log.e(TAG, "getOneWallpaper:  " + BinaryToHexString(m_Data) + "   地址： " + bytesToInt(m_Data, 12));
                 picture_address = bytesToInt(m_Data, 12);
 //                takePhoto.onPickFromGalleryWithCrop(imageUri, getCropOptions());
 //                Intent intent = new Intent(Intent.ACTION_PICK,
@@ -653,7 +653,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 break;
             case 0x16:
                 final int waitTime = ((m_Data[7] & 0xff) << 8) | (m_Data[8] & 0xff);
-                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: " + BinaryToHexString(m_Data) + "   ***   " + waitTime);
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: " + BinaryToHexString(m_Data) + "   ***   " + waitTime);
                 new Thread() {
                     @Override
                     public void run() {
@@ -671,7 +671,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
                 break;
             case 0x0E:
                 //     sendDataStart();
-                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: llllllllllllllllllllllllllllllllllllll");
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: llllllllllllllllllllllllllllllllllllll");
 //                sendData(count);
 //                count++;
                 //--------------------------
@@ -679,11 +679,11 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
 
                 break;
             case 0x10:
-//                Log.d(TAG, "sendData:   back " + BinaryToHexString(m_Data) + "     count " + count);
+//                Log.e(TAG, "sendData:   back " + BinaryToHexString(m_Data) + "     count " + count);
 //                dialogView.setProgress((double) count * 100 / 2304);
 //
 //                if (count >= 2304) {
-//                    Log.d(TAG, "sendData: " + "   over     over   over   over   over   over   over   over   over");
+//                    Log.e(TAG, "sendData: " + "   over     over   over   over   over   over   over   over   over");
 //                    dialogView.dismiss();
 //                    count = 0;
 //                    sendPicture = false;
@@ -768,7 +768,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             m_Data[11 + i] = pixel_data[i + num * 50];
         }
 
-        //        Log.d(TAG, "sendData1:  "+BinaryToHexString(m_Data));
+        //        Log.e(TAG, "sendData1:  "+BinaryToHexString(m_Data));
         m_Length = 20;
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
 
@@ -824,7 +824,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             sum += onByte;
         }
         //       校验数据---
-                Log.d(TAG, "sendData   out:  " +"   校验： "+sum);
+                Log.e(TAG, "sendData   out:  " +"   校验： "+sum);
         byte yy = (byte) (sum & 0xFF);
         m_Data[1] = yy;
         m_Length = 2;
@@ -868,16 +868,16 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
     @Override
     public void onValueChange(NumberPicker numberPicker, int oldVal,
                               int newVal) {
-        Log.d(TAG, "onValueChange: id： " + numberPicker.getId() + "  oldVal: " + oldVal + "  newVal: " + newVal);
+        Log.e(TAG, "onValueChange: id： " + numberPicker.getId() + "  oldVal: " + oldVal + "  newVal: " + newVal);
     }
 
     @Override
     public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
-        Log.d(TAG, "onValueChange  onScrollStateChange: "+scrollState+"  fling   "+ NumberPicker.OnScrollListener.SCROLL_STATE_FLING+"   idle   "+NumberPicker.OnScrollListener.SCROLL_STATE_IDLE+"  TOUCH_SCROLL:  "+NumberPicker.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+        Log.e(TAG, "onValueChange  onScrollStateChange: "+scrollState+"  fling   "+ NumberPicker.OnScrollListener.SCROLL_STATE_FLING+"   idle   "+NumberPicker.OnScrollListener.SCROLL_STATE_IDLE+"  TOUCH_SCROLL:  "+NumberPicker.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
         switch (scrollState){
             case NumberPicker.OnScrollListener.SCROLL_STATE_IDLE:
                 int value = numberPicker.getValue()-1;
-                Log.d(TAG, "stopValue: "+value+"    "+supportPreview);
+                Log.e(TAG, "stopValue: "+value+"    "+supportPreview);
                 if(supportPreview){
                     previewWallPaper(value);
                 }
@@ -898,7 +898,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
             int columnIndex = c.getColumnIndex(filePathColumns[0]);
             String imagePath = c.getString(columnIndex);
             c.close();
-            Log.d(TAG, "onActivityResult: "+imagePath);
+            Log.e(TAG, "onActivityResult: "+imagePath);
             Intent myCropIntent = new Intent(SetWallpaperActivity.this,CropActivity.class);
             myCropIntent.putExtra("path",imagePath);
             startActivityForResult(myCropIntent, CROP_IMAGE);
@@ -926,7 +926,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");
+        Log.e(TAG, "onPause: ");
 
     }
 }

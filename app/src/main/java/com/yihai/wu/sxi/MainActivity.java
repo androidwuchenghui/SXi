@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private byte[] pixel_data = new byte[115200];
     Integer[] images = {R.mipmap.a, R.mipmap.b, R.mipmap.c, R.mipmap.d, R.mipmap.e, R.mipmap.f};
-    private static final String TAG = "printInMainActivity";
+    private static final String TAG = "MainActivity";
     private DarkImageButton btn_connect;
     private DarkImageButton btn_information;
     private DarkImageButton btn_set;
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DarkImageButton btn_upgrade;
     private TextView connectedState;
     private TextView myName;
+
     //打开蓝牙需要的参数
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -94,12 +95,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
             }
 
-            Log.d(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress);
+            Log.e(TAG, "onServiceConnected: " + mBluetoothLeService.getTheConnectedState() + "  g_TX_char:  " + g_Character_TX + "   lastConnect:  " + lastAddress);
             if (mBluetoothLeService.getTheConnectedState() == 0) {
                 connectedState.setText(R.string.have_been_not_connected);
                 //              try to connect
                 if (lastAddress != null) {
-                    Log.d(TAG, "doScan:  绑定成功后    叫后台去搜索   ");
+                    Log.e(TAG, "doScan:  绑定成功后    叫后台去搜索   ");
                     mBluetoothLeService.serviceScan();
 
                 }
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(TAG, "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.e(TAG, "onServiceDisconnected: " + "---------服务未连接-------------");
             mBluetoothLeService = null;
         }
     };
@@ -123,17 +124,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private WallpaperDialogView wallpaperDialogView;
 
 
-
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         //        int a = REQUEST_CONNECTED;
         //        int b = REQUST_RESULT;
         //        int c = REQUST_MODE;
         //        int d = REQUEST_CODE_TO_MAIN;
-        //        Log.d(TAG, "onCreate: 0x013:" + a + "  0x111:" + b + "   0x222:" + c + "    0x002:" + d);
+        //        Log.e(TAG, "onCreate: 0x013:" + a + "  0x111:" + b + "   0x222:" + c + "    0x002:" + d);
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
 
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sp = getSharedPreferences("lastConnected", Context.MODE_PRIVATE);
         edit = sp.edit();
         lastAddress = sp.getString("address", null);
-        Log.d(TAG, "life :-----onCreate-----     lastAddress： " + lastAddress);
+        Log.e(TAG, "life :-----onCreate-----     lastAddress： " + lastAddress);
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -168,17 +169,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         initButton();
-        //android 6.0 权限
+        //android 6.0 权限   还有定位权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                Log.e(TAG, " onCreate:   --打开权限  ");
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, PERMISSION_REQUEST_COARSE_LOCATION);
             }
         }
+        // 打开gps定位
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isGpsEnable(this) == false) {
+            Log.e(TAG, "onCreate:   -- 跳转到定位 --  ");
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             this.startActivityForResult(intent, 0x0A);
         }
+
         //绑定服务
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -195,18 +205,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         wallpaperDialogView.setCanceledOnTouchOutside(false);
         wallpaperDialogView.setCancelable(false);
 
-//        wallpaperDialogView.show();
-//        walpaperDialogView.setProgress(80);
+        //        wallpaperDialogView.show();
+        //        walpaperDialogView.setProgress(80);
 
         Call<BannerEntity> bannerImages = mRetrofitService.getBannerImages();
         bannerImages.enqueue(new Callback<BannerEntity>() {
             @Override
             public void onResponse(Call<BannerEntity> call, Response<BannerEntity> response) {
                 List<BannerEntity.ImagesUrlBean> images_url = response.body().getImages_url();
-                Log.d(TAG, "onResponse:   下载成功  "+images_url.size());
+                Log.e(TAG, "onResponse:   下载轮播图成功  " + images_url.size());
                 List<String> banner_images = new ArrayList<String>();
                 for (BannerEntity.ImagesUrlBean imagesUrlBean : images_url) {
-//                    Log.d(TAG, "onResponse: "+imagesUrlBean.getLink());
+                    //                    Log.e(TAG, "onResponse: "+imagesUrlBean.getLink());
                     banner_images.add(imagesUrlBean.getLink());
                 }
                 initBanner(banner_images);
@@ -215,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailure(Call<BannerEntity> call, Throwable t) {
-                Log.d(TAG, "onFailure: "+"  下载失败  ");
+                Log.e(TAG, "onFailure: 轮播图 " + "  下载失败  ");
                 List images_list = new ArrayList();
                 for (Integer image : images) {
                     images_list.add(image);
@@ -229,8 +239,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onRestart() {
         super.onRestart();
+
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
-        Log.d(TAG, "life:----onRestart---   " + mBluetoothLeService.getTheConnectedState());
+        Log.e(TAG, "life:----onRestart---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             myName.setText(deviceName);
             connectedState.setText(R.string.have_been_connected);
@@ -251,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: MainActivity 收到的数据为：  " + s + "   ");
+                    Log.e(TAG, "onReceive: MainActivity 收到的数据为：  " + s + "   ");
                     Sys_YiHi_Protocol_RX_Porc(data);
 
                     break;
@@ -297,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             myName.setText(deviceName);
                             submitDialog.dismiss();
                             submitDialog.setMessage(MainActivity.this.getString(R.string.connecting));
-                            Log.d(TAG, "run: mainTest   // 开始询问设备是否处于更换壁纸模式（也就是蓝屏状态）");
+                            Log.e(TAG, "run: mainTest   // 开始询问设备是否处于更换壁纸模式（也就是蓝屏状态）");
                             if (g_Character_TX == null) {
                                 g_Character_TX = mBluetoothLeService.getG_Character_TX();
                             }
@@ -308,16 +319,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case BluetoothLeService.ACTION_SEND_PROGRESS:
 
-                    if(wallpaperDialogView.isShowing()){
+                    if (wallpaperDialogView.isShowing()) {
                         int sendProgress = intent.getIntExtra("sendProgress", 0);
-                        wallpaperDialogView.setProgress( sendProgress * 100 / 2304);
-                        if(sendProgress==2304){
+                        wallpaperDialogView.setProgress(sendProgress * 100 / 2304);
+                        if (sendProgress == 2304) {
                             wallpaperDialogView.dismiss();
                             mBluetoothLeService.setCanSendPicture(false);
                         }
                     }
 
-                break;
+                    break;
             }
         }
     };
@@ -343,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registerReceiver(mainActivityReceiver, makeMainBroadcastFilter());
         lastAddress = sp.getString("address", null);
         //        if(ConnectedBleDevices.getConnectedDevice()!=null&&mBluetoothLeService!=null&&ConnectedBleDevices.getConnectedDevice().isConnected){
-        //            Log.d(TAG, "onStart: "+mBluetoothLeService);
+        //            Log.e(TAG, "onStart: "+mBluetoothLeService);
         //            mBluetoothLeService.connect(ConnectedBleDevices.getConnectedDevice().deviceAddress);
         //        }
         if (!mBluetoothAdapter.isEnabled()) {
@@ -352,13 +363,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBluetoothAdapter.enable();
         }
 
-        Log.d(TAG, "handlePasswordCallbacks:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
+        Log.e(TAG, "handlePasswordCallbacks:---onStart----  adapter  " + mBluetoothAdapter + "   打开蓝牙了：  " + mBluetoothAdapter.isEnabled() + "  service：  " + mBluetoothLeService + "  state " + "  last: " + lastAddress);
 
-        Log.d(TAG, "life: onStart: " + mBluetoothAdapter.isEnabled());
+        Log.e(TAG, "life: onStart: " + mBluetoothAdapter.isEnabled());
         if (mBluetoothLeService != null && mBluetoothAdapter != null && lastAddress != null && mBluetoothAdapter.isEnabled()) {
-            Log.d(TAG, "onResume:   state  " + mBluetoothLeService.getTheConnectedState());
+            Log.e(TAG, "onResume:   state  " + mBluetoothLeService.getTheConnectedState());
             if (mBluetoothLeService.getTheConnectedState() == 0) {
-                Log.d(TAG, "doScan:  onStart  -->   让后台去连接 " + mBluetoothAdapter);
+                Log.e(TAG, "doScan:  onStart  -->   后台发起连接 " + mBluetoothAdapter);
                 mBluetoothLeService.setDisConnectByMyself(false);
                 mBluetoothLeService.serviceScan();
             }
@@ -400,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         banner.setOnBannerClickListener(new OnBannerClickListener() {
             @Override
             public void OnBannerClick(int position) {
-//                Log.d(TAG, "OnBannerClick: " + position); //position 从1开始
+                //                Log.e(TAG, "OnBannerClick: " + position); //position 从1开始
                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
                 startActivity(intent);
             }
@@ -428,16 +439,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_reset:
                 g_Character_Baud_Rate = mBluetoothLeService.getG_Character_Baud_Rate();
                 if (g_Character_Baud_Rate != null) {
-                    Log.d(TAG, "g_Character_Baud_Rate:  波特率重置");
+                    Log.e(TAG, "g_Character_Baud_Rate:  波特率重置");
                     g_Character_Baud_Rate.setValue(intToBytes(5));
                     mBluetoothLeService.writeCharacteristic(g_Character_Baud_Rate);
                 }
 
                 break;
             case R.id.btn_upgrade:
-//                goToUpgradeMode();
-//                getAddrRange();
-
+                //                goToUpgradeMode();
+                //                getAddrRange();
 
                 break;
         }
@@ -485,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "life: ---onDestroy---: ");
+        Log.e(TAG, "life: ---onDestroy---: ");
         //        unregisterReceiver(mainActivityReceiver);
         mBluetoothLeService.disconnect();
         mBluetoothLeService.close();
@@ -565,28 +575,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 String s = BinaryToHexString(m_Data);
                 String substring = s.substring(12);
-//                Log.d(TAG, "receiveSetting:    s: "+s+"   sub :  "+substring);
-//                int model = Integer.parseInt(substring);
+                //                Log.e(TAG, "receiveSetting:    s: "+s+"   sub :  "+substring);
+                //                int model = Integer.parseInt(substring);
                 String selectedModel = null;
-                switch (substring){
+                switch (substring) {
                     case "00":
                         selectedModel = "C1";
                         break;
                     case "01":
-                         selectedModel = "C2";
+                        selectedModel = "C2";
                         break;
                     case "02":
-                         selectedModel = "C3";
+                        selectedModel = "C3";
                         break;
                     case "03":
-                         selectedModel = "C4";
+                        selectedModel = "C4";
                         break;
                     case "04":
-                         selectedModel = "C5";
+                        selectedModel = "C5";
                         break;
                 }
 
-//                Log.d(TAG, "receiveSetting:     " + s + "    " + substring + "   m:  "  + "   " + selectedModel);
+                //                Log.e(TAG, "receiveSetting:     " + s + "    " + substring + "   m:  "  + "   " + selectedModel);
 
                 List<MyModel> allMyModel = MyModel.getAllMyModel();
                 for (MyModel myModel : allMyModel) {
@@ -601,13 +611,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //询问是否蓝屏换壁纸模式
             case 0x6C:
                 if (m_Data[5] == 0x16) {
-//                    Log.d(TAG, " wallpaper: " + BinaryToHexString(m_Data));
+                    //                    Log.e(TAG, " wallpaper: " + BinaryToHexString(m_Data));
                     if (m_Data[6] == 0x01) {
                         //已经处于蓝屏换壁纸模式
-                        Log.d(TAG, "sendData: "+"    已经蓝屏  ");
+                        Log.e(TAG, "sendData: " + "    已经蓝屏  ");
 
                         wallpaperDialogView.show();
-                        new Thread(){
+                        new Thread() {
                             @Override
                             public void run() {
                                 super.run();
@@ -615,13 +625,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 pixelSp = getSharedPreferences("pixelData", Context.MODE_PRIVATE);
                                 String pixels = pixelSp.getString("pixels", null);
 
-                                 String[] split = pixels.split(",");
+                                String[] split = pixels.split(",");
 
-                                 int count = sp.getInt("count", 0);
+                                int count = sp.getInt("count", 0);
                                /* for (int j = 0; j < 57600; j++) {
 
-//                                    Log.d(TAG, "pixelData:    " + String.valueOf(pixels) + "   length: " + split.length + "  count: " + count);
-                                    Log.d(TAG, "sendData: " + split.length + "  count: " + count+"    j:  "+j);
+//                                    Log.e(TAG, "pixelData:    " + String.valueOf(pixels) + "   length: " + split.length + "  count: " + count);
+                                    Log.e(TAG, "sendData: " + split.length + "  count: " + count+"    j:  "+j);
                                     int getPixel = Integer.parseInt(split[j]);
                                     int r1 = (getPixel & 0x00F80000) >> 8;
                                     int g1 = (getPixel & 0x0000FC00) >> 5;
@@ -635,7 +645,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     pixel_data[m_dataIndex + 1] = one;
                                     pixel_data[m_dataIndex] = two;
                                     if(j==57599){
-                                        Log.d(TAG, "sendData: "+"     "+mBluetoothLeService+"   count: "+count);
+                                        Log.e(TAG, "sendData: "+"     "+mBluetoothLeService+"   count: "+count);
                                         mBluetoothLeService.setPixel_data(pixel_data);
                                         mBluetoothLeService.setCount(count);
                                         mBluetoothLeService.sendData(count);
@@ -657,9 +667,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         pixel_data[index + 1] = one;
                                         pixel_data[index] = two;
 
-                                        if(j==239&&k==239){
-                                            Log.d(TAG, "sendData: >>>>>>  "+myIndex+"  count: "+count+"  service: "+mBluetoothLeService+"    tx: "+mBluetoothLeService.getG_Character_TX());
-                                            myIndex=0;
+                                        if (j == 239 && k == 239) {
+                                            Log.e(TAG, "sendData: >>>>>>  " + myIndex + "  count: " + count + "  service: " + mBluetoothLeService + "    tx: " + mBluetoothLeService.getG_Character_TX());
+                                            myIndex = 0;
                                             mBluetoothLeService.setPixel_data(pixel_data);
                                             mBluetoothLeService.setCount(count);
                                             mBluetoothLeService.setCanSendPicture(true);
@@ -682,13 +692,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "life:-----onStop: ");
+        Log.e(TAG, "life:-----onStop: ");
         unregisterReceiver(mainActivityReceiver);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0x0A) {
+
             if (isGpsEnable(this)) {
                 Log.i("fang", " request location permission success");
                 //Android6.0需要动态申请权限
@@ -718,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "mainTest:---- onResume: " + mBluetoothLeService);
+        Log.e(TAG, "mainActivity begin :  ---- onResume:       bleService   ---> " + mBluetoothLeService);
 
     }
 
@@ -779,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             m_Data[11 + i] = pixel_data[i + num * 50];
         }
 
-        //        Log.d(TAG, "sendData1:  "+BinaryToHexString(m_Data));
+        //        Log.e(TAG, "sendData1:  "+BinaryToHexString(m_Data));
         m_Length = 20;
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
 
@@ -836,14 +847,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sum += onByte;
         }
         //       校验数据---
-        Log.d(TAG, "sendData   out:  " + "   校验： " + sum);
+        Log.e(TAG, "sendData   out:  " + "   校验： " + sum);
         byte yy = (byte) (sum & 0xFF);
         m_Data[1] = yy;
         m_Length = 2;
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
     }
 
-    private void getAddrRange(){
+    private void getAddrRange() {
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -856,7 +867,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Sys_Proc_Charactor_TX_Send(m_Data_DeviceSetting, m_Length);
     }
 
-    private void goToUpgradeMode(){
+    private void goToUpgradeMode() {
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;

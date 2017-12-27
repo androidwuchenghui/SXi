@@ -36,7 +36,7 @@ public class CropActivity extends AppCompatActivity implements View.OnClickListe
 
         mClipImageLayout = (ClipImageLayout) findViewById(R.id.clipImageLayout);
         String path = getIntent().getStringExtra(KEY);
-        Log.d("path", "onCreate: "+path);
+        Log.e("path", "onCreate: "+path);
 
         // 有的系统返回的图片是旋转了，有的没有旋转，所以处理
         int degreee = readBitmapDegree(path);

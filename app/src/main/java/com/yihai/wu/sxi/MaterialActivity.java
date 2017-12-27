@@ -140,12 +140,12 @@ public class MaterialActivity extends AppCompatActivity {
                 }
 
             }
-            Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
+            Log.e(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务未连接-------------");
             mBluetoothLeService = null;
         }
     };

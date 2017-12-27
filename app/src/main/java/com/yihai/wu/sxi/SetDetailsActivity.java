@@ -219,15 +219,15 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive:ssss " + s);
+                    Log.e(TAG, "onReceive:ssss " + s);
                     if (TAG == "SetDetailsActivity" && sendData) {
-                        Log.d(TAG, "receiveInfo: " + s);
+                        Log.e(TAG, "receiveInfo: " + s);
                         if (mergerData) {
                             if (receiveCount == 1) {
                                 mergerDataOver = true;
                                 byte[] mergerBytes = byteMerger(firstByteArray, data);
                                 String result = first + s;
-                                Log.d(TAG, "temperInfo: 第二节数据合并后：" + BinaryToHexString(mergerBytes));
+                                Log.e(TAG, "temperInfo: 第二节数据合并后：" + BinaryToHexString(mergerBytes));
                                 mergerData = false;
                                 receiveCount = 0;
                                 first = "";
@@ -236,7 +236,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                             } else {
                                 mergerDataOver = false;
                                 first += s;
-                                Log.d(TAG, "mergerBytes: 一段：" + first);
+                                Log.e(TAG, "mergerBytes: 一段：" + first);
                                 firstByteArray = new byte[data.length];
                                 firstByteArray = data;
                                 receiveCount++;
@@ -312,17 +312,17 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                         pack = 0x04;
                         break;
                 }
-                Log.d(TAG, "onServiceConnected:    开始取数据   " + g_Character_TX);
+                Log.e(TAG, "onServiceConnected:    开始取数据   " + g_Character_TX);
                 getSettingPackage_ReadData_Exe(pack);
 
             }
 
-            Log.d(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
+            Log.e(TAG, "onServiceConnected:   char:  " + g_Character_TX + "   ser:  " + mBluetoothLeService);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务未连接-------------");
             mBluetoothLeService = null;
         }
     };
@@ -330,7 +330,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart: rrrrrrrrrrr");
+        Log.e(TAG, "onStart: rrrrrrrrrrr");
         initUI();
     }
 
@@ -350,7 +350,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         btSwitch.setOpened(status == 0 ? false : true);
 
         int display = myModel.display;
-        Log.d("log", "initUI:取得数据 " + display);
+        Log.e("log", "initUI:取得数据 " + display);
         RadioButton display_rbt = (RadioButton) rgDisplayStatus.getChildAt(display);
         if (mb4 == 1) {
             displayMode.setTextColor(getResources().getColor(R.color.colorGray));
@@ -384,7 +384,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
         //口感
         textured = myModel.texture;
-        Log.d(TAG, "onStart: " + textured);
+        Log.e(TAG, "onStart: " + textured);
         setShowText(textured);
         //记忆模式选择
         int memory = myModel.memory;
@@ -399,7 +399,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         RadioButton rb_jouleOrPower = (RadioButton) rgJoule.getChildAt(jouleOrPower);
         rb_jouleOrPower.setChecked(true);
 
-        Log.d(TAG, "initUIjouleOrPower: " + jouleOrPower);
+        Log.e(TAG, "initUIjouleOrPower: " + jouleOrPower);
         //操作模式
         int operation = myModel.operation;
         RadioButton rb_operation = (RadioButton) rgOperation.getChildAt(operation);
@@ -409,7 +409,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         tempValue = myModel.temperature;
         //seekBar补偿温度
         compensateTempValue = myModel.temperature_c;
-        Log.d(TAG, "initUI: 温度单位 " + temperatureUnit);
+        Log.e(TAG, "initUI: 温度单位 " + temperatureUnit);
         switch (temperatureUnit) {
             case 0:
                 miniSkAt.setText(tempMin_c + "");
@@ -576,7 +576,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
             public void afterTextChanged(Editable editable) {
 
                 changeName = String.valueOf(editable);
-                Log.d(TAG, "onLayoutChange: " + etSetName.getText() + "    " + changeName);
+                Log.e(TAG, "onLayoutChange: " + etSetName.getText() + "    " + changeName);
             }
         });
         //获取屏幕高度
@@ -641,16 +641,16 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     public void onLayoutChange(View v, int left, int top, int right,
                                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
         if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
-            Log.d(TAG, "onLayoutChange: " + "监听到软键盘弹起...");
+            Log.e(TAG, "onLayoutChange: " + "监听到软键盘弹起...");
 
         } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
 
-            Log.d(TAG, "onLayoutChange: " + "监听到软键盘关闭...");
+            Log.e(TAG, "onLayoutChange: " + "监听到软键盘关闭...");
             if (!TextUtils.isEmpty(etSetName.getText())) {
                 MyModel myModelForGivenName = MyModel.getMyModelForGivenName(detail);
 
                 if (myModelForGivenName != null) {
-                    Log.d(TAG, "onLayoutChange: " + changeName + "    " + myModelForGivenName.showName);
+                    Log.e(TAG, "onLayoutChange: " + changeName + "    " + myModelForGivenName.showName);
                     if (!changeName.equals(myModelForGivenName.showName)) {
                         myModelForGivenName.showName = changeName;
                         myModelForGivenName.save();
@@ -718,7 +718,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
                     String str = showAdjustTemperature.getText().toString();
                     int num = Integer.parseInt(str);
-                    Log.d(TAG, "onStopTrackingTouch: " + str);
+                    Log.e(TAG, "onStopTrackingTouch: " + str);
                     if (g_Character_TX != null) {
                         setUserDeviceSetting((byte) 0x06, num);
                     }
@@ -750,7 +750,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     int TCR_num = seekBar.getProgress() + 50;
                     myModel2.tcr = TCR_num;
                     if (g_Character_TX != null) {
-                        Log.d(TAG, "onStopTrackingTouch: " + TCR_num);
+                        Log.e(TAG, "onStopTrackingTouch: " + TCR_num);
                         setUserDeviceSetting((byte) 0x08, TCR_num);
                     }
                     myModel2.save();
@@ -929,7 +929,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         if (sendData == false) {
             return;
         }
-        Log.d(TAG, "Sys_Proc_Charactor_TX_Send:     " + BinaryToHexString(m_Data) + "    写TX特性");
+        Log.e(TAG, "Sys_Proc_Charactor_TX_Send:     " + BinaryToHexString(m_Data) + "    写TX特性");
         byte[] m_MyData = new byte[m_Length];
         for (int i = 0; i < m_Length; i++) {
             m_MyData[i] = m_Data[i];
@@ -1013,13 +1013,13 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
         //Get command code.
         m_Command = m_Data[(m_Index + 4)];
         m_SecondCommand = m_Data[(m_Index + 5)];
-        //        Log.d(TAG, "onReceiveMainActivity: " + m_Command);
+        //        Log.e(TAG, "onReceiveMainActivity: " + m_Command);
         if (m_Command == 0x58 && m_SecondCommand == 0x0F && m_Data.length == 7)
         //获得功率焦耳切换
         {
             s = BinaryToHexString(m_Data);
             String substring = s.substring(12);
-            //            Log.d(TAG, "处理    : power&Joule--   " + s + "  -:   " + substring);
+            //            Log.e(TAG, "处理    : power&Joule--   " + s + "  -:   " + substring);
             int model = Integer.parseInt(substring);
             //1
             MyModel myModel = MyModel.getMyModelForGivenName(detail);
@@ -1035,7 +1035,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                 if (m_Data[5] == 0x01) {
 
                     final int waitTime = ((m_Data[8] & 0xff) << 8) | (m_Data[9] & 0xff);
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间：" + BinaryToHexString(m_Data) + "   " + waitTime);
+                    Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: 等待时间：" + BinaryToHexString(m_Data) + "   " + waitTime);
 
                     new Thread() {
                         @Override
@@ -1052,7 +1052,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
 
                 } else if (m_Data[5] == 0x04) {
                     //得到数据包  - SettingPackage        ---此处为合并的数据包
-                    Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: 处理数据包:  " + BinaryToHexString(m_Data) + "  int:  " + (int) m_Data[8]);
+                    Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: 处理数据包:  " + BinaryToHexString(m_Data) + "  int:  " + (int) m_Data[8]);
                     MyModel configPackage = MyModel.getMyModelForGivenName(detail);
                     configPackage.bypass = (int) m_Data[8];
                     configPackage.JouleOrPower = (int) m_Data[9] - 1;
@@ -1085,7 +1085,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     configPackage.memory = (int) m_Data[36];
                     configPackage.save();
 
-                    Log.d(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + tcr_value);
+                    Log.e(TAG, "powerValue: " + powerValue + "  jouleValue: " + jouleValue + "  tempValue:  " + tempValue + "  compensateTempValue:  " + compensateTempValue + "  TCR_Value:  " + tcr_value);
 
                     //获得温度调节范围
                     mergerData = true;
@@ -1102,22 +1102,22 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     seekBarSetJoule.setProgress(setJouleNum - 100);
                 } else if (m_Data[5] == (byte) 0x09 && mergerDataOver) {
                     mergerDataOver = false;
-                    Log.d(TAG, "temperInfo: 温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
+                    Log.e(TAG, "temperInfo: 温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
                     tempMax_c = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
                     tempMin_c = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
                     tempMax_f = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
                     tempMin_f = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "获得温度调节范围： temperInfo   " + tempMax_c + "  " + tempMin_c + "  " + tempMax_f + "  " + tempMin_f);
+                    Log.e(TAG, "获得温度调节范围： temperInfo   " + tempMax_c + "  " + tempMin_c + "  " + tempMax_f + "  " + tempMin_f);
 
                     mergerData = true;
                     getUserDeviceSetting((byte) 0x0A);
                 } else if (m_Data[5] == (byte) 0x0A && mergerDataOver) {
-                    Log.d(TAG, "temperInfo: 补偿温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
+                    Log.e(TAG, "temperInfo: 补偿温度范围合并后： " + m_Data.length + "    " + BinaryToHexString(m_Data));
                     compensateTempMax_c = (m_Data[6] & 0xff) << 24 | (m_Data[7] & 0xff) << 16 | (m_Data[8] & 0xff) << 8 | m_Data[9] & 0xff;
                     compensateTempMin_c = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
                     compensateTempMax_f = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
                     compensateTempMin_f = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "获得补偿温度调节范围： temperInfo   " + compensateTempMax_c + "   " + compensateTempMin_c + "   " + compensateTempMax_f + "   " + compensateTempMin_f);
+                    Log.e(TAG, "获得补偿温度调节范围： temperInfo   " + compensateTempMax_c + "   " + compensateTempMin_c + "   " + compensateTempMax_f + "   " + compensateTempMin_f);
                     mergerData = true;
                     getUserDeviceSetting((byte) 0x0D);
 
@@ -1126,7 +1126,7 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     powerRange_min = (m_Data[10] & 0xff) << 24 | (m_Data[11] & 0xff) << 16 | (m_Data[12] & 0xff) << 8 | m_Data[13] & 0xff;
                     jouleRange_max = (m_Data[14] & 0xff) << 24 | (m_Data[15] & 0xff) << 16 | (m_Data[16] & 0xff) << 8 | m_Data[17] & 0xff;
                     jouleRange_min = (m_Data[18] & 0xff) << 24 | (m_Data[19] & 0xff) << 16 | (m_Data[20] & 0xff) << 8 | m_Data[21] & 0xff;
-                    Log.d(TAG, "功率和焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
+                    Log.e(TAG, "功率和焦耳切换时范围  temperInfo: " + powerRange_max + "   " + powerRange_min + "   " + "   " + jouleRange_max + "    " + jouleRange_min);
                     MyModel getModel = MyModel.getMyModelForGivenName(detail);
                     getModel.powerRange_max = powerRange_max;
                     getModel.powerRange_min = powerRange_min;
@@ -1135,16 +1135,16 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
                     getModel.save();
                     getUserDeviceSetting((byte) 0x0B);
                 } else if (m_Data[5] == (byte) 0x0B) {
-                    //                    Log.d(TAG, "temperInfo:     TCR   " + BinaryToHexString(m_Data));
+                    //                    Log.e(TAG, "temperInfo:     TCR   " + BinaryToHexString(m_Data));
                     tcr_max = bytesToInt(m_Data, 6);
                     tcr_min = bytesToInt(m_Data, 10);
-                    //                    Log.d(TAG, "temperInfo:     TCR    " + tcr_max + "   " + tcr_min);
+                    //                    Log.e(TAG, "temperInfo:     TCR    " + tcr_max + "   " + tcr_min);
                     getUserDeviceSetting((byte) 0x15);
 
                 } else if (m_Data[5] == (byte) 0x15) {
-                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+BinaryToHexString(m_Data));
-                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[6],m_Data[7])+"   "+bytes2Int(m_Data[8],m_Data[9]));
-                    //                    Log.d(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[10],m_Data[11])+"   "+bytes2Int(m_Data[12],m_Data[13]));
+                    //                    Log.e(TAG, "Range_Power_Joule_ECO: "+BinaryToHexString(m_Data));
+                    //                    Log.e(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[6],m_Data[7])+"   "+bytes2Int(m_Data[8],m_Data[9]));
+                    //                    Log.e(TAG, "Range_Power_Joule_ECO: "+bytes2Int(m_Data[10],m_Data[11])+"   "+bytes2Int(m_Data[12],m_Data[13]));
                     eco_range_power_max = bytes2Int(m_Data[6], m_Data[7]);
                     eco_range_power_min = bytes2Int(m_Data[8], m_Data[9]);
                     eco_range_joule_max = bytes2Int(m_Data[10], m_Data[11]);
@@ -1304,10 +1304,10 @@ public class SetDetailsActivity extends AppCompatActivity implements View.OnLayo
     protected void onRestart() {
         super.onRestart();
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
-        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        Log.e(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             connectState.setText(R.string.connected);
-            Log.d(TAG, "onRestart: sendData   " + sendData);
+            Log.e(TAG, "onRestart: sendData   " + sendData);
         } else {
             connectState.setText(R.string.no_connect);
         }

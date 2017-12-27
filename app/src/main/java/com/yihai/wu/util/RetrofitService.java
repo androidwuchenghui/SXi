@@ -13,4 +13,6 @@ public interface RetrofitService {
 
     @GET(Constant.BANNER_IMAGES)
     Call<BannerEntity> getBannerImages();
+
+
 }

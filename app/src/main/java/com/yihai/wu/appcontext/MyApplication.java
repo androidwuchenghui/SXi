@@ -3,6 +3,7 @@ package com.yihai.wu.appcontext;
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.app.Application;
 import com.crashlytics.android.Crashlytics;
+import com.yihai.wu.crashutil.CrashHandler;
 import com.yihai.wu.util.Constant;
 import com.yihai.wu.util.RetrofitService;
 
@@ -23,6 +24,7 @@ public class MyApplication extends Application {
         ActiveAndroid.initialize(this);
         Fabric.with(this, new Crashlytics());
         mRetrofitService = initRetrofit();
+        CrashHandler.getInstance().init(this);
     }
 
     @Override

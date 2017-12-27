@@ -161,12 +161,12 @@ public class DeviceInformationActivity extends BaseActivity {
             }
             //            g_Character_TX = mBluetoothLeService.getG_Character_TX();
             //            g_Character_DeviceName = mBluetoothLeService.getG_Character_DeviceName();
-            //            Log.d("setActivityInService", "onServiceConnected: " + mBluetoothLeService+"  character_TX:  "+g_Character_TX+"    "+deviceName);
+            //            Log.e("setActivityInService", "onServiceConnected: " + mBluetoothLeService+"  character_TX:  "+g_Character_TX+"    "+deviceName);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务断开-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务断开-------------");
             mBluetoothLeService = null;
         }
     };
@@ -196,7 +196,7 @@ public class DeviceInformationActivity extends BaseActivity {
                         counts = (data[2] & 0xff) + 3;
                     }
 
-//                    Log.d(TAG, "receive_bytes: " + s + "    ---  " + counts);
+//                    Log.e(TAG, "receive_bytes: " + s + "    ---  " + counts);
                     if (wait) {
                         merger_bytes = byteMerger(merger_bytes, data);
                         Sys_YiHi_Protocol_RX_Porc(merger_bytes);
@@ -215,14 +215,14 @@ public class DeviceInformationActivity extends BaseActivity {
 
                     /*
                                         if (get_software_version) {
-                                            Log.d("DeviceInformation", "onReceive: 收到的数据为：  " + s + "    " + get_software_version);
+                                            Log.e("DeviceInformation", "onReceive: 收到的数据为：  " + s + "    " + get_software_version);
 
                                             if (software_Version == null) {
                                                 software_Version = data;
                                             } else {
                                                 software_Version = byteMerger(software_Version, data);
                                                 get_software_version = false;
-                                                Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
+                                                Log.e(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
                                                 Sys_YiHi_Protocol_RX_Porc(software_Version);
                                                 software_Version = null;
                                             }
@@ -232,7 +232,7 @@ public class DeviceInformationActivity extends BaseActivity {
                                             } else {
                                                 software_Version = byteMerger(software_Version, data);
                                                 getId = false;
-                                                Log.d(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
+                                                Log.e(TAG, "onReceiveRX: " + BinaryToHexString(software_Version));
                                                 Sys_YiHi_Protocol_RX_Porc(software_Version);
                                                 software_Version = null;
                                             }
@@ -246,7 +246,7 @@ public class DeviceInformationActivity extends BaseActivity {
 
     //获得产品名称
     private void getConnectedDeviceRealName() {
-//        Log.d(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
+//        Log.e(TAG, "getConnectedDeviceRealName: " + " 获得产品名称");
         byte[] m_Data_GetDeviceName = new byte[32];
         //GetDeviceName
         int m_NameLength = 0;

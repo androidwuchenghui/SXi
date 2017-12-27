@@ -132,28 +132,28 @@ public class SetTextureActivity extends AppCompatActivity {
                     //                    if(begin){
                     //                        r++;
                     //                    }
-                    Log.d(TAG, "口感选择收到数据: " + s + "   R: ");
+                    Log.e(TAG, "口感选择收到数据: " + s + "   R: ");
                     /*if(TAG=="SetTextureActivity"&&r==1&&begin ==true){
                         oneFirst = subBytes(data, 11, 9);
-                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
                     }else if(TAG=="SetTextureActivity"&&r==2&&begin ==true){
                         oneFirst = byteMerger(oneFirst, data);
-                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
                     }else if(TAG=="SetTextureActivity"&&r==3&&begin ==true){
                         oneFirst = byteMerger(oneFirst, data);
-                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
                     }else if(TAG=="SetTextureActivity"&&r==4&&begin ==true){
                         oneFirst = byteMerger(oneFirst, data);
-                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
                         //处理取到的50个数据
 //                        for (int i = 0; i < oneFirst.length; i+=2) {
 //                            byte[] bs = new byte[2];
 //                            bs[0] = oneFirst[i];
 //                            bs[1] = oneFirst[i+1];
 //                            int powerData = ((bs[0]&0xff)<<8)|(bs[1] & 0xff);
-//                            Log.d(TAG, "onReceive: "+powerData);
+//                            Log.e(TAG, "onReceive: "+powerData);
 //                        }
-                        Log.d(TAG, "onReceive: "+r+"  "+begin+"   " +order);
+                        Log.e(TAG, "onReceive: "+r+"  "+begin+"   " +order);
                         if (order==4){
                             order=0;
                         }
@@ -203,7 +203,7 @@ public class SetTextureActivity extends AppCompatActivity {
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         registerReceiver(setDetailsActivityReceiver, makeBroadcastFilter());
         initUI();
-        Log.d(TAG, "SetTextureActivityonCreate: ");
+        Log.e(TAG, "SetTextureActivityonCreate: ");
     }
 
     //界面初始化
@@ -240,12 +240,12 @@ public class SetTextureActivity extends AppCompatActivity {
                 }
             }
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
-            Log.d(TAG, "onServiceConnected: bind  : service: " + mBluetoothLeService + "    character:  " + g_Character_TX);
+            Log.e(TAG, "onServiceConnected: bind  : service: " + mBluetoothLeService + "    character:  " + g_Character_TX);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务未连接-------------");
             mBluetoothLeService = null;
         }
     };
@@ -299,7 +299,7 @@ public class SetTextureActivity extends AppCompatActivity {
 //                Intent s1ToCurve = new Intent(SetTextureActivity.this, HelloActivity.class);
                 s1ToCurve.putExtra("state",mBluetoothLeService.getTheConnectedState());
                 s1ToCurve.putExtra("custom", "S1");
-                Log.d(TAG, "detailClick: "+mBluetoothLeService.getTheConnectedState());
+                Log.e(TAG, "detailClick: "+mBluetoothLeService.getTheConnectedState());
                 startActivity(s1ToCurve);//进入曲线界面
                 break;
             case R.id.tv_custom_s2:
@@ -471,7 +471,7 @@ public class SetTextureActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
-        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        Log.e(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             connectState.setText(R.string.connected);
         } else {

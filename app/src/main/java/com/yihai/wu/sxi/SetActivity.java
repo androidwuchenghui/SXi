@@ -127,11 +127,11 @@ public class SetActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d("wallpaper", "onReceive: 收到的数据为：  " + s + "  ---   " + needMerge + "    " + getInit);
+                    Log.e("wallpaper", "onReceive: 收到的数据为：  " + s + "  ---   " + needMerge + "    " + getInit);
                     //                      Sys_YiHi_Protocol_RX_Porc(data);
                     //                    if(data.length>3){
                     //                        if(data[0]==0x55&&data[1]==0xFF&&(data[2]&0xFF)>20){
-                    //                            Log.d(TAG, "set:  **********  ");
+                    //                            Log.e(TAG, "set:  **********  ");
                     //                            merger_bytes = data;
                     //                            wait = true;
                     //                            return;
@@ -154,7 +154,7 @@ public class SetActivity extends AppCompatActivity {
                         needMerge = false;
                         merger_bytes = data;
                         getInit = true;
-                        Log.d(TAG, "wallpaper: needMerge  " + BinaryToHexString(merger_bytes) + "   " + getInit + "   " + needMerge);
+                        Log.e(TAG, "wallpaper: needMerge  " + BinaryToHexString(merger_bytes) + "   " + getInit + "   " + needMerge);
                         break;
                     }
 
@@ -186,12 +186,12 @@ public class SetActivity extends AppCompatActivity {
                 status.setText(R.string.connected);
             }
 
-            Log.d("setActivityInService", "onServiceConnected: " + mBluetoothLeService + "  character_TX:  " + g_Character_TX + "    " + deviceName);
+            Log.e("setActivityInService", "onServiceConnected: " + mBluetoothLeService + "  character_TX:  " + g_Character_TX + "    " + deviceName);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务断开-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务断开-------------");
             mBluetoothLeService = null;
         }
     };
@@ -210,7 +210,7 @@ public class SetActivity extends AppCompatActivity {
         super.onPause();
         if (!deviceName.equals(et.getText().toString())) {
             ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-            Log.d(TAG, "onPause: connectedDevice   " + connectedDevice);
+            Log.e(TAG, "onPause: connectedDevice   " + connectedDevice);
             if (connectedDevice != null) {
                 connectedDevice.deviceName = et.getText().toString();
                 connectedDevice.save();
@@ -493,7 +493,7 @@ public class SetActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("setActivityInService", "onDestroy: ");
+        Log.e("setActivityInService", "onDestroy: ");
 
         unregisterReceiver(mainActivityReceiver);
         unbindService(mServiceConnection);
@@ -502,7 +502,7 @@ public class SetActivity extends AppCompatActivity {
     }
 
     public void setSelectedData(String str) {
-        Log.d(TAG, "setSelectedData: " + str);
+        Log.e(TAG, "setSelectedData: " + str);
         switch (str) {
             case "C1":
                 setUserDeviceSettingModel((byte) 0x00);
@@ -571,7 +571,7 @@ public class SetActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         g_Character_TX = mBluetoothLeService.getG_Character_TX();
-        Log.d(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
+        Log.e(TAG, "onRestart:----MainActivity---   " + mBluetoothLeService.getTheConnectedState());
         if (mBluetoothLeService.getTheConnectedState() == 2) {
             status.setText(R.string.connected);
         } else {
@@ -715,7 +715,7 @@ public class SetActivity extends AppCompatActivity {
                 String mString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
 
                 int i1 = b & 0x0f;
-                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: "+b+"  ****  "+tString+"  bbbb:  "+ i1);
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: "+b+"  ****  "+tString+"  bbbb:  "+ i1);
 
                 if(i1==1){
                     select_control("C1");
@@ -727,7 +727,7 @@ public class SetActivity extends AppCompatActivity {
 
                 int num = getNumericValue(mString.charAt(5));
 //                mb4 = getNumericValue(tString.charAt(4));
-                Log.d(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num+"  ---->: "+mb4);
+                Log.e(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num+"  ---->: "+mb4);
 
                 if (num != 1) {
                     line_set_wallpaper.setVisibility(View.GONE);
@@ -752,10 +752,10 @@ public class SetActivity extends AppCompatActivity {
 
             case (byte) 0x6C:
                 if (m_Data[5] == 0x02) {
-//                    Log.d(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
-//                    Log.d(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
-//                    Log.d(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
-//                    Log.d(TAG, "wallpaper:   最小地址    KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
+//                    Log.e(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
+//                    Log.e(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
+//                    Log.e(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
+//                    Log.e(TAG, "wallpaper:   最小地址    KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
                     byte b1 = m_Data[12];
                     String substring = Integer.toBinaryString((b1 & 0xFF) + 0x100).substring(1);
 
@@ -765,9 +765,9 @@ public class SetActivity extends AppCompatActivity {
                     char c3 = substring.charAt(3);
                     char c4 = substring.charAt(4);
                     char c5 = substring.charAt(5);
-//                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
+//                    Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
                     int numericValue = getNumericValue((int) c5);
-//                    Log.d(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
+//                    Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
                     if(numericValue==1){
                         supportPreview = true;
                     }else {
@@ -780,7 +780,7 @@ public class SetActivity extends AppCompatActivity {
                     //                        }
                     //                    }, 50);
                     //                } else if (m_Data[5] == 0x04) {
-                    //                    Log.d(TAG, "wallpaper: 准备好数据：  " + BinaryToHexString(m_Data) + "   地址： " + bytesToInt(m_Data, 12));
+                    //                    Log.e(TAG, "wallpaper: 准备好数据：  " + BinaryToHexString(m_Data) + "   地址： " + bytesToInt(m_Data, 12));
                     //
                 }
 

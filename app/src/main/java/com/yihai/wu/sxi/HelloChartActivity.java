@@ -185,14 +185,14 @@ public class HelloChartActivity extends AppCompatActivity {
                     Bundle bundle = intent.getBundleExtra(BluetoothLeService.EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.d(TAG, "onReceive: allReceive   :    " + s);
+                    Log.e(TAG, "onReceive: allReceive   :    " + s);
                     if (startReadPowerCurveData) {
-                        Log.d("ReadPowerCurveData", s);
+                        Log.e("ReadPowerCurveData", s);
                         //处理收到的功率曲线的数据
                         handlerCurveData(data);
                     }
                     if (startReadTempCurveData) {
-                        Log.d("ReadTempCurveData", s);
+                        Log.e("ReadTempCurveData", s);
                         //处理收到的温度曲线的数据
                         handlerCurveData(data);
                     }
@@ -234,16 +234,16 @@ public class HelloChartActivity extends AppCompatActivity {
 
         if (TAG == "HelloChartActivity" && littleOrder == 1 && begin == true) {
             oneFirst = subBytes(data, 11, 9);
-            //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+            //                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
         } else if (TAG == "HelloChartActivity" && littleOrder == 2 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
-            //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+            //                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
         } else if (TAG == "HelloChartActivity" && littleOrder == 3 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
-            //                        Log.d(TAG, "onFirst: "+BinaryToHexString(oneFirst));
+            //                        Log.e(TAG, "onFirst: "+BinaryToHexString(oneFirst));
         } else if (TAG == "HelloChartActivity" && littleOrder == 4 && begin == true) {
             oneFirst = byteMerger(oneFirst, data);
-            Log.d(TAG, "byteMergerData: " + BinaryToHexString(oneFirst));
+            Log.e(TAG, "byteMergerData: " + BinaryToHexString(oneFirst));
             //处理取到的50个数据
 
             for (int i = 0; i < oneFirst.length; i += 2) {
@@ -268,7 +268,7 @@ public class HelloChartActivity extends AppCompatActivity {
                         sb1.append(powerData);
                     }
 
-                    Log.d(TAG, "byteMergerData: " + sb1 + "       curveNum:  " + curveNum);
+                    Log.e(TAG, "byteMergerData: " + sb1 + "       curveNum:  " + curveNum);
                     count = 0;
                     if (curveNum == 0) {
                         readTexture = Textures.getTexture(settingPackage, customName);
@@ -285,7 +285,7 @@ public class HelloChartActivity extends AppCompatActivity {
                         String temperData = sb1.toString();
                         readTexture.arr3 = getTemperData(temperData);
                         count = 0;
-                        Log.d(TAG, "ReadTempCurveData: " + sb1);
+                        Log.e(TAG, "ReadTempCurveData: " + sb1);
                         sb1.setLength(0);
 
                         startReadTempCurveData = false;
@@ -300,13 +300,13 @@ public class HelloChartActivity extends AppCompatActivity {
                 }
 
             }
-            Log.d(TAG, "handlerCurveData onReceive: " + littleOrder + "  " + begin + "   " + bigOrder + "  data--->SB:   " + sb1);
+            Log.e(TAG, "handlerCurveData onReceive: " + littleOrder + "  " + begin + "   " + bigOrder + "  data--->SB:   " + sb1);
         }
         if (littleOrder == 4 && begin && bigOrder == 1) {
             begin = false;
             littleOrder = 0;
             //取第二组25个点
-            Log.d(TAG, "handlerCurveData: 取第二组25个数组");
+            Log.e(TAG, "handlerCurveData: 取第二组25个数组");
             if (startReadPowerCurveData) {
                 settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x01, (byte) 0x04, userOrder, 50);
             }
@@ -317,7 +317,7 @@ public class HelloChartActivity extends AppCompatActivity {
             begin = false;
             littleOrder = 0;
             //取第三组25个点
-            Log.d(TAG, "handlerCurveData: 取第三组25个数组");
+            Log.e(TAG, "handlerCurveData: 取第三组25个数组");
             if (startReadPowerCurveData) {
                 settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x02, (byte) 0x04, userOrder, 50);
             }
@@ -328,7 +328,7 @@ public class HelloChartActivity extends AppCompatActivity {
             begin = false;
             littleOrder = 0;
             //取第四组25个点
-            Log.d(TAG, "handlerCurveData: 取第四组25个数组");
+            Log.e(TAG, "handlerCurveData: 取第四组25个数组");
             if (startReadPowerCurveData) {
                 settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x03, (byte) 0x04, userOrder, 50);
             }
@@ -397,7 +397,7 @@ public class HelloChartActivity extends AppCompatActivity {
                 break;
         }
         ConnectedBleDevices connectedDevice = ConnectedBleDevices.getConnectedDevice();
-        Log.d(TAG, "onCreate:   获取连接的设备： " + connectedDevice);
+        Log.e(TAG, "onCreate:   获取连接的设备： " + connectedDevice);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         registerReceiver(setHelloChartActivityReceiver, makeBroadcastFilter());
@@ -434,18 +434,18 @@ public class HelloChartActivity extends AppCompatActivity {
                 Log.e("service", "Unable to initialize Bluetooth");
                 finish();
             }
-            Log.d(TAG, "onServiceConnected: HelloChartActivity service connect");
+            Log.e(TAG, "onServiceConnected: HelloChartActivity service connect");
             g_Character_TX = mBluetoothLeService.getG_Character_TX();
             if (g_Character_TX != null) {             //   功率曲线上的点的数据   序号00     第一组的25个点
                 startReadPowerCurveData = true;
-                Log.d(TAG, "onServiceConnected: " + "开始查询数据   " + settingPackageOrder + "   " + userOrder);
+                Log.e(TAG, "onServiceConnected: " + "开始查询数据   " + settingPackageOrder + "   " + userOrder);
                 settingPackage_PowerCurve_ReadData(settingPackageOrder, (byte) 0x01, (byte) 0x00, (byte) 0x04, userOrder, 50);
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d("service", "onServiceDisconnected: " + "---------服务未连接-------------");
+            Log.e("service", "onServiceDisconnected: " + "---------服务未连接-------------");
             mBluetoothLeService = null;
         }
     };
@@ -461,11 +461,11 @@ public class HelloChartActivity extends AppCompatActivity {
     }
 
     private void init() {
-        Log.d(TAG, "init: " + settingPackage + "   " + customName);
+        Log.e(TAG, "init: " + settingPackage + "   " + customName);
         //查询数据库、
         Textures texture = Textures.getTexture(settingPackage, customName);
 
-        Log.d(TAG, "init: " + texture.arr1 + "    " + texture.arr3 + "    " + texture.dash + "    " + dashListInTemper);
+        Log.e(TAG, "init: " + texture.arr1 + "    " + texture.arr3 + "    " + texture.dash + "    " + dashListInTemper);
         //功率曲线的数据
         powerData1 = getLineData(texture.arr1, 5);
         //        powerMoveList.add(powerData1);
@@ -499,8 +499,8 @@ public class HelloChartActivity extends AppCompatActivity {
         jouleOrPower = myMode.JouleOrPower;
         //单位
         temperatureUnit = myMode.temperatureUnit;
-        Log.d(TAG, "temperatureUnit init: " + temperatureUnit);
-        //        Log.d(TAG, "init: powerDashValue    j/p: " + jouleOrPower + "   powerDashValue  " + powerDashValue + "  temperDashValue   " + temperDashValue);
+        Log.e(TAG, "temperatureUnit init: " + temperatureUnit);
+        //        Log.e(TAG, "init: powerDashValue    j/p: " + jouleOrPower + "   powerDashValue  " + powerDashValue + "  temperDashValue   " + temperDashValue);
         switch (jouleOrPower) {
             case 0:
                 generateInitialLineData();//生成功率曲线
@@ -883,14 +883,14 @@ public class HelloChartActivity extends AppCompatActivity {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.d(TAG, "actionDown getRate: " + chartComputator.computeRawY((float) 100) + "  " + chartComputator.computeRawY((float) 140));
+                    Log.e(TAG, "actionDown getRate: " + chartComputator.computeRawY((float) 100) + "  " + chartComputator.computeRawY((float) 140));
                     if (rate == 0) {
                         rate = (chartComputator.computeRawY((float) 100) - chartComputator.computeRawY((float) 140)) / (float) 40;
                     }
                     clickX = (int) motionEvent.getX();
                     clickY = (int) motionEvent.getY();
                     selectedValue = selectPoint(currentMainLine.getValues());//选中点
-                    Log.d(TAG, "selectPoint onTouch:  X: " + clickX + "  ---  Y: " + clickY + "   selectedValue " + selectedValue);
+                    Log.e(TAG, "selectPoint onTouch:  X: " + clickX + "  ---  Y: " + clickY + "   selectedValue " + selectedValue);
                     if (selectedValue == null) {
                         selectedDashLine = selectedDashLine(motionEvent, currentDashLine);    //选中虚线
                     }
@@ -915,11 +915,11 @@ public class HelloChartActivity extends AppCompatActivity {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    Log.d(TAG, "getZoomLevel:   "+myChart.getZoomLevel());
+                    Log.e(TAG, "getZoomLevel:   "+myChart.getZoomLevel());
                     int moveX = (int) motionEvent.getX();
                     int moveY = (int) motionEvent.getY();
                     int move = moveY - clickY;
-                    Log.d(TAG, "onTouch: " + moveX + "  -----  " + moveY);
+                    Log.e(TAG, "onTouch: " + moveX + "  -----  " + moveY);
 
                     if (selectedDashLine != null) {           //一起移动
                         dataChanged = true;
@@ -964,10 +964,10 @@ public class HelloChartActivity extends AppCompatActivity {
                         }
                     } else if (selectedValue != null) {   //单点移动
                         dataChanged = true;
-                        Log.d(TAG, "onTouch: " + moveX + "  -----  " + moveY);
+                        Log.e(TAG, "onTouch: " + moveX + "  -----  " + moveY);
                         float currentX = selectedValue.getX();
                         float currentY = selectedValue.getY() - move / rate;
-                        Log.d(TAG, "onTouch: " + "找到点" + selectedValue.toString());
+                        Log.e(TAG, "onTouch: " + "找到点" + selectedValue.toString());
                         //控制范围
                         if (currentY < currentAxisY_Values.get(0).getValue()) {
                             currentY = currentAxisY_Values.get(0).getValue();
@@ -1015,11 +1015,11 @@ public class HelloChartActivity extends AppCompatActivity {
                             temperDashValue = (int) currentDashLine.getValues().get(0).getY();
                             break;
                     }
-                    Log.d(TAG, "dashValues: powerDashValue: " + powerDashValue + "  jouleDashValue:  " + jouleDashValue + "  temperDashValue:  " + temperDashValue);
+                    Log.e(TAG, "dashValues: powerDashValue: " + powerDashValue + "  jouleDashValue:  " + jouleDashValue + "  temperDashValue:  " + temperDashValue);
                     selectedDashLine = null;
                     selectedValue = null;
                     if (selectedValue != null) {
-                        //                        Log.d(TAG, "onTouch: 抬起的点" + (int) (selectedValue.getY()));
+                        //                        Log.e(TAG, "onTouch: 抬起的点" + (int) (selectedValue.getY()));
 
                        /* powerData1[(int) (selectedValue.getX()*2)]= (int) selectedValue.getY();
                         StringBuilder sb = new StringBuilder();
@@ -1060,7 +1060,7 @@ public class HelloChartActivity extends AppCompatActivity {
                             jouleIndex = currentIndex;
                         }
                         setAboveAndNextButtonState(currentMoveLineList, currentIndex);
-                        Log.d(TAG, "onTouch: " + currentIndex + "  powerIndex  " + powerIndex);
+                        Log.e(TAG, "onTouch: " + currentIndex + "  powerIndex  " + powerIndex);
                         dataChanged = false;
                     }
                     break;
@@ -1079,7 +1079,7 @@ public class HelloChartActivity extends AppCompatActivity {
             r.set(clickX - width, clickY - width, clickX + width, clickY + width);
             int pointX = (int) chartComputator.computeRawX(value.getX());
             int pointY = (int) chartComputator.computeRawY(value.getY());
-            Log.d(TAG, "selectPoint: x:  " + pointX + "  y: " + pointY);
+            Log.e(TAG, "selectPoint: x:  " + pointX + "  y: " + pointY);
             if (r.contains(pointX, pointY)) {
                 return value;
             }
@@ -1197,7 +1197,7 @@ public class HelloChartActivity extends AppCompatActivity {
                         jouleIndex++;
                         changeForWave(jouleIndex, jouleLine, jouleDashline);
                     }
-                    //                    Log.d(TAG, "OnClick: pl: "+powerMoveList.size()+" index : "+powerIndex);
+                    //                    Log.e(TAG, "OnClick: pl: "+powerMoveList.size()+" index : "+powerIndex);
                     break;
                 case R.id.btn_waveBehind:
 
@@ -1216,7 +1216,7 @@ public class HelloChartActivity extends AppCompatActivity {
                         jouleIndex--;
                         changeForBehindWave(jouleIndex, jouleLine);
                     }
-                    Log.d(TAG, "OnClick: powerMoveList: " + powerMoveList.size() + " index " + powerIndex);
+                    Log.e(TAG, "OnClick: powerMoveList: " + powerMoveList.size() + " index " + powerIndex);
                     break;
                 case R.id.btn_save:
                     if (!MyUtils.NoDoubleClickUtils.isDoubleClick()) {
@@ -1297,7 +1297,7 @@ public class HelloChartActivity extends AppCompatActivity {
             lineChartData.setAxisYLeft(axisY);
             lineChartData.setAxisXBottom(axisX);
             myChart.setLineChartData(lineChartData);
-            Log.d("myBitmap", "btn_save: line1color:  " + line1Color + "  line3Color  " + line3Color);
+            Log.e("myBitmap", "btn_save: line1color:  " + line1Color + "  line3Color  " + line3Color);
             //                    myChart.setViewportCalculationEnabled(false);
             Viewport v = new Viewport(0, 210, 10, 0);
             myChart.setMaximumViewport(v);
@@ -1308,7 +1308,7 @@ public class HelloChartActivity extends AppCompatActivity {
             myChart.setDrawingCacheEnabled(true);
             myChart.buildDrawingCache();
             final Bitmap bmp = myChart.getDrawingCache();
-            Log.d("myBitmap", "with:  " + bmp.getWidth() + "  height:  " + bmp.getHeight());
+            Log.e("myBitmap", "with:  " + bmp.getWidth() + "  height:  " + bmp.getHeight());
             int bmpWidth = bmp.getWidth();
             final int bmpHeight = bmp.getHeight();
             //                    myChart.invalidate();
@@ -1376,7 +1376,7 @@ public class HelloChartActivity extends AppCompatActivity {
                                         PointF f = new PointF(valueX, l);
                                         if (chartComputator.rawPixelsToDataPoint(valueX, j, f)) {
                                             DecimalFormat df = new DecimalFormat("#0.0");
-                                            //                                                    Log.d("bmp", "run:  功率   point   " + f + "   f.x:  " + df.format(f.x) + "   f.y:  " + Math.round(f.y));
+                                            //                                                    Log.e("bmp", "run:  功率   point   " + f + "   f.x:  " + df.format(f.x) + "   f.y:  " + Math.round(f.y));
                                             arrPower[i] = Math.round(f.y);
                                             break;
                                         }
@@ -1388,7 +1388,7 @@ public class HelloChartActivity extends AppCompatActivity {
                                         PointF f = new PointF(valueX, l);
                                         if (chartComputator.rawPixelsToDataPoint(valueX, j, f)) {
                                             DecimalFormat df = new DecimalFormat("#0.0");
-                                            Log.d("bmp", "run:  温度  point   " + f + "   f.x:  " + df.format(f.x) + "   f.y:  " + Math.round(f.y) + "    数量:  " + a);
+                                            Log.e("bmp", "run:  温度  point   " + f + "   f.x:  " + df.format(f.x) + "   f.y:  " + Math.round(f.y) + "    数量:  " + a);
                                             arrTemp[i] = Math.round(f.y);
                                             break;
                                         }
@@ -1405,7 +1405,7 @@ public class HelloChartActivity extends AppCompatActivity {
                                 arrTemp[i] = arrPower[i];
                             }
                         } else if (i % 5 == 0) {
-                            Log.d("bmp", "run: " + "     原始数据      ");
+                            Log.e("bmp", "run: " + "     原始数据      ");
                             arrPower[i] = (int) line1.getValues().get(b).getY();
                             arrTemp[i] = (int) line3.getValues().get(b).getY();
                             b++;
@@ -1414,7 +1414,7 @@ public class HelloChartActivity extends AppCompatActivity {
                     arrPower[99] = (int) line1.getValues().get(20).getY();
                     arrTemp[99] = (int) line3.getValues().get(20).getY();
 
-                    Log.d(TAG, "runInThread: k:  " + k + "   a:  " + a + "   b:  " + b + "   功率数据：  " + arrPower + "   温度数据：  " + arrTemp + "   powerDashValue  " + powerDashValue);
+                    Log.e(TAG, "runInThread: k:  " + k + "   a:  " + a + "   b:  " + b + "   功率数据：  " + arrPower + "   温度数据：  " + arrTemp + "   powerDashValue  " + powerDashValue);
                     b = 0;
                     for (int i = 0; i < arrPower.length; i++) {
                         byte[] getBytes = intToBytes(arrPower[i] * 10);
@@ -1440,7 +1440,7 @@ public class HelloChartActivity extends AppCompatActivity {
                     if (g_Character_TX != null) {
                         sendCurveDataToDevice((byte) 0x4E, powerBytes);
                         sendCurveDataToDevice((byte) 0x6A, temperBytes);
-                        Log.d(TAG, "powerDashValue: ----------------------------- ");
+                        Log.e(TAG, "powerDashValue: ----------------------------- ");
                         //                        sendMiddleLineDataToDevice();
                     }
 
@@ -1648,7 +1648,7 @@ public class HelloChartActivity extends AppCompatActivity {
 
     //读取曲线数据                         Setting 包的序号     曲线      序号    数量     编号
     public void settingPackage_PowerCurve_ReadData(byte pp, byte tt, byte mm, byte rr, byte ll, int length) {
-        Log.d(TAG, "口感选择发出数据: ");
+        Log.e(TAG, "口感选择发出数据: ");
         byte[] m_Data_DeviceSetting = new byte[32];
         int m_Length = 0;
         m_Data_DeviceSetting[0] = 0x55;
@@ -1684,7 +1684,7 @@ public class HelloChartActivity extends AppCompatActivity {
             return;
         }
         String s = BinaryToHexString(m_MyData);
-        Log.d(TAG, "sendData:   write into:    " + s + "    length:   " + m_Length);
+        Log.e(TAG, "sendData:   write into:    " + s + "    length:   " + m_Length);
         g_Character_TX.setValue(m_MyData);
         mBluetoothLeService.writeCharacteristic(g_Character_TX);
     }
@@ -1734,12 +1734,12 @@ public class HelloChartActivity extends AppCompatActivity {
         m_Command = m_Data[(m_Index + 4)];
         switch (m_Command) {
             case 0x67:
-                Log.d(TAG, "powerCurveReadData 口感选择准备处理数据: " + BinaryToHexString(m_Data));
+                Log.e(TAG, "powerCurveReadData 口感选择准备处理数据: " + BinaryToHexString(m_Data));
                 int height = (m_Data[6] & 0xf0) >> 4;
                 int low = m_Data[6] & 0x0f;
                 if (height == 2 && low == 2) {      //      功率曲线的虚线
                     int i1 = ((m_Data[11] & 0xff) << 8) | (m_Data[12] & 0xff);
-                    Log.d(TAG, " powerDashValue  功率曲线的中线的数据****  :  结果： " + i1);
+                    Log.e(TAG, " powerDashValue  功率曲线的中线的数据****  :  结果： " + i1);
                     readTexture.dash = i1 / 10;
 
                     //读取温度中线
@@ -1748,7 +1748,7 @@ public class HelloChartActivity extends AppCompatActivity {
                 } else if (height == 2 && low == 4) {       //      温度曲线的虚线
                     int i1 = ((m_Data[11] & 0xff) << 8) | (m_Data[12] & 0xff);
                     readTexture.dashValueInTemper = i1;
-                    Log.d(TAG, " powerDashValue  温度曲线的中线的数据----   " + BinaryToHexString(m_Data) + "   结果：  " + i1);
+                    Log.e(TAG, " powerDashValue  温度曲线的中线的数据----   " + BinaryToHexString(m_Data) + "   结果：  " + i1);
                     startReadMiddleLine = false;
                     readTexture.save();
                     init();
@@ -1757,7 +1757,7 @@ public class HelloChartActivity extends AppCompatActivity {
 
                 if (height == 1) {
                     final int waitTime = ((m_Data[9] & 0xff) << 8) | (m_Data[10] & 0xff);
-                    Log.d(TAG, "等待时间: " + waitTime);
+                    Log.e(TAG, "等待时间: " + waitTime);
                     new Thread() {
                         @Override
                         public void run() {
@@ -1773,13 +1773,13 @@ public class HelloChartActivity extends AppCompatActivity {
                 }
                 break;
             case 0x4F:
-                Log.d(TAG, "sendDataBack:   " + " " + BinaryToHexString(m_Data));
+                Log.e(TAG, "sendDataBack:   " + " " + BinaryToHexString(m_Data));
                 break;
             case 0x6B:
-                Log.d(TAG, "powerDashValue: 发送温度曲线数据后返回的数据：" + BinaryToHexString(m_Data));
+                Log.e(TAG, "powerDashValue: 发送温度曲线数据后返回的数据：" + BinaryToHexString(m_Data));
                 break;
             case 0x58:
-                Log.d(TAG, "powerDashValue:   收到要处理的虚线数据   " + BinaryToHexString(m_Data));
+                Log.e(TAG, "powerDashValue:   收到要处理的虚线数据   " + BinaryToHexString(m_Data));
                 break;
         }
     }
@@ -1845,7 +1845,7 @@ public class HelloChartActivity extends AppCompatActivity {
     private void sendCurveDataToDevice(byte function, byte[] data) {
         for (int i = 0; i < 4; i++) {
             byte[] bt = subBytes(data, i * 50, 50);
-            Log.d(TAG, "run:send50Data  Prepare    i:    " + i + "     " + BinaryToHexString(bt) + "       " + bt.length);
+            Log.e(TAG, "run:send50Data  Prepare    i:    " + i + "     " + BinaryToHexString(bt) + "       " + bt.length);
             //  开始发送
             curve_SendData(function, (byte) i, (byte) 0x04, userOrder, bt);
             try {
@@ -1893,7 +1893,7 @@ public class HelloChartActivity extends AppCompatActivity {
 
     private void sendMiddleLineDataToDevice() {
 
-        Log.d(TAG, "sendMiddleLineDataToDevice: " + temperatureUnit + "   " + jouleOrPower + "  userOrder  " + userOrder + "   powerDashValue  " + powerDashValue);
+        Log.e(TAG, "sendMiddleLineDataToDevice: " + temperatureUnit + "   " + jouleOrPower + "  userOrder  " + userOrder + "   powerDashValue  " + powerDashValue);
         if (temperatureUnit == 0 && jouleOrPower == 0) {
             settingPackage_sendMidlleLineData(userOrder, (byte) 0x02, (byte) 0x01, powerDashValue * 10);
             settingPackage_sendMidlleLineData(userOrder, (byte) 0x04, (byte) 0x00, temperDashValue);
