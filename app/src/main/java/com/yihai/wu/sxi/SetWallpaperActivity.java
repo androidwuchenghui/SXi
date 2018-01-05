@@ -84,7 +84,7 @@ public class SetWallpaperActivity extends TakePhotoActivity implements View.OnCl
         Intent startIntent = getIntent();
         supportPreview = startIntent.getBooleanExtra("support",false);
 //        takePhoto = getTakePhoto();
-
+        Log.d(TAG, "support: "+supportPreview);
         selectPicture = (Button) findViewById(R.id.btn_selectPicture);
         selectPicture.setOnClickListener(this);
         show_img = (ImageView) findViewById(R.id.show_img);

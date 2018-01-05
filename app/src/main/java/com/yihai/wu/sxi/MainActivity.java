@@ -449,6 +449,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //                goToUpgradeMode();
                 //                getAddrRange();
 
+                Log.d(TAG, "onCharacteristicRead: "+mBluetoothLeService);
+
+                mBluetoothLeService.read_Module_Info();
                 break;
         }
 

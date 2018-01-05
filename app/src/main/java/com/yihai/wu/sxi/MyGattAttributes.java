@@ -6,13 +6,15 @@ public class MyGattAttributes {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static HashMap<String, String> attributes = new HashMap();
 
-    public static String getC_UUID_Service_Device_Information="";
+    public static String C_UUID_Service_Device_Information="0000180a-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Service_SendDataToDevice="0000ffe5-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Service_ReadDataFromDevice="0000ffe0-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Service_Bluetooth_RSSI="0000ffa0-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Service_DeviceConfig="0000ff90-0000-1000-8000-00805f9b34fb";
     //防劫持密钥服务的UUID
     public static String C_UUID_Service_Password="0000ffc0-0000-1000-8000-00805f9b34fb";
+
+
     //一些特征值
     public static String C_UUID_Character_SendDataToDevice="0000ffe9-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_ReadDataFromDevice="0000ffe4-0000-1000-8000-00805f9b34fb";
@@ -27,7 +29,8 @@ public class MyGattAttributes {
     public static String C_UUID_Character_Bluetooth_Power="0000ff97-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Password_C1="0000ffc1-0000-1000-8000-00805f9b34fb";
     public static String C_UUID_Character_Password_Notify="0000ffc2-0000-1000-8000-00805f9b34fb";
-
+    public static String C_UUID_Character_Module_Information="00002a23-0000-1000-8000-00805f9b34fb";
+    public static String C_UUID_Character_Module_Soft_Version="00002a26-0000-1000-8000-00805f9b34fb";
 
 
 
@@ -38,7 +41,7 @@ public class MyGattAttributes {
     static {
     	/*这里的Service的UUID有些是GATT强制BLE设备必须提供的,例如UUID=180A就是一个,这个Service封装有设备信息.*/
         // Sample Services.
-        attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");
+        attributes.put(C_UUID_Service_Device_Information, "Device Information Service");
         attributes.put(C_UUID_Service_SendDataToDevice, "Send Data to Device");
         attributes.put(C_UUID_Service_ReadDataFromDevice, "Read Data from Device");
         attributes.put(C_UUID_Service_Bluetooth_RSSI, "Bluetooth RSSI information");

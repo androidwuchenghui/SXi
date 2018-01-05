@@ -155,6 +155,14 @@ public class BluetoothLeService extends Service {
             UUID.fromString(MyGattAttributes.C_UUID_Character_Password_Notify);
     public final UUID g_UUID_Charater_Baud_Rate =
             UUID.fromString(MyGattAttributes.C_UUID_Character_Device_CommBaudRate);
+    //  180a   模块信息读取通道。
+    public final UUID g_UUID_Service_Device_Information =
+            UUID.fromString(MyGattAttributes.C_UUID_Service_Device_Information);
+    // 模块信息下两个特征值
+    public final UUID g_UUID_Character_Module_Information =
+            UUID.fromString(MyGattAttributes.C_UUID_Character_Module_Information);
+    public final UUID g_UUID_Character_Module_Soft_Version =
+            UUID.fromString(MyGattAttributes.C_UUID_Character_Module_Soft_Version);
 
     private BluetoothGattCharacteristic g_Character_TX;
     private BluetoothGattCharacteristic g_Character_DeviceName;
@@ -196,7 +204,7 @@ public class BluetoothLeService extends Service {
         }
     };
 
-    private Thread sendPixelThread = new Thread(){
+    private Thread sendPixelThread = new Thread() {
         @Override
         public void run() {
             super.run();
@@ -225,7 +233,7 @@ public class BluetoothLeService extends Service {
                 mConnectionState = STATE_CONNECTED;//连接状态
                 broadcastUpdate(intentAction);
                 // Attempts to discover services after successful connection.
-                Log.e(TAG, "ServiceOnConnectionStateChange: " + "     连接成功   ");
+                Log.e(TAG, "discoverServices: " + "     搜索Service    ");
                 mBluetoothGatt.discoverServices();
                 // 提交密码
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -275,7 +283,7 @@ public class BluetoothLeService extends Service {
 
                 pool.execute(serviceThread);
             } else if (status == 129) {
-                                Log.e(TAG, "status = 129: -----出现129错误 ");
+                Log.e(TAG, "status = 129: -----出现129错误 ");
                 //                mBluetoothAdapter.disable();
                 //                Timer single_timer = new Timer();
                 //                single_timer.schedule(new TimerTask() {
@@ -299,17 +307,17 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-            Log.e(TAG, "onCharacteristicRead: " + characteristic.getUuid() + ">>>：" + g_UUID_Charater_CustomerID);
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                Log.e(TAG, "onCharacteristicRead: " + characteristic.getUuid()+"  :  "+g_Character_Module_Information);
 
                 if (characteristic.getUuid().equals(g_UUID_Charater_CustomerID)) {
 
                     byte[] data = characteristic.getValue();
                     readID = BinaryToHexString(data);
                     //     产品识别码
-                    Log.e(TAG, "onCharacteristicRead: "+" 识别码："+readID );
+                    Log.e(TAG, "onCharacteristicRead: " + " 识别码：" + readID);
                     if (readID.equals("0601")) {
                         //确认为本公司产品之后，产生6位随机密码
                         sb = new StringBuilder();
@@ -341,6 +349,18 @@ public class BluetoothLeService extends Service {
                         new Delete().from(ConnectedBleDevices.class).execute();
                         broadcastUpdate(BluetoothLeService.ACTION_NOT_BELONG);
                     }
+                }
+                if(characteristic.getUuid().equals(g_UUID_Character_Module_Information)){
+                    Log.e(TAG, "onCharacteristicRead: yeyeyeyyeye");
+                    byte[] data = characteristic.getValue();
+                   String a= BinaryToHexString(data);
+                    Log.d(TAG, "onCharacteristicRead: "+a);
+                    readCharacteristic(g_Character_Module_Soft_Information);
+                }
+                if(characteristic.getUuid().equals(g_UUID_Character_Module_Soft_Version)){
+                    byte[] data = characteristic.getValue();
+                    String a= BinaryToHexString(data);
+                    Log.d(TAG, "onCharacteristicRead: "+a);
                 }
             }
         }
@@ -376,7 +396,7 @@ public class BluetoothLeService extends Service {
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
-                        Log.e(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
+            Log.e(TAG, "onCharacteristicChanged: " + characteristic.getUuid() + "  >>>  " + g_UUID_Charater_Password_C2);
             if (characteristic.getUuid().equals(g_UUID_Charater_Password_C2)) {
                 //                broadcastUpdate(ACTION_DATA_COMMIT_PASSWORD_RESULT, characteristic);
 
@@ -412,11 +432,11 @@ public class BluetoothLeService extends Service {
 
                 Log.e(TAG, "onCharacteristicChanged:  RX    " + BinaryToHexString(characteristic.getValue()));
                 broadcastRxUpdate(ACTION_DATA_RX, characteristic);
-//                if (canSendPicture) {
-//                    byte[] value = characteristic.getValue();
-//                    Log.e(TAG, "sendPicture: "+BinaryToHexString(value));
-//                    Sys_YiHi_Protocol_RX_Porc(value);
-//                }
+                //                if (canSendPicture) {
+                //                    byte[] value = characteristic.getValue();
+                //                    Log.e(TAG, "sendPicture: "+BinaryToHexString(value));
+                //                    Sys_YiHi_Protocol_RX_Porc(value);
+                //                }
             }
 
         }
@@ -464,11 +484,12 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
-    private void broadcastUpdateProgress( String action) {
+    private void broadcastUpdateProgress(String action) {
         final Intent intent = new Intent(action);
-        intent.putExtra("sendProgress",count);
+        intent.putExtra("sendProgress", count);
         sendBroadcast(intent);
     }
+
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -537,6 +558,7 @@ public class BluetoothLeService extends Service {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_RX);
         return intentFilter;
     }
+
     /****************************************接受广播***********************************************************/
     private boolean wait = false;
     private byte[] merger_bytes;
@@ -545,13 +567,13 @@ public class BluetoothLeService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            switch (action){
+            switch (action) {
                 case ACTION_DATA_RX:
                     Bundle bundle = intent.getBundleExtra(EXTRA_DATA);
                     byte[] data = bundle.getByteArray("byteValues");
                     String s = BinaryToHexString(data);
-                    Log.e(TAG, "sendPicture: "+s);
-                    if(canSendPicture) {
+                    Log.e(TAG, "sendPicture: " + s);
+                    if (canSendPicture) {
                         Sys_YiHi_Protocol_RX_Porc(data);
                     }
 
@@ -612,7 +634,7 @@ public class BluetoothLeService extends Service {
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         unregisterReceiver(serviceReceiver);
         Log.e(TAG, "onServiceDestroy: 后台服务关闭 ");
-        Intent stateService =  new Intent (this, LogService.class);
+        Intent stateService = new Intent(this, LogService.class);
         stopService(stateService);
     }
 
@@ -717,6 +739,9 @@ public class BluetoothLeService extends Service {
      * @param characteristic The characteristic to read from.
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if(characteristic==null){
+            return;
+        }
         Log.e(TAG, "readCharacteristic: 读特征值    gatt:  " + mBluetoothGatt + "    " + characteristic.getUuid());
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
@@ -859,6 +884,9 @@ public class BluetoothLeService extends Service {
     private BluetoothGattCharacteristic g_Character_CustomerID;
     private BluetoothGattCharacteristic g_Character_Password;
     private BluetoothGattCharacteristic g_Character_Password_Notify;
+    private BluetoothGattCharacteristic g_Character_Module_Information;
+    private BluetoothGattCharacteristic g_Character_Module_Soft_Information;
+
     private String connectedAddress;
     private StringBuilder sb;
     private String changeTo;
@@ -874,6 +902,7 @@ public class BluetoothLeService extends Service {
         boolean m_b_Check_DeviceName = false;
         boolean m_b_Check_Password = false;
         boolean m_b_Notify_Password = false;
+        boolean m_b_Check_Device_Information = false;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
         String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
         ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
@@ -886,25 +915,38 @@ public class BluetoothLeService extends Service {
             if (g_UUID_Service_SendData.equals(gattService.getUuid())) {
                 Log.e(TAG, "Service TX found");
                 m_b_Check_TX = true;
+                Log.d(TAG, "onCharacteristicRead: m_b_Check_TX  "+m_b_Check_TX);
             } else {
                 m_b_Check_TX = false;
             }
             if (g_UUID_Service_ReadData.equals(gattService.getUuid())) {
                 m_b_Check_RX = true;
+                Log.d(TAG, "onCharacteristicRead: m_b_Check_RX   "+m_b_Check_RX);
             } else {
                 m_b_Check_RX = false;
             }
             if (g_UUID_Service_DeviceConfig.equals(gattService.getUuid())) {
                 m_b_Check_DeviceName = true;
+                Log.d(TAG, "onCharacteristicRead: m_b_Check_DeviceName   "+m_b_Check_DeviceName);
             } else {
                 m_b_Check_DeviceName = false;
             }
 
             if (g_UUID_Service_Password.equals(gattService.getUuid())) {
                 m_b_Check_Password = true;
+                Log.d(TAG, "onCharacteristicRead: m_b_Check_Password    "+m_b_Check_Password);
             } else {
                 m_b_Check_Password = false;
             }
+
+            if (g_UUID_Service_Device_Information.equals(gattService.getUuid())) {
+                newVersion = true;
+                m_b_Check_Device_Information = true;
+                Log.d(TAG, "onCharacteristicRead: m_b_Check_Device_Information  "+m_b_Check_Device_Information);
+            } else {
+                m_b_Check_Device_Information = false;
+            }
+
             //currentServiceData.put(
             //        LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
             currentServiceData.put(
@@ -964,6 +1006,7 @@ public class BluetoothLeService extends Service {
                     }
 
                 }
+
                 if (m_b_Check_Password == true) {
                     if (g_UUID_Charater_Password.equals(gattCharacteristic.getUuid())) {
                         g_Character_Password = gattCharacteristic;
@@ -972,12 +1015,19 @@ public class BluetoothLeService extends Service {
                     }
 
                 }
+                //模块信息
+                if (m_b_Check_Device_Information) {
+                    if (g_UUID_Character_Module_Information.equals(gattCharacteristic.getUuid())) {
+                        g_Character_Module_Information = gattCharacteristic;
+                    } else if (g_UUID_Character_Module_Soft_Version.equals(gattCharacteristic.getUuid())) {
+                        g_Character_Module_Soft_Information = gattCharacteristic;
+                    }
+                }
 
             }//for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics)-----------
             //            mGattCharacteristics.add(charas);
             //            gattCharacteristicData.add(gattCharacteristicGroupData);
         } //for (BluetoothGattService gattService : gattServices)------------
-
         /*
         SimpleExpandableListAdapter gattServiceAdapter = new SimpleExpandableListAdapter(
                 this,
@@ -1031,6 +1081,7 @@ public class BluetoothLeService extends Service {
             commitPassword(DEFAULT_PASSWORD + DEFAULT_PASSWORD);
         }
 
+
     }//displayGattServices()------------------------END
 
     private int commit_amount = 100;
@@ -1079,6 +1130,7 @@ public class BluetoothLeService extends Service {
     private boolean step3 = false;
     private boolean step5 = false;
 
+    private boolean newVersion = false;
     //      ----首次连接提交第一次密码
     private void handlePasswordCallbacks(String reply) {
         ConnectedBleDevices devices = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
@@ -1087,18 +1139,18 @@ public class BluetoothLeService extends Service {
             //提交密码后判断回馈的信息
             switch (reply) {
                 case "00":
-                    ////////    此处因之前芯片6.0 以上修改密码后无法连接
-  /*
-
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //   此处因之前芯片6.0 以上修改密码后无法连接    蓝牙新固件优化安卓
+                        //   newVersion为true 则存在180a  跳过设置密码
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && newVersion) {
                         broadcastUpdate(ACTION_LAND_SUCCESS);
                         devices.isConnected = true;
                         devices.save();
 
                         getConnectedDeviceRealName();
+                        newVersion = false;
                         break;
                     }
-*/
+
                     Log.e(TAG, "handlePasswordCallbacks: 密码提交---正确---");
                     if (devices.password.equals(DEFAULT_PASSWORD)) {
                         step3 = true;
@@ -1107,7 +1159,7 @@ public class BluetoothLeService extends Service {
                     isFirst();
                     break;
                 case "01":
-                    ////////////////////////////
+                    //
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
                         broadcastUpdate(ACTION_LOGIN_FAILED);
@@ -1211,7 +1263,7 @@ public class BluetoothLeService extends Service {
     }
 
     public void sendData(int num) {
-//        Log.e(TAG, "sendData: begin~~~~~  ");
+        //        Log.e(TAG, "sendData: begin~~~~~  ");
         sendData1(num);
         sendData2(num);
         sendData3(num);
@@ -1253,7 +1305,7 @@ public class BluetoothLeService extends Service {
             m_Data[11 + i] = pixel_data[i + num * 50];
         }
 
-//                Log.e(TAG, "sendData1:  "+BinaryToHexString(m_Data));
+        //                Log.e(TAG, "sendData1:  "+BinaryToHexString(m_Data));
         m_Length = 20;
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
 
@@ -1274,7 +1326,7 @@ public class BluetoothLeService extends Service {
         if (m_Length <= 0) {
             return;
         }
-//        Log.e(TAG, "sendData:  "+BinaryToHexString(m_MyData));
+        //        Log.e(TAG, "sendData:  "+BinaryToHexString(m_MyData));
         g_Character_TX.setValue(m_MyData);
         writeCharacteristic(g_Character_TX);
     }
@@ -1293,7 +1345,7 @@ public class BluetoothLeService extends Service {
             m_Data[i] = pixel_data[i + 9 + num * 50];
         }
         m_Length = 20;
-//        Log.e(TAG, "sendData2:  "+BinaryToHexString(m_Data));
+        //        Log.e(TAG, "sendData2:  "+BinaryToHexString(m_Data));
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
     }
 
@@ -1311,7 +1363,7 @@ public class BluetoothLeService extends Service {
             m_Data[i] = pixel_data[i + 29 + num * 50];
         }
         m_Length = 20;
-//        Log.e(TAG, "sendData3:  "+BinaryToHexString(m_Data));
+        //        Log.e(TAG, "sendData3:  "+BinaryToHexString(m_Data));
         Sys_Proc_Charactor_TX_Send(m_Data, m_Length);
     }
 
@@ -1333,7 +1385,7 @@ public class BluetoothLeService extends Service {
             sum += onByte;
         }
         //       校验数据---
-//        Log.e(TAG, "sendData   out:  " + "   校验： " + sum);
+        //        Log.e(TAG, "sendData   out:  " + "   校验： " + sum);
         byte yy = (byte) (sum & 0xFF);
         m_Data[1] = yy;
         m_Length = 2;
@@ -1385,13 +1437,13 @@ public class BluetoothLeService extends Service {
         m_Command = m_Data[(m_Index + 5)];
         switch (m_Command) {
             case 0x0E:
-                Log.e(TAG, "sendPicture: "+BinaryToHexString(m_Data)  +"    "+g_Character_TX+"  count: "+count+"  piex: "+pixel_data.length);
+                Log.e(TAG, "sendPicture: " + BinaryToHexString(m_Data) + "    " + g_Character_TX + "  count: " + count + "  piex: " + pixel_data.length);
                 pool.execute(sendPixelThread);
                 break;
             case 0x10:
                 Log.e(TAG, "sendData:   back " + BinaryToHexString(m_Data) + "     count :  " + count);
-                int num = count-1;
-                editor.putInt("count",num);
+                int num = count - 1;
+                editor.putInt("count", num);
                 editor.commit();
                /* dialogView.setProgress((double) count * 100 / 2304);
 
@@ -1405,12 +1457,12 @@ public class BluetoothLeService extends Service {
 
                 broadcastUpdateProgress(ACTION_SEND_PROGRESS);
 
-                if(count>=2304){
-                    count =0;
+                if (count >= 2304) {
+                    count = 0;
                     canSendPicture = false;
                     return;
                 }
-//                sendData(count);
+                //                sendData(count);
                 pool.execute(sendPixelThread);
                 break;
         }
@@ -1503,7 +1555,7 @@ public class BluetoothLeService extends Service {
                 int i1 = HexToInt(count);
                 String AckDevice_ID_Behind = AckDevice_ID.substring(10);
                 String realID = hexStringToString(AckDevice_ID_Behind);
-                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: id:    "+count+" int:   "+i1 +"  behind: "+AckDevice_ID_Behind+"   "+ AckDevice_ID + "  r: " + realID+"   length: "+m_Data.length);
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: id:    " + count + " int:   " + i1 + "  behind: " + AckDevice_ID_Behind + "   " + AckDevice_ID + "  r: " + realID + "   length: " + m_Data.length);
 
                 ConnectedBleDevices deviceID = ConnectedBleDevices.getConnectInfoByAddress(connectedAddress);
                 deviceID.deviceID = realID;
@@ -1567,11 +1619,12 @@ public class BluetoothLeService extends Service {
                 deviceSoftVision.lastConnect = true;
                 deviceSoftVision.save();
                 get_software_version = false;
-                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  " );
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: softvision:   " + back_Software + "  vision:  " + Software_Version + "  ---> 数据获取完毕    connectedState:  ");
 
                 break;
         }
     }
+
     //获得id
     private void getConnectedDeviceID() {
         byte[] m_Data_GetDeviceID = new byte[32];
@@ -1608,5 +1661,9 @@ public class BluetoothLeService extends Service {
         m_Data_GetDevSoftVision[4] = 0x41;
         m_SoftVision = 5;
         Sys_Proc_Charactor_TX_Send(m_Data_GetDevSoftVision, m_SoftVision);
+    }
+
+    protected void read_Module_Info(){
+        readCharacteristic(g_Character_Module_Information);
     }
 }

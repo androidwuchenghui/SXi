@@ -69,8 +69,8 @@ public class DeviceInformationActivity extends BaseActivity {
         String versionName = getVersionName(this);
         Intent getIntent = getIntent();
         int state = getIntent.getIntExtra("connectState", 0);
-//        visionName.setText(versionName);
-        visionName.setText("1.56.9");
+        visionName.setText(versionName);
+//        visionName.setText("1.56.9");
 
         if (state == 2) {
             connectState.setText(R.string.connected);

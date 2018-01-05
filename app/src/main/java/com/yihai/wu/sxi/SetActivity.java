@@ -338,7 +338,7 @@ public class SetActivity extends AppCompatActivity {
         line_c5 = (LinearLayout) findViewById(R.id.line_c5);
         line_c5.setOnClickListener(new clickEvent());
         line_set_wallpaper = (LinearLayout) findViewById(R.id.line_set_wallpaper);
-                        line_set_wallpaper.setVisibility(View.GONE);
+        line_set_wallpaper.setVisibility(View.GONE);
 
         tv_c1 = (TextView) findViewById(R.id.tv_c1);
         tv_c1.setOnClickListener(new clickEvent());
@@ -438,7 +438,7 @@ public class SetActivity extends AppCompatActivity {
                     }
                     select_control("C1");
                     toDetail.putExtra("detail", "C1");
-                    toDetail.putExtra("mb4",mb4);
+                    toDetail.putExtra("mb4", mb4);
                     startActivity(toDetail);
                     break;
                 case R.id.detail_c2:
@@ -479,8 +479,8 @@ public class SetActivity extends AppCompatActivity {
                     break;
                 case R.id.detail_c6:
                     //                    WheelCurvedPicker.setVisibility(View.VISIBLE);
-                    Intent setWallpaperIntent = new Intent(SetActivity.this,SetWallpaperActivity.class);
-                    setWallpaperIntent.putExtra("support",supportPreview);
+                    Intent setWallpaperIntent = new Intent(SetActivity.this, SetWallpaperActivity.class);
+                    setWallpaperIntent.putExtra("support", supportPreview);
 
                     startActivity(setWallpaperIntent);
                     //                    getWallPaperRequest();
@@ -656,7 +656,8 @@ public class SetActivity extends AppCompatActivity {
     }
 
     /**
-     *  对返回的數據byte[]进行处理
+     * 对返回的數據byte[]进行处理
+     *
      * @param m_Data
      */
 
@@ -708,16 +709,19 @@ public class SetActivity extends AppCompatActivity {
 
             case 0x19:
                 String Protocol_Capability = BinaryToHexString(m_Data);
-//                byte b = m_Data[m_Index + 6];
-                byte b = m_Data[m_Index + 7];
-                //转成2进制
-                String tString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
+                Log.d(TAG, "Sys_YiHi_Protocol_RX_Porc: " + Protocol_Capability);
+                byte b = m_Data[m_Index + 6];
+                byte b2 = m_Data[m_Index + 7];
+                //转成2进制         0xpp
+                String tString = Integer.toBinaryString((b2 & 0xFF) + 0x100).substring(1);
+                //          0xMM
                 String mString = Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);
+                //计算 0XPP 低四位
+                int i1 = b2 & 0x0f;
 
-                int i1 = b & 0x0f;
-                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: "+b+"  ****  "+tString+"  bbbb:  "+ i1);
+                Log.e(TAG, "Sys_YiHi_Protocol_RX_Porc: " + b + "  PP: " + tString + " <<  mm:  " + mString + "   低四位： " + i1);
 
-                if(i1==1){
+                if (i1 != 0||i1==1) {
                     select_control("C1");
                     line_c2.setVisibility(View.GONE);
                     line_c3.setVisibility(View.GONE);
@@ -726,8 +730,8 @@ public class SetActivity extends AppCompatActivity {
                 }
 
                 int num = getNumericValue(mString.charAt(5));
-//                mb4 = getNumericValue(tString.charAt(4));
-                Log.e(TAG, ": cap :   第6位的二进制： " + tString + "      收到的16进制数据：  " + Protocol_Capability + "    " + num+"  ---->: "+mb4);
+                //                mb4 = getNumericValue(tString.charAt(4));
+                Log.e(TAG, ": Sys_YiHi_Protocol_RX_Porc :   第6位的二进制： " + "      收到的16进制数据：  " + Protocol_Capability + "    " + num + "  ---->: " + mb4);
 
                 if (num != 1) {
                     line_set_wallpaper.setVisibility(View.GONE);
@@ -752,25 +756,27 @@ public class SetActivity extends AppCompatActivity {
 
             case (byte) 0x6C:
                 if (m_Data[5] == 0x02) {
-//                    Log.e(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
-//                    Log.e(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
-//                    Log.e(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
-//                    Log.e(TAG, "wallpaper:   最小地址    KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
+//                                        Log.e(TAG, "wallpaper:  準備處理 " + BinaryToHexString(m_Data));
+                    //                    Log.e(TAG, "wallpaper:  數量 ： " + bytes2Int(m_Data[6], m_Data[7]) + "  寬度  :" + bytes2Int(m_Data[8], m_Data[9]) + "  高度： " + bytes2Int(m_Data[10], m_Data[11]));
+                    //                    Log.e(TAG, "wallpaper:   : " + "  缓冲容量 TT:  " + bytesToInt(m_Data, 13) + "  单个数据包最大容量  VV:  " + bytes2Int(m_Data[17], m_Data[18]));
+                    //                    Log.e(TAG, "wallpaper:   最小地址    KK:   " + bytesToInt(m_Data, 19) + "  最大地址LL:   " + bytesToInt(m_Data, 23));
                     byte b1 = m_Data[12];
                     String substring = Integer.toBinaryString((b1 & 0xFF) + 0x100).substring(1);
-
-                    char c = substring.charAt(0);
-                    char c1 = substring.charAt(1);
-                    char c2 = substring.charAt(2);
-                    char c3 = substring.charAt(3);
-                    char c4 = substring.charAt(4);
+                    Log.d(TAG, "testc: "+BinaryToHexString(m_Data)+"   --    "+  substring);
+//                    char c = substring.charAt(0);
+//                    char c1 = substring.charAt(1);
+//                    char c2 = substring.charAt(2);
+//                    char c3 = substring.charAt(3);
+//                    char c4 = substring.charAt(4);
                     char c5 = substring.charAt(5);
-//                    Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
+                    //                    Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5);
                     int numericValue = getNumericValue((int) c5);
-//                    Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
-                    if(numericValue==1){
+//                                        Log.e(TAG, "wallpaper:  "+substring+"  "+c+"  "+c1+" "+c2+" "+c3+" "+c4+" "+c5+"  value: "+numericValue);
+                  //判断是否支持 浏览壁纸功能
+                    Log.e(TAG, "testc: "+numericValue+"  ：为1支持 " );
+                    if (numericValue == 1) {
                         supportPreview = true;
-                    }else {
+                    } else {
                         supportPreview = false;
                     }
                     //                    handler.postDelayed(new Runnable() {
@@ -793,7 +799,7 @@ public class SetActivity extends AppCompatActivity {
         }
     }
 
-    private void setEnable(TextView tv,ImageView iv) {
+    private void setEnable(TextView tv, ImageView iv) {
 
         tv.setTextColor(getResources().getColor(R.color.colorGray));
         tv.setClickable(false);
